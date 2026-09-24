@@ -14,7 +14,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "e2e": "playwright test",
-    "e2e:setup": "playwright install chromium",
+    "e2e:setup": "node scripts/setup-browser.mjs",
+    "e2e:navigation": "playwright test e2e/navigation.spec.ts --workers=1",
     "db:studio": "drizzle-kit studio"
   },
   "engines": {

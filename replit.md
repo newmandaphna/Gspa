@@ -8,7 +8,9 @@ Marketing site, real-time reservations, members portal, and a front-desk admin.
 - Install: `npm ci` (Node.js 22; required by the project's test runner).
 - Dev: `npm run dev` (port 5000, bound to 0.0.0.0). The Run button does this.
 - Build: `npm run build` · Start: `npm run start` (Autoscale deployment uses these).
-- Tests: `npm test` (Vitest, in-memory Postgres) · `npm run e2e` (Playwright; run `npm run e2e:setup` once to install Chromium, then either build the app or leave the dev server running on port 5000).
+- Tests: `npm test` (Vitest, in-memory Postgres) · `npm run e2e` (Playwright; run `npm run e2e:setup` once, then either build the app or leave the dev server running on port 5000).
+- Navigation-only browser checks (read-only): with the dev workflow running, run `npm run e2e:setup`, then `E2E_BASE_URL="https://$REPLIT_DEV_DOMAIN" npm run e2e:navigation`. Covers tablet/desktop layout and mobile keyboard, Escape, focus, and scroll restoration. Do not run the full `e2e` suite against shared data: it includes booking mutations.
+- Browser runtime: Replit/Nix uses the `chromium` system package in `.replit`, resolved through PATH rather than a machine-specific store path. Its wrapper isolates browser libraries; do not export bundled application's libraries via `LD_LIBRARY_PATH`. Outside Nix, setup installs Playwright's pinned Chromium and OS dependencies (may require administrator privileges). `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` optionally selects another compatible executable. Setup verifies an actual headless launch and reports browser/Node versions.
 
 ## Data
 

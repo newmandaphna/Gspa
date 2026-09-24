@@ -1,4 +1,5 @@
 import { defineConfig } from "@playwright/test";
+import { browserExecutable } from "./scripts/browser-runtime.mjs";
 
 const PORT = process.env.PORT || "5000";
 
@@ -9,6 +10,7 @@ export default defineConfig({
   use: {
     baseURL: process.env.E2E_BASE_URL || `http://localhost:${PORT}`,
     headless: true,
+    launchOptions: { executablePath: browserExecutable() },
   },
   webServer: process.env.E2E_BASE_URL
     ? undefined

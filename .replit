@@ -5,6 +5,7 @@ hidden = [".config", ".next", "node_modules", ".data", "tsconfig.tsbuildinfo"]
 
 [nix]
 channel = "stable-25_05"
+packages = ["chromium"]
 
 [deployment]
 deploymentTarget = "autoscale"
