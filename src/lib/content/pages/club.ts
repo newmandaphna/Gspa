@@ -45,16 +45,16 @@ export const REQUIREMENTS_LINK: Cta = { label: "See requirements", href: "/visit
 
 export const CLUB_META = {
   title: "The Club",
-  description: `${FACILITY.sqft} square feet on one level in Jamaica, Queens: ${numberWord(FACILITY.laneCount)} acoustic lanes, ${numberWord(FACILITY.suites)} private suites, ${numberWord(FACILITY.simulatorBays)} simulator bays, a lounge, lockers and a classroom.`,
+  description: `${FACILITY.sqft} square feet on one level in Jamaica, Queens: ${numberWord(FACILITY.laneCount)} acoustic lanes, ${numberWord(FACILITY.suites)} private suites, ${numberWord(FACILITY.simulatorBays)} simulator bays, a lounge behind ballistic glass and a classroom for ${numberWord(FACILITY.classroomSeats)}.`,
 };
 
 /* ------------------------------------------------------------------ hero */
 
 export const CLUB_HERO: SectionCopy = {
   eyebrow: "The Club",
-  headline: "Built like a studio. Runs like a range.",
+  headline: "Built like a studio, run like a range.",
   subhead: `${FACILITY.sqft} square feet on one level in Jamaica, Queens.`,
-  body: "Lanes, suites, simulator bays, lounge, lockers, and a classroom. Everything you need, nothing you have to ask for.",
+  body: "Lanes, suites, simulator bays, a lounge, lockers, a classroom, all on one floor with a host at the desk.",
 };
 
 export type ZoneKey = "lanes" | "suites" | "sim" | "classroom" | "lounge" | "lockers" | "desk";
@@ -76,9 +76,9 @@ export const CLUB_PHOTO_ALT = "The range floor at The Gun Spa, seen from the lou
 
 export const CLUB_AIR: SectionCopy = {
   eyebrow: `Air changes: ${FACILITY.airChangesPerHour} per hour`,
-  headline: "You breathe. We handle the air.",
+  headline: "The air goes one way: downrange.",
   subhead: "Downrange airflow and filtration on every lane.",
-  body: "Air moves one direction: away from you. Lead stays where it belongs.",
+  body: "Fresh air comes in behind you, and the lead leaves with it through the filters at the far end.",
   secondary: { label: "Read the FAQ", href: "/visit#faq" },
 };
 
@@ -90,16 +90,16 @@ export const CLUB_TARGETS: SectionCopy = {
   eyebrow: "Carriers",
   headline: "Targets that listen.",
   subhead: `Programmable carriers from ${TARGET_STOPS[0]} to ${FACILITY.laneYards} yards.`,
-  body: "Set distance, turn and timing at the lane. Your drills are saved to your profile.",
+  body: "Distance, turn, timing: all set from the lane. A drill you like saves to your profile for next time.",
 };
 
 /* ---------------------------------------------------------------- suites */
 
 export const CLUB_SUITES: SectionCopy = {
   eyebrow: "Private suites",
-  headline: `${cap(numberWord(FACILITY.suites))} suites. Your own door.`,
+  headline: `${cap(numberWord(FACILITY.suites))} suites behind ${numberWord(FACILITY.suites)} doors.`,
   subhead: `A private ${numberWord(FACILITY.lanesPerSuite)}-lane bay with its own lounge.`,
-  body: `Sofa, screen, espresso, a range officer dedicated to your party, and nobody else on the line. Open both suites and the ${FOUNDERS_SUITE.name} seats ${numberWord(FOUNDERS_SUITE.maxGuestsPerUnit)}.`,
+  body: `A sofa and a screen, espresso in the lounge, plus a range officer who works only your party. Nobody else shares the line. Open both suites and the ${FOUNDERS_SUITE.name} seats ${numberWord(FOUNDERS_SUITE.maxGuestsPerUnit)}.`,
   cta: { label: "Reserve a suite", href: "/reserve?category=suite" },
 };
 
@@ -112,27 +112,27 @@ export const SUITE_SPECS: string[] = [
 ];
 
 export const SUITE_PLAN_CAPTION = `Opens to the ${FOUNDERS_SUITE.name}`;
-export const SUITE_PHOTO_ALT = "A private suite: two lanes behind glass, a sofa and a screen in the attached lounge";
+export const SUITE_PHOTO_ALT = "A private suite: two lanes behind glass with a sofa and a screen in the attached lounge";
 
 /* ------------------------------------------------------------- simulator */
 
 export const CLUB_SIMULATOR: SectionCopy = {
   eyebrow: "Simulator",
-  headline: `${cap(numberWord(FACILITY.simulatorBays))} bays. No live fire.`,
+  headline: "Shoot the wall on purpose.",
   subhead: "Laser-recoil pistols and rifles on a 4K wall.",
-  body: "From plate racks to judgment scenarios, the same bays instructors use for defensive coursework.",
+  body: "Steel on a timer, or a scenario that branches on your call. Instructors run defensive coursework on these bays.",
   cta: { label: "Reserve the simulator", href: `/reserve?experience=${SIMULATOR.slug}` },
 };
 
-export const SIMULATOR_CHIPS: string[] = ["Steel", "Timed drills", "Decision scenarios"];
+export const SIMULATOR_CHIPS: string[] = ["Steel", "Timed drills", "Decision scenarios", "Laser recoil"];
 
 /* ---------------------------------------------------------------- lounge */
 
 export const CLUB_LOUNGE: SectionCopy = {
   eyebrow: "Lounge",
-  headline: "After the last string.",
+  headline: "Exhale.",
   subhead: "A lounge that feels like a members' club, because it is.",
-  body: "Espresso, tea and sparkling water. Towel service, wifi, and a view of the line through ballistic glass. The lounge is non-alcoholic, always.",
+  body: "Espresso or tea and sparkling water, then a warm towel when you come off the line. The lanes are right there behind ballistic glass. No alcohol, ever.",
 };
 
 export type LoungeIconKind = "cup" | "towel" | "wifi" | "glass";
@@ -151,9 +151,9 @@ export const LOUNGE_PHOTO_ALT = "The lounge at The Gun Spa, espresso on the tabl
 
 export const CLUB_LOCKERS: SectionCopy = {
   eyebrow: "Lockers",
-  headline: "Lockers and detailing.",
-  subhead: "Your gear, kept. Your firearm, detailed.",
-  body: "Gear lockers for members, opened by fingerprint or PIN. Detailing and the gunsmith bench are members' services.",
+  headline: "Keep your gear here.",
+  subhead: "A locker for your gear, a bench for your firearm.",
+  body: `${LOCKERS_TOTAL} gear lockers for members, each opened by fingerprint or PIN. Detailing and the gunsmith bench are members' services too.`,
   cta: { label: "See membership", href: "/membership" },
 };
 
@@ -171,7 +171,7 @@ export const CLUB_SAFETY: SectionCopy = {
   eyebrow: "Safety",
   headline: "Four rules. No exceptions.",
   subhead: "A range officer on every string, every day.",
-  body: "Our rules are short so that nobody forgets them.",
+  body: "Short rules are the ones people remember.",
   cta: { label: "Read the range rules", href: "/legal#range-rules" },
 };
 

@@ -33,7 +33,7 @@ export const HOME_META = {
 export const HERO = {
   headline: SITE.tagline,
   subhead: "A private shooting club in Jamaica, Queens.",
-  body: `${FACILITY.laneCount} acoustic lanes. ${cap(spell(FACILITY.suites))} private suites. ${cap(spell(FACILITY.simulatorBays))} simulator bays. ${FACILITY.transit.airtrainFromJfkMin} minutes from JFK.`,
+  body: `${FACILITY.laneCount} acoustic lanes, ${spell(FACILITY.suites)} private suites off the line, ${spell(FACILITY.simulatorBays)} simulator bays. ${FACILITY.transit.airtrainFromJfkMin} minutes from JFK on the AirTrain.`,
   cta: { label: "Reserve a lane", href: "/reserve?category=lane" },
   link: { label: "Explore membership", href: "/membership" },
   imageSlot: "HERO_PHOTO_01",
@@ -42,19 +42,19 @@ export const HERO = {
 
 export const QUIET = {
   eyebrow: "The room",
-  headline: "Loud sport. Quiet room.",
-  subhead: "Every lane is built around your heart rate, not the noise.",
-  body: "Acoustic baffling, filtered air on every lane, and lighting you dim from the lane. You leave calmer than you arrived.",
+  headline: "A quiet place to be loud.",
+  subhead: "Baffled walls and filtered air, with lights you set from the lane.",
+  body: "Baffling swallows the echo before it reaches the next lane. Dim the lights from where you stand. You leave calmer than you arrived.",
   captions: ["Baffled", "Ventilated", "Dimmable"],
   link: { label: "See the lanes", href: "/club" },
 } as const;
 
 export const LANES = {
   eyebrow: "Lanes",
-  headline: `${FACILITY.laneCount} lanes. One standard.`,
-  subhead: `${FACILITY.laneYards} yards, programmable carriers, filtered air.`,
-  body: "Each lane runs its own carrier and its own air. Reserve one lane, or two side by side.",
-  chips: [`${FACILITY.laneYards} yd`, "Own air supply", "Programmable carrier"],
+  headline: "Pick your lane, or two.",
+  subhead: `${FACILITY.laneYards} yards on all ${FACILITY.laneCount} lanes, each with its own carrier and air.`,
+  body: "Program the carrier from where you stand, and reserve two side by side when you bring friends.",
+  chips: [`${FACILITY.laneYards} yd`, "Own air supply", "Programmable carrier", "Acoustic baffling"],
   cta: { label: "Reserve a lane", href: "/reserve?category=lane" },
   requirements: { label: "See requirements", href: "/visit#requirements" },
   eligibility: ELIGIBILITY_LABELS[laneSession?.eligibility ?? "handgun"],
@@ -65,20 +65,20 @@ export const LANES = {
 export const SUITES = {
   eyebrow: "Private suites",
   headline: "A range of your own.",
-  subhead: `${cap(spell(FACILITY.suites))} private suites. ${cap(spell(FACILITY.lanesPerSuite))} lanes each. Lounge attached.`,
-  body: `Frosted glass, a sofa, a screen, and a host outside the door. For ${spell(privateSuite?.maxGuestsPerUnit ?? 6)} people who want the room to themselves.`,
+  subhead: `${cap(spell(FACILITY.suites))} private suites with ${spell(FACILITY.lanesPerSuite)} lanes each and their own lounge.`,
+  body: `Frosted glass, a sofa, a screen, a host outside the door. Room for ${spell(privateSuite?.maxGuestsPerUnit ?? 6)} people who would rather have the place to themselves.`,
   cta: { label: "Reserve a suite", href: "/reserve?category=suite" },
   link: { label: "See the suites", href: "/club#suites" },
   imageSlot: "SUITE_PHOTO_01",
-  imageAlt: "A private suite: two lanes behind frosted glass, a sofa and a screen in the attached lounge",
+  imageAlt: "A private suite: two lanes behind frosted glass with a sofa and a screen in the attached lounge",
   caption: privateSuite ? `${privateSuite.name} · ${privateSuite.durationMin} min · ${formatMoney(privateSuite.priceCents)}` : "Private Suite",
 } as const;
 
 export const SIMULATOR = {
   eyebrow: "Simulator",
   headline: "Start here.",
-  subhead: `${cap(spell(FACILITY.simulatorBays))} simulator bays. No live ammunition.`,
-  body: `Branching scenarios and an instructor debrief. Up to ${spell(simulatorBay?.maxGuestsPerUnit ?? 4)} people share a bay for an hour.`,
+  subhead: `${cap(spell(FACILITY.simulatorBays))} simulator bays with no live ammunition.`,
+  body: `Scenarios branch on what you do; an instructor debriefs you after. Up to ${spell(simulatorBay?.maxGuestsPerUnit ?? 4)} people share a bay for an hour.`,
   cta: { label: "Reserve the simulator", href: "/reserve?experience=simulator-bay" },
   requirements: { label: "See requirements", href: "/visit#requirements" },
   eligibility: ELIGIBILITY_LABELS[simulatorBay?.eligibility ?? "simulator"],
@@ -90,8 +90,8 @@ export const SIMULATOR = {
 export const FIRST_SESSION = {
   eyebrow: "First Session",
   headline: firstSession?.tagline ?? "Your first shots, done right.",
-  subhead: "Ninety minutes. One instructor. Zero assumptions.",
-  body: "Safety, stance, grip and sight picture in the classroom, then supervised live fire on a house rifle. No experience required.",
+  subhead: `${firstSession?.durationMin ?? 90} minutes with an instructor who assumes nothing.`,
+  body: "Safety, stance, grip, sight picture: the classroom comes first. Then live fire on a house rifle with the instructor at your shoulder. No experience required.",
   steps: ["Safety", "Stance", "Grip", "Sights", "Live fire"],
   cta: { label: "Reserve First Session", href: "/reserve?experience=first-session" },
   requirements: { label: "See requirements", href: "/visit#requirements" },
@@ -104,8 +104,8 @@ export type HospitalityIconKey = "towel" | "espresso" | "locker" | "brush";
 export const HOSPITALITY = {
   eyebrow: "The lounge",
   headline: "The spa part is not a metaphor.",
-  subhead: "Warm towels, cold water, a proper espresso.",
-  body: "A towel is warm before you ask. Members keep their gear in a locker that opens to a fingerprint or a PIN. You leave smelling like coffee, not solvent.",
+  subhead: "Warm towels and a proper espresso.",
+  body: "The towel is warm before you ask. Members keep their gear in a locker that opens to a fingerprint or a PIN. You go home smelling like the espresso.",
   items: [
     { key: "towel", label: "Towels", note: "Every visit" },
     { key: "espresso", label: "Espresso", note: "The lounge" },
@@ -122,8 +122,8 @@ export const HOSPITALITY = {
 export const MEMBERSHIP = {
   eyebrow: "Membership",
   headline: "Membership is the product.",
-  subhead: "Three tiers. One vetting process. Bring guests.",
-  body: "Members reserve further ahead, bring guests, and keep a locker. Founders hold same-day priority.",
+  subhead: `${cap(spell(MEMBERSHIP_TIERS.length))} tiers, all vetted the same way, all with guests.`,
+  body: "Members reserve further ahead and keep a locker. Founders hold same-day priority; guests come in at the member rate.",
   caption: "days ahead",
   publicWindowNote: `Public reservations open ${spell(BOOKING.maxAdvanceDays)} days ahead.`,
   cta: { label: "Compare tiers", href: "/membership#tiers" },
@@ -142,11 +142,11 @@ export const MEMBERSHIP = {
 export const VISIT = {
   eyebrow: "Visit",
   headline: `${FACILITY.transit.airtrainFromJfkMin} minutes from JFK.`,
-  subhead: `${SITE.address.neighborhood}. E, J, Z and the LIRR.`,
-  body: `AirTrain from the terminal, or the train from Penn in ${FACILITY.transit.lirrFromPennMin} minutes. The address is on the Visit page.`,
+  subhead: `${SITE.address.neighborhood}. E, J or Z train, or the LIRR.`,
+  body: `Take the AirTrain from your terminal, or the LIRR from Penn in ${FACILITY.transit.lirrFromPennMin} minutes. The address and the hours are on the Visit page.`,
   cta: { label: "Plan your visit", href: "/visit" },
   hoursLink: { label: "See hours", href: "/visit#hours" },
-  stations: ["Jamaica LIRR", "Sutphin Blvd–Archer Av", "AirTrain JFK"],
+  stations: ["Jamaica LIRR", "Sutphin Blvd-Archer Av", "AirTrain JFK"],
   pin: SITE.shortName,
   imageSlot: "EXTERIOR_PHOTO_01",
   imageAlt: "The exterior of The Gun Spa at dusk, the wordmark lit above the door",
