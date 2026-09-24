@@ -63,20 +63,28 @@ describe("clientIp", () => {
 });
 
 describe("resolveSiteUrl", () => {
-  it("prefers the explicit URL, then the workspace domain in development, and never throws", () => {
-    expect(resolveSiteUrl({ NEXT_PUBLIC_SITE_URL: "https://staging.gunspa.com/" })).toBe("https://staging.gunspa.com");
-    expect(resolveSiteUrl({ NEXT_PUBLIC_SITE_URL: "staging.gunspa.com" })).toBe("https://staging.gunspa.com");
-    expect(resolveSiteUrl({ REPLIT_DEV_DOMAIN: "abc.riker.replit.dev" })).toBe("https://abc.riker.replit.dev");
-    expect(resolveSiteUrl({})).toBe("http://localhost:5000");
-    expect(resolveSiteUrl({ NEXT_PUBLIC_SITE_URL: "http://[bad" })).toBe("http://localhost:5000");
+  it("in development prefers the explicit URL, then the workspace domain, then localhost, and never throws", () => {
+    const dev = { NODE_ENV: "development" };
+    expect(resolveSiteUrl({ ...dev, NEXT_PUBLIC_SITE_URL: "https://staging.gunspa.com/" })).toBe("https://staging.gunspa.com");
+    expect(resolveSiteUrl({ ...dev, NEXT_PUBLIC_SITE_URL: "staging.gunspa.com" })).toBe("https://staging.gunspa.com");
+    expect(resolveSiteUrl({ ...dev, NEXT_PUBLIC_SITE_URL: "http://localhost:5000" })).toBe("http://localhost:5000");
+    expect(resolveSiteUrl({ ...dev, REPLIT_DEV_DOMAIN: "efcb4e1b-00-383xumqdxm5dm.worf.replit.dev" })).toBe("https://efcb4e1b-00-383xumqdxm5dm.worf.replit.dev");
+    expect(resolveSiteUrl(dev)).toBe("http://localhost:5000");
+    expect(resolveSiteUrl({ NODE_ENV: "test" })).toBe("http://localhost:5000");
+    expect(resolveSiteUrl({ ...dev, NEXT_PUBLIC_SITE_URL: "http://[bad" })).toBe("http://localhost:5000");
   });
 
   it("uses the canonical domain for every production build, whatever the build host exposes", () => {
-    // Replit's deployment builder runs `next build` without the workspace secrets, and the sitemap,
-    // robots file and Open Graph tags are rendered at build time. Only the canonical domain may win there.
+    // Replit's deployment builder renders the sitemap, robots file and Open Graph tags at build time
+    // with an environment that is not the workspace's. Only the canonical domain or a real public
+    // override may win there; a build-host token must never ship.
     expect(resolveSiteUrl({ NODE_ENV: "production" })).toBe("https://gunspa.com");
+    expect(resolveSiteUrl({})).toBe("https://gunspa.com");
     expect(resolveSiteUrl({ NODE_ENV: "production", REPLIT_DOMAINS: "0hdm0b8.y_", REPLIT_DEV_DOMAIN: "0hdm0b8.y_" })).toBe("https://gunspa.com");
+    expect(resolveSiteUrl({ NODE_ENV: "production", NEXT_PUBLIC_SITE_URL: "0hdm0b8.y_" })).toBe("https://gunspa.com");
+    expect(resolveSiteUrl({ NODE_ENV: "production", NEXT_PUBLIC_SITE_URL: "https://0hdm0b8.y_" })).toBe("https://gunspa.com");
     expect(resolveSiteUrl({ NODE_ENV: "production", NEXT_PUBLIC_SITE_URL: "https://www.gunspa.com" })).toBe("https://www.gunspa.com");
+    expect(resolveSiteUrl({ NODE_ENV: "production", NEXT_PUBLIC_SITE_URL: "gspa-newmandaphna.replit.app" })).toBe("https://gspa-newmandaphna.replit.app");
     expect(resolveSiteUrl({ NODE_ENV: "production", NEXT_PUBLIC_SITE_URL: "http://[bad" })).toBe("https://gunspa.com");
   });
 });
