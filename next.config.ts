@@ -8,6 +8,13 @@ const nextConfig: NextConfig = {
   agentRules: false,
   poweredByHeader: false,
   reactStrictMode: true,
+  images: {
+    // AVIF first, WebP for the rest. Breakpoints follow the phones and desktops the
+    // shoot is exported for (see MEDIA.md); 2560 covers a full-bleed hero on a 5K display.
+    formats: ["image/avif", "image/webp"],
+    deviceSizes: [390, 430, 768, 1024, 1440, 1920, 2560],
+    minimumCacheTTL: 60 * 60 * 24 * 30,
+  },
 };
 
 export default nextConfig;

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMeta } from "@/lib/seo/meta";
 import { LegalNav } from "@/components/pages/legal/LegalNav";
 import { RetentionTable } from "@/components/pages/legal/RetentionTable";
 import { Container } from "@/components/ui/Container";
@@ -26,10 +27,10 @@ import {
 } from "@/lib/content/pages/legal";
 import { RANGE_RULES, REQUIREMENTS, REQUIREMENTS_LAST_REVIEWED } from "@/lib/content/requirements";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta("/legal", {
   title: LEGAL_META.title,
   description: LEGAL_META.description,
-};
+});
 
 /* ------------------------------------------------------------ helpers */
 

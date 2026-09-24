@@ -5,6 +5,8 @@ import type { Rung } from "@/lib/content/pages/training";
 /**
  * Training page visuals. Pure SVG/CSS, no imagery. Hairlines are 1px:
  * rgba(255,255,255,.12) on dark, #d2d2d7 on light. One gold element per piece.
+ * The ladder is the page's device; the rest are section illustrations and
+ * stand-ins for photo slots.
  */
 
 const GOLD = "#c9a55a";
@@ -80,6 +82,36 @@ export function GroupingTarget({ className }: { className?: string }) {
 }
 
 /* ------------------------------------------------------------------------
+   Portrait stand-in for the 4:5 instructor slots: the lane in raking light,
+   two rails to the target and one downlight, so a photograph drops in later
+   at the same crop.
+   --------------------------------------------------------------------- */
+export function PortraitArt({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice" className={cn("h-full w-full", className)} aria-hidden="true">
+      <defs>
+        <linearGradient id="pa-bg" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#0a0a0b" />
+          <stop offset="1" stopColor="#1c1c20" />
+        </linearGradient>
+        <radialGradient id="pa-light" cx="50%" cy="28%" r="45%">
+          <stop offset="0" stopColor={GOLD_2} stopOpacity="0.2" />
+          <stop offset="1" stopColor={GOLD_2} stopOpacity="0" />
+        </radialGradient>
+      </defs>
+      <rect width="400" height="500" fill="url(#pa-bg)" />
+      <ellipse cx="200" cy="150" rx="220" ry="200" fill="url(#pa-light)" />
+      {/* lane rails converging on the target frame */}
+      <path d="M40 500L170 190M360 500L230 190" fill="none" stroke={HAIR_DARK} strokeWidth="1" />
+      <path d="M0 470H400M20 400H380M60 330H340" fill="none" stroke={HAIR_DARK} strokeWidth="1" />
+      <rect x="176" y="150" width="48" height="56" rx="2" fill="#0a0a0b" stroke="rgba(226,201,138,0.5)" strokeWidth="1" />
+      <circle cx="200" cy="178" r="12" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="1" />
+      <circle cx="200" cy="178" r="2" fill={GOLD} />
+    </svg>
+  );
+}
+
+/* ------------------------------------------------------------------------
    The ladder: five ascending treads drawn with hairlines. The tread under
    the pointer turns gold. Bookable treads link into the reservation flow.
    --------------------------------------------------------------------- */
@@ -94,11 +126,7 @@ export function Ladder({ rungs, className }: { rungs: ReadonlyArray<Rung>; class
                 <span className="font-mono normal-case tracking-normal text-ink-faint">{String(i + 1).padStart(2, "0")} </span>
                 {r.label}
               </span>
-              {r.chip && (
-                <span className="inline-flex shrink-0 items-center rounded-pill px-2.5 py-1 font-mono text-[0.6875rem] text-ink-muted ring-1 ring-inset ring-ink/15">
-                  {r.chip}
-                </span>
-              )}
+              {r.chip && <span className="shrink-0 font-mono text-[0.6875rem] uppercase tracking-[0.12em] text-ink-muted">{r.chip}</span>}
             </span>
             <span className="tabular mt-3 block font-mono text-[0.8125rem] text-ink-muted">
               {r.duration && r.price ? `${r.duration} · ${r.price}` : r.duration || r.price || "Details to follow"}
@@ -153,27 +181,6 @@ export function StepRail({ steps, className }: { steps: ReadonlyArray<string>; c
         </li>
       ))}
     </ol>
-  );
-}
-
-/* ------------------------------------------------------------------------
-   Private: two overlapping rounded rectangles joined by one gold hairline.
-   --------------------------------------------------------------------- */
-export function PairDiagram({ left, right, className }: { left: string; right: string; className?: string }) {
-  return (
-    <svg viewBox="0 0 640 360" className={cn("h-full w-full", className)} aria-hidden="true">
-      <rect x="70" y="70" width="300" height="200" rx="28" fill="#f5f5f7" stroke={HAIR_LIGHT} strokeWidth="1" />
-      <rect x="270" y="110" width="300" height="200" rx="28" fill="#f5f5f7" stroke={HAIR_LIGHT} strokeWidth="1" fillOpacity="0.92" />
-      <line x1="220" y1="170" x2="420" y2="210" stroke={GOLD_DEEP} strokeWidth="1" pathLength={1} className="draw" />
-      <circle cx="220" cy="170" r="3" fill={GOLD_DEEP} />
-      <circle cx="420" cy="210" r="3" fill={GOLD_DEEP} />
-      <text x="96" y="104" fontFamily="var(--font-mono)" fontSize="13" fill="#6e6e73">
-        {left}
-      </text>
-      <text x="544" y="290" fontFamily="var(--font-mono)" fontSize="13" fill="#6e6e73" textAnchor="end">
-        {right}
-      </text>
-    </svg>
   );
 }
 

@@ -11,6 +11,7 @@ import { CATEGORY_LABELS, ELIGIBILITY_LABELS, type CatalogItem, type Category } 
 import { ACK_SUMMARY, CANCELLATION_POLICY, requirementsFor } from "@/lib/content/requirements";
 import { BOOKING, TIER_WINDOW_DAYS, windowDaysFor } from "@/lib/config/site";
 import { computeAmount, maxBookableDate } from "@/lib/availability";
+import { laneFor, laneNoteFor, parseLane } from "@/lib/lanes";
 import { formatDateLong, formatMoney, isHHMM, isIsoDate, todayIso } from "@/lib/time";
 import { cn } from "@/lib/cn";
 
@@ -62,6 +63,8 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
   const initialDate = params.get("date");
   const initialTime = params.get("time");
   const cancelledCode = params.get("cancelled");
+  // A lane tapped on a floor plan (?lane=07). Carried into the booking notes as a request; the desk assigns lanes at check-in.
+  const linkedLane = useMemo(() => parseLane(params.get("lane")), [params]);
 
   const [category, setCategory] = useState<Category>(() => {
     if (initialSlug) {
@@ -72,6 +75,9 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
     return categories[0] ?? "lane";
   });
   const [experience, setExperience] = useState<CatalogItem | null>(() => bookable.find((e) => e.slug === initialSlug) ?? null);
+  // The lane only travels with an experience that runs on a lane. Switching to the simulator or an instructor session drops it.
+  const lane = laneFor(linkedLane, experience);
+  const laneNote = laneNoteFor(linkedLane, experience);
   const [step, setStep] = useState<0 | 1 | 2>(() => (initialSlug && bookable.some((e) => e.slug === initialSlug) ? 1 : 0));
   const [date, setDate] = useState<string | null>(() => (initialDate && isIsoDate(initialDate) ? initialDate : null));
   const [time, setTime] = useState<string | null>(() => (initialTime && isHHMM(initialTime) ? initialTime : null));
@@ -193,7 +199,7 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
           email: form.email,
           phone: form.phone,
           memberNumber: member ? "" : typedMember,
-          notes: form.notes || "",
+          notes: [laneNote, form.notes.trim()].filter(Boolean).join(" "),
           ackRequirements: true,
         }),
       });
@@ -525,7 +531,7 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
                     <textarea
                       id="notes"
                       rows={3}
-                      maxLength={500}
+                      maxLength={500 - (laneNote ? laneNote.length + 1 : 0)}
                       value={form.notes}
                       onChange={(e) => setForm({ ...form, notes: e.target.value })}
                       placeholder="First time shooting, celebrating a birthday, bringing your own long gun…"
@@ -568,7 +574,7 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
           </AnimatePresence>
 
           {error && (
-            <p role="alert" className="t-body mt-6 rounded-xl bg-[#fff2f0] px-4 py-3 text-[#c0392b]">
+            <p role="alert" className="t-body mt-6 rounded-xl bg-danger/10 px-4 py-3 text-danger">
               {error}
             </p>
           )}
@@ -585,6 +591,7 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
                   <Row label="Date" value={date ? formatDateLong(date) : "Choose a day"} />
                   <Row label="Time" value={selectedSlot ? `${selectedSlot.label} · ${durationLabel(experience.durationMin)}` : (time ?? "Choose a time")} />
                   <Row label="Guests" value={`${guests} · ${unitNoun(experience, units)}`} />
+                  {lane && <Row label="Lane" value={`${lane}, requested`} />}
                   {member && <Row label="Member" value={member.memberNumber} />}
                   {!member && typedMember && <Row label="Member no." value={typedMember.toUpperCase()} />}
                 </dl>

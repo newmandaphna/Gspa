@@ -6,6 +6,18 @@
  * and stay until confirmed at the source.
  */
 import { FACILITY, HOURS, SITE } from "@/lib/config/site";
+import { REQUIREMENTS } from "@/lib/content/requirements";
+
+const ONES = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"];
+
+/** Numbers under twenty spelled out for running copy (voice rule). */
+function numberWord(n: number): string {
+  return ONES[n] ?? String(n);
+}
+
+function cap(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
 
 export type Cta = { label: string; href: string; external?: boolean };
 
@@ -23,6 +35,14 @@ function openHour(dow: number): string {
   const h = HOURS[dow];
   if (!h) return "";
   const n = Number(h.open.slice(0, 2)) % 12;
+  return String(n || 12);
+}
+
+/** "22:00" for a day of week becomes "10" for running copy. */
+function closeHour(dow: number): string {
+  const h = HOURS[dow];
+  if (!h) return "";
+  const n = Number(h.close.slice(0, 2)) % 12;
   return String(n || 12);
 }
 
@@ -44,6 +64,24 @@ export const VISIT_HERO: SectionCopy = {
 };
 
 export const EXTERIOR_PHOTO_ALT = `The street entrance of ${SITE.name} in ${SITE.address.neighborhood}, at dusk, sign lit`;
+
+/* ------------------------------------------------------------- why here */
+
+/**
+ * Why a runway and not a high street. Only what FACILITY and the address
+ * say, plus what anyone who has driven Rockaway Blvd knows. What the
+ * building was before is the owner's to supply, so it is not here.
+ */
+export const VISIT_WHY = {
+  eyebrow: "Why here",
+  headline: "Why a runway and not a high street",
+  subhead: `You cannot put a ${FACILITY.laneYards}-yard live-fire range under apartments.`,
+  paragraphs: [
+    `So the club sits where south Queens meets the airport fence: ${SITE.address.line1}, off the ${FACILITY.transit.expressway.split(" (")[0]}, at the north fence of JFK, on the boulevard the cargo trucks use. The neighbors are freight and a runway, which is what ${numberWord(FACILITY.laneCount)} lanes with their own air need.`,
+    `The airport is the point. ${cap(numberWord(FACILITY.transit.driveFromJfkMin))} minutes from any terminal means a layover shoots: land, take a car up Rockaway Blvd, an hour in the simulator or on a lane, and back through security. Members from Manhattan come the other way, ${FACILITY.transit.driveFromManhattanMin} minutes down the Van Wyck.`,
+    "One honest line about traffic. Rockaway Blvd carries the cargo traffic all day and the Van Wyck slows after 4 PM, so give the trip back more room than the map says.",
+  ],
+} as const;
 
 /* --------------------------------------------------------------- transit */
 
@@ -77,7 +115,7 @@ export const MAP_EMBED_ALT = `Map of the streets around ${SITE.name}, ${SITE.add
 
 export const VISIT_HOURS: SectionCopy = {
   eyebrow: "Hours",
-  headline: "Seven days.",
+  headline: `Open until ${closeHour(1)} most nights, ${closeHour(0)} on Sundays.`,
   subhead: `Weekends open at ${openHour(6)}, weekdays at ${openHour(1)}.`,
   body: "This table is the one the calendar reads. The last start of the day is closing time minus the length of your session.",
 };
@@ -97,8 +135,8 @@ export const OPEN_STATUS_LABELS = {
 
 export const VISIT_BRING: SectionCopy = {
   eyebrow: "What to bring",
-  headline: "Pack light.",
-  subhead: "Photo ID, closed-toe shoes, a calm head.",
+  headline: "Bring ID and shoes you can stand in.",
+  subhead: "We have the rest: eye and ear protection, targets, a towel.",
   body: "The full list is below and the desk checks every line of it. Read it once before you come and check-in takes a minute.",
   cta: { label: "See requirements", href: "#requirements" },
 };
@@ -116,8 +154,8 @@ export const BRING_ITEMS: BringItem[] = [
 export const VISIT_REQUIREMENTS: SectionCopy = {
   eyebrow: "Requirements",
   headline: "Read this once.",
-  subhead: "Every rule, in one list.",
-  body: "When you reserve, the flow shows only the lines that apply to that session. Nothing else on the site restates them. Brackets mean counsel is still on it, and the date below is the last review.",
+  subhead: `${cap(numberWord(REQUIREMENTS.length))} lines, the same card the desk keeps.`,
+  body: "When you reserve, the flow shows only the lines that apply to that session. Nothing else on the site restates them. Brackets mean counsel is still on it, and the date at the foot of the card is the last review.",
 };
 
 export const LAST_REVIEWED_LABEL = "Last reviewed";
@@ -134,8 +172,8 @@ export const VISIT_FAQ: SectionCopy = {
 
 export const VISIT_CONTACT: SectionCopy = {
   eyebrow: "Contact",
-  headline: "Call the desk.",
-  subhead: "A concierge answers whenever the club is open.",
+  headline: "Someone at the desk picks up",
+  subhead: `Whenever the doors are open, until ${closeHour(1)} most nights.`,
   body: "Call or write. Groups and buyouts start with the desk.",
   secondary: { label: "Press and partnerships", href: `mailto:${SITE.email}?subject=Press%20and%20partnerships`, external: true },
 };

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { cancelBooking } from "@/lib/booking";
+import { sendBookingCancellation } from "@/lib/email";
 import { expectedJson, isJsonRequest } from "@/lib/http";
 import { clientKey, rateLimit } from "@/lib/ratelimit";
 
@@ -20,5 +21,9 @@ export async function POST(req: Request, ctx: { params: Promise<{ code: string }
   }
   const result = await cancelBooking(code, { email });
   if (!result.ok) return NextResponse.json({ error: result.error }, { status: 400 });
+  // The guest asked, so the guest hears back. cancelBooking hands back the row
+  // and its experience, so there is no second read to fail, and sendEmail
+  // never throws. Never blocks the response.
+  void sendBookingCancellation(result.booking, result.experience, "guest");
   return NextResponse.json({ ok: true, code: result.booking.code, status: result.booking.status });
 }

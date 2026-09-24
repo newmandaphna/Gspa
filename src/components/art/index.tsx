@@ -43,8 +43,9 @@ export function TargetRings({ className, tone = "dark", rings = 6, animate = tru
 
 /**
  * A lane receding into darkness: converging light rails and a lit target frame.
- * Pass `target={false}` when used as a full-bleed backdrop behind centred copy:
- * the hard-edged target box lands at the visual centre and reads as an overlap.
+ * Used once on the site, as the home hero backdrop (page.tsx), so the vanishing
+ * point belongs to one page. Pass `target={false}` behind copy: the hard-edged
+ * target box otherwise lands at the visual centre and reads as an overlap.
  */
 export function LanePerspective({ className, target = true }: { className?: string; target?: boolean }) {
   return (
@@ -101,7 +102,10 @@ export function LanePerspective({ className, target = true }: { className?: stri
   );
 }
 
-/** Soft accent/white glows for dark bands. Absolutely positioned; parent must be relative + overflow-hidden. */
+/**
+ * Soft accent/white glow. Absolutely positioned; parent must be relative + overflow-hidden.
+ * Reserved for the simulator band on the home page (SimArt); every other dark band sits flat.
+ */
 export function Glow({ className, variant = "accent" }: { className?: string; variant?: "accent" | "white" | "cool" }) {
   const color = variant === "accent" ? "rgba(226,201,138,0.28)" : variant === "cool" ? "rgba(41,151,255,0.22)" : "rgba(255,255,255,0.16)";
   return (
@@ -113,7 +117,7 @@ export function Glow({ className, variant = "accent" }: { className?: string; va
   );
 }
 
-/** A "device-like" glossy panel — glass card with an inner highlight, for feature tiles. */
+/** A "device-like" glossy panel: a glass card with an inner highlight, for feature tiles. */
 export function GlassPanel({ className, children, tone = "dark" }: { className?: string; children?: React.ReactNode; tone?: "dark" | "light" }) {
   return (
     <div

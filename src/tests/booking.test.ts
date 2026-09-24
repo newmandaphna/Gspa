@@ -3,7 +3,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 process.env.PGLITE_DATA_DIR = "memory://";
 delete process.env.DATABASE_URL;
 
-import { adminSetStatus, cancelBooking, createBooking, getAvailability, getBookingByCode, listBookings, markPaidBySession, attachStripeSession } from "@/lib/booking";
+import { adminSetStatus, cancelBooking, cancelBySession, createBooking, getAvailability, getBookingByCode, listBookings, markPaidBySession, attachStripeSession } from "@/lib/booking";
 import { CATALOG } from "@/lib/content/catalog";
 import { RESOURCES } from "@/lib/config/site";
 import { addDaysIso, todayIso, zonedToUtc } from "@/lib/time";
@@ -123,6 +123,11 @@ describe("booking lifecycle (in-memory Postgres)", () => {
     expect(late.ok).toBe(false);
     const ok = await cancelBooking(res.booking.code, { email: "CANCEL@example.com", now: NOW });
     expect(ok.ok).toBe(true);
+    if (!ok.ok) return;
+    // The cancel route mails the guest from this result, so the row and its experience come back together.
+    expect(ok.booking.status).toBe("cancelled");
+    expect(ok.experience.slug).toBe(lane.slug);
+    expect(ok.experience.id).toBe(ok.booking.experienceId);
     const rows = await listBookings({ from: zonedToUtc(DAY, "00:00"), to: zonedToUtc(addDaysIso(DAY, 1), "00:00") });
     expect(rows.some((r) => r.booking.code === res.booking.code)).toBe(false);
   });
@@ -197,5 +202,42 @@ describe("booking lifecycle (in-memory Postgres)", () => {
     row = await getBookingByCode(paid.booking.code);
     expect(row?.booking.status).toBe("cancelled");
     expect(row?.booking.paymentStatus).toBe("refunded");
+  });
+
+  it("reports a paid session once, and releases an expired hold once", async () => {
+    // Stripe redelivers checkout.session.completed on any retry: only the first delivery confirms the row.
+    const res = await createBooking({ ...base, time: "21:00", paymentMode: "stripe", email: "twice@example.com" });
+    expect(res.ok).toBe(true);
+    if (!res.ok) return;
+    await attachStripeSession(res.booking.id, "cs_test_twice");
+    expect((await markPaidBySession("cs_test_twice", "pi_twice"))?.paymentStatus).toBe("paid");
+    expect(await markPaidBySession("cs_test_twice", "pi_twice")).toBeNull();
+    expect((await getBookingByCode(res.booking.code))?.booking.status).toBe("confirmed");
+
+    // checkout.session.expired: the hold is released by the first delivery and nothing is left for the second.
+    const hold = await createBooking({ ...base, time: "20:00", paymentMode: "stripe", email: "expired@example.com" });
+    expect(hold.ok).toBe(true);
+    if (!hold.ok) return;
+    await attachStripeSession(hold.booking.id, "cs_test_expired");
+    expect((await cancelBySession("cs_test_expired"))?.code).toBe(hold.booking.code);
+    expect(await cancelBySession("cs_test_expired")).toBeNull();
+    // A hold the guest already cancelled is not "released" by Stripe either.
+    const mine = await createBooking({ ...base, time: "14:00", paymentMode: "stripe", email: "mine@example.com" });
+    expect(mine.ok).toBe(true);
+    if (!mine.ok) return;
+    await attachStripeSession(mine.booking.id, "cs_test_mine");
+    expect((await cancelBooking(mine.booking.code, { email: "mine@example.com", now: NOW })).ok).toBe(true);
+    expect(await cancelBySession("cs_test_mine")).toBeNull();
+  });
+
+  it("refuses to cancel a row whose status changed since it was read", async () => {
+    const res = await createBooking({ ...base, time: "14:30", email: "changed@example.com" });
+    expect(res.ok).toBe(true);
+    if (!res.ok) return;
+    const first = await cancelBooking(res.booking.code, { email: "changed@example.com", now: NOW });
+    expect(first.ok).toBe(true);
+    const second = await cancelBooking(res.booking.code, { email: "changed@example.com", now: NOW });
+    expect(second.ok).toBe(false);
+    if (!second.ok) expect(second.error).toContain("already cancelled");
   });
 });

@@ -4,11 +4,20 @@
  * Lines in [square brackets] await counsel. Have counsel review before launch.
  */
 
+import { BOOKING } from "@/lib/config/site";
+import { itemBySlug } from "@/lib/content/catalog";
+
 export type RequirementTag = "handgun" | "longgun" | "simulator" | "training" | "guests" | "members" | "all";
 
 export type Requirement = { text: string; tags: RequirementTag[] };
 
 export const REQUIREMENTS_LAST_REVIEWED = "[date]";
+
+/** House floor for live fire. New York State allows supervised shooting from STATE_SUPERVISED_AGE. */
+export const LIVE_FIRE_MIN_AGE = 18;
+export const STATE_SUPERVISED_AGE = 12;
+/** Minutes after the start time at which a reservation becomes a no-show (matches the terms in legal.ts). */
+export const LATE_NO_SHOW_MIN = 20;
 
 export const REQUIREMENTS: Requirement[] = [
   {
@@ -28,7 +37,7 @@ export const REQUIREMENTS: Requirement[] = [
     tags: ["longgun", "training"],
   },
   {
-    text: "Minimum age for live fire is 18 as a house rule. New York State allows supervised shooting from 12; the club sets its own floor and reviews it every year.",
+    text: `Minimum age for live fire is ${LIVE_FIRE_MIN_AGE} as a house rule. New York State allows supervised shooting from ${STATE_SUPERVISED_AGE}; the club sets its own floor and reviews it every year.`,
     tags: ["handgun", "longgun", "training"],
   },
   {
@@ -105,13 +114,81 @@ export function requirementsFor(eligibility: "handgun" | "longgun" | "simulator"
 export const ACK_SUMMARY =
   "I understand that everyone in my party must present valid government photo ID, that handguns require a valid NYC pistol license, and that all guests complete the safety briefing and sign the range acknowledgement on arrival.";
 
-export const CANCELLATION_POLICY =
-  "Cancel free up to 24 hours before a lane, training or simulator session, and up to 72 hours before a suite or event. Inside the window, half the fee is held as lane credit for 12 months. No-shows forfeit the session.";
+/**
+ * The state course cancels on its own, longer window (catalog `cancelHours`).
+ * The FAQ, the reserve flow and the legal terms all read these so the number
+ * cannot drift from the catalog.
+ */
+const course = itemBySlug("nys-ccw-course");
+export const COURSE_NAME = course?.name ?? "the state course";
+export const COURSE_CANCEL_DAYS = Math.round((course?.cancelHours ?? 168) / 24);
+const SMALL_WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"];
+/** "seven days", spelled out per the voice rule. */
+export const COURSE_CANCEL_WINDOW = `${SMALL_WORDS[COURSE_CANCEL_DAYS] ?? String(COURSE_CANCEL_DAYS)} days`;
 
-/** The four rules, verbatim. Shown on the Club page and in Legal. */
+export const CANCELLATION_POLICY = `Cancel free up to ${BOOKING.freeCancelHours} hours before a lane, training or simulator session, up to ${BOOKING.suiteFreeCancelHours} hours before a suite or event, and up to ${COURSE_CANCEL_WINDOW} before the ${COURSE_NAME}. Inside the window, half the fee is held as lane credit for 12 months. No-shows forfeit the session.`;
+
+/** The four rules, verbatim. Shown on the House Rules page and in Legal. */
 export const RANGE_RULES: string[] = [
   "Treat every firearm as if it is loaded.",
   "Keep the muzzle pointed downrange.",
   "Keep your finger off the trigger until your sights are on the target.",
   "Know your target and what is beyond it.",
 ];
+
+export const RANGE_RULES_LABEL = "The four everyone posts";
+
+/**
+ * House rules: what this club decided on top of the four. Decision first,
+ * reason second. A draft for the owner to react to; the numbers come from
+ * the constants above and from BOOKING so they cannot drift from the terms.
+ */
+export type HouseRule = { decision: string; reason: string };
+
+export const HOUSE_RULES_DRAFT_LINE = `Draft for the owner. Reviewed ${REQUIREMENTS_LAST_REVIEWED}.`;
+
+export const HOUSE_RULES: HouseRule[] = [
+  {
+    decision: "The range officer has the last word.",
+    reason: "Not the desk, and not the member who brought you.",
+  },
+  {
+    decision: "Nothing impairing, before or during.",
+    reason: "Not a beer at lunch, not an edible on the Van Wyck.",
+  },
+  {
+    decision: "Cased in, cased out.",
+    reason: "Your firearm comes out at your lane and nowhere else.",
+  },
+  {
+    decision: "Film yourself all you like.",
+    reason: "Film another guest without asking and your day is over.",
+  },
+  {
+    decision: "Your brass goes forward.",
+    reason: "Hot cases on the floor behind the line are how someone else slips.",
+  },
+  {
+    decision: "Your guests are yours.",
+    reason: "What they do on the line is on your membership.",
+  },
+  {
+    decision: `Late is ${LATE_NO_SHOW_MIN} minutes.`,
+    reason: "After that the lane goes back on the calendar.",
+  },
+  {
+    decision: "Brimmed hats off on the line.",
+    reason: "Hot brass finds the gap.",
+  },
+  {
+    decision: "The lounge is quiet.",
+    reason: "Take the call outside.",
+  },
+  {
+    decision: `Live fire is ${LIVE_FIRE_MIN_AGE}.`,
+    reason: `The state says ${STATE_SUPERVISED_AGE}. We chose ${LIVE_FIRE_MIN_AGE} and we look at it again every year.`,
+  },
+];
+
+/** Moves here from the footer. */
+export const RANGE_OFFICER_LINE = "Firearms are handled under the supervision of certified Range Safety Officers.";

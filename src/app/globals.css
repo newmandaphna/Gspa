@@ -1,4 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Montserrat:wght@500;600&family=IBM+Plex+Mono:wght@400;500&display=swap");
 @import "tailwindcss";
 
 /* ------------------------------------------------------------------------
@@ -34,11 +33,13 @@
   --color-hairline-dark: #2c2c30;
 
   /* Editorial pairing: a serif with character for headlines, a humanist sans for reading,
-     Montserrat for the wordmark (the logo's geometric letterforms), Plex Mono for codes and times. */
-  --font-sans: "Instrument Sans", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
-  --font-display: "Instrument Serif", "Iowan Old Style", "Palatino Linotype", Georgia, "Times New Roman", serif;
-  --font-brand: "Montserrat", "Instrument Sans", -apple-system, "Helvetica Neue", Arial, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+     Plex Mono for codes and times. The families are self-hosted through next/font/local
+     (src/app/fonts.ts), which sets --font-instrument-serif, --font-instrument-sans and
+     --font-plex-mono on <html> with size-adjusted fallbacks already in each stack.
+     The wordmark is outlined path data, so no brand face is loaded. */
+  --font-sans: var(--font-instrument-sans), -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-display: var(--font-instrument-serif), "Iowan Old Style", "Palatino Linotype", Georgia, "Times New Roman", serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
   --radius-pill: 980px;
   --radius-card: 28px;
@@ -78,7 +79,9 @@ body {
   background: rgba(201, 165, 90, 0.35);
 }
 
-/* Display type: Instrument Serif at its single weight, gentle tracking, tabular figures for numerals-as-art. */
+/* Display type: Instrument Serif at its single weight, gentle tracking. Figures are proportional
+   here, so 14, 21 and 30 sit as words do rather than in spreadsheet columns; .tabular and mono
+   keep tabular figures for times, codes and anything that lines up. */
 .t-display,
 .t-hero,
 .t-1,
@@ -87,7 +90,7 @@ body {
 .t-numeral {
   font-family: var(--font-display);
   font-weight: 400;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: proportional-nums;
   text-rendering: geometricPrecision;
 }
 .t-italic {
@@ -96,6 +99,62 @@ body {
 .font-mono,
 .tabular {
   font-variant-numeric: tabular-nums;
+}
+/* Prices in display type are proportional too; hang the currency sign into the margin where supported. */
+.t-price {
+  font-variant-numeric: proportional-nums;
+}
+
+/* Editorial type. Opening quotes and full stops hang into the margin on the three largest sizes;
+   headings balance their lines, running text avoids orphans and short last lines. */
+.t-display,
+.t-hero,
+.t-1 {
+  hanging-punctuation: first last;
+}
+.t-display,
+.t-hero,
+.t-1,
+.t-2,
+.t-3,
+.t-subhead {
+  text-wrap: balance;
+}
+.t-lead,
+.t-body-lg,
+.t-body,
+.t-caption,
+.t-footnote {
+  text-wrap: pretty;
+}
+/* Above 80 px the serif needs almost no tracking; the tight value below is for the smaller sizes. */
+@media (min-width: 842px) {
+  .t-display {
+    letter-spacing: -0.005em;
+  }
+}
+@media (min-width: 1143px) {
+  .t-hero {
+    letter-spacing: -0.005em;
+  }
+}
+
+/* CSS-only entrance for hero type: it is in the server HTML and paints before any
+   script runs, then rises 12 px into place. Stagger siblings with --enter-delay.
+   The reduced-motion block below collapses it to an instant appearance. */
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.enter {
+  animation: enter 700ms var(--ease-apple) both;
+  animation-delay: var(--enter-delay, 0ms);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -161,6 +220,16 @@ body {
     line-height: 1.32;
     font-weight: 400;
     letter-spacing: -0.008em;
+  }
+  /* Subheads: the serif in italic at t-lead size. */
+  .t-subhead {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(1.375rem, 2vw, 1.875rem);
+    line-height: 1.28;
+    letter-spacing: -0.004em;
+    font-variant-numeric: proportional-nums;
   }
   .t-body-lg {
     font-size: 1.1875rem;

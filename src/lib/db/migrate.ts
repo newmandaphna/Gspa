@@ -67,6 +67,7 @@ async function createSchema(db: Db): Promise<void> {
       member_id INTEGER,
       notes TEXT,
       ack_requirements BOOLEAN NOT NULL DEFAULT FALSE,
+      reminder_sent_at TIMESTAMPTZ,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
@@ -118,6 +119,7 @@ async function createSchema(db: Db): Promise<void> {
   await db.execute(sql`ALTER TABLE experiences ADD COLUMN IF NOT EXISTS extra_guest_cents INTEGER`);
   await db.execute(sql`ALTER TABLE experiences ADD COLUMN IF NOT EXISTS eligibility TEXT NOT NULL DEFAULT 'anyone'`);
   await db.execute(sql`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS member_id INTEGER`);
+  await db.execute(sql`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS reminder_sent_at TIMESTAMPTZ`);
   await db.execute(sql`
     CREATE TABLE IF NOT EXISTS inquiries (
       id SERIAL PRIMARY KEY,
@@ -132,4 +134,32 @@ async function createSchema(db: Db): Promise<void> {
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
   `);
+  // Seed the desk log only when this run creates the table. ensureSchema runs on every cold
+  // start, and an entry the desk removed must stay removed.
+  const deskLogExisted = await tableExists(db, "desk_log");
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS desk_log (
+      id SERIAL PRIMARY KEY,
+      date TEXT NOT NULL,
+      text TEXT NOT NULL,
+      initials TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+  await db.execute(sql`CREATE INDEX IF NOT EXISTS desk_log_date_idx ON desk_log (date)`);
+  if (!deskLogExisted) {
+    // The one true entry: the day the site went live. The desk writes everything after it.
+    await db.execute(sql`
+      INSERT INTO desk_log (date, text, initials)
+      VALUES ('2026-09-24', 'Site is live. Reservations open.', 'GS')
+    `);
+  }
+}
+
+/** True when a table of that name is already in the current schema. */
+async function tableExists(db: Db, name: string): Promise<boolean> {
+  const result = (await db.execute(sql`SELECT to_regclass(${name}) IS NOT NULL AS exists`)) as unknown as {
+    rows?: Array<{ exists: boolean | null }>;
+  };
+  return result.rows?.[0]?.exists === true;
 }

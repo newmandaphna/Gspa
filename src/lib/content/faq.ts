@@ -1,3 +1,6 @@
+import { BOOKING } from "@/lib/config/site";
+import { COURSE_CANCEL_WINDOW, COURSE_NAME } from "@/lib/content/requirements";
+
 export type Faq = { id: string; q: string; a: string };
 
 export const FAQ: Faq[] = [
@@ -44,7 +47,12 @@ export const FAQ: Faq[] = [
   {
     id: "what-to-wear",
     q: "What should I wear?",
-    a: "Closed-toe shoes, a crew-neck or higher top, nothing loose that could catch hot brass. Long hair tied back, brimmed hats left at home. A calm head helps.",
+    a: "Closed-toe shoes and a crew neck or higher. Hot brass goes down a V-neck, and it has, more than once. Long hair tied back, brimmed hats off on the line.",
+  },
+  {
+    id: "calibers",
+    q: "What calibers do you stock?",
+    a: "[Owner to list the calibers stocked at the desk.] House ammunition is sold at the desk for use on the premises, brass or nickel cased only. If you shoot something unusual, call ahead or bring your own within the rules above.",
   },
   {
     id: "kids",
@@ -60,6 +68,11 @@ export const FAQ: Faq[] = [
     id: "non-shooters",
     q: "Can non-shooters come and watch?",
     a: "Yes. The lounge looks straight onto the line through ballistic glass and each suite has a lounge of its own. Watchers still show ID and sign the acknowledgement at the desk, same as everyone.",
+  },
+  {
+    id: "lounge-noise",
+    q: "Can I hear the shooting from the lounge?",
+    a: "Muffled, through the ballistic glass. The lanes are baffled and the glass is thick, so you can talk at the table at normal volume and still watch every shot. Phone calls go outside; that is the one rule the lounge has.",
   },
   {
     id: "late",
@@ -87,9 +100,24 @@ export const FAQ: Faq[] = [
     a: "The simulator, yes, with a passport. Live fire depends on your visa status under federal law. Ask the desk before you reserve and you will get a straight answer. [Counsel to confirm.]",
   },
   {
+    id: "layover",
+    q: "I'm on a layover at JFK. Can I come shoot?",
+    a: "Yes, if the layover is long enough. Plan on three hours door to door: five minutes each way by car, fifteen at the desk for ID and the briefing, an hour in the bay, and whatever your terminal takes to clear security again. Watch the Van Wyck after 4 PM. Without a NYC pistol license that hour is the simulator, which is open to anyone 18 and over with a passport. Reserve before you land.",
+  },
+  {
+    id: "luggage",
+    q: "Can I bring my luggage?",
+    a: "Yes. Bags stay behind the desk while you shoot and nothing bigger than a range bag goes onto the floor. [Owner to confirm the space behind the desk.] Keep your passport on you; the desk asks for it at check-in.",
+  },
+  {
+    id: "out-of-city-permit",
+    q: "My pistol permit is from Nassau, Westchester or upstate. Can I bring my handgun?",
+    a: "[Answer pending counsel: whether a pistol license issued outside the five boroughs is honored here.] Call the desk before you reserve and bring the license with you. Whatever counsel says about the handgun, the simulator is open to you at 18 with photo ID.",
+  },
+  {
     id: "cancellation",
     q: "What is the cancellation policy?",
-    a: "Cancel free up to 24 hours before for anything except suites and events, which need 72 hours. Inside the window, half the fee is held as lane credit for 12 months. No-shows forfeit the session. The cancel link is in your confirmation.",
+    a: `Cancel free up to ${BOOKING.freeCancelHours} hours before for anything except suites and events, which need ${BOOKING.suiteFreeCancelHours} hours, and the ${COURSE_NAME}, which needs ${COURSE_CANCEL_WINDOW}. Inside the window, half the fee is held as lane credit for 12 months. No-shows forfeit the session. The cancel link is in your confirmation.`,
   },
   {
     id: "phones",
@@ -114,6 +142,11 @@ export const FAQ: Faq[] = [
   {
     id: "alcohol",
     q: "Is alcohol served?",
-    a: "No. What the lounge does serve: espresso, tea, sparkling water, light food. Nothing impairing before or during a session, full stop.",
+    a: "No. The lounge pours espresso, tea and sparkling water. Nothing impairing before or during a session, full stop.",
+  },
+  {
+    id: "food",
+    q: "Is there food?",
+    a: "Espresso, tea and sparkling water for certain. [Owner to confirm anything to eat beyond that.] Nothing is served on the firing line, and wash your hands before you eat; the lead question above says why.",
   },
 ];

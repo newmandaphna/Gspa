@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import { pageMeta } from "@/lib/seo/meta";
 import Link from "next/link";
 import { ApplyForm } from "@/components/pages/membership/ApplyForm";
-import { HeroBeams, Nameplate, Shield } from "@/components/pages/membership/Art";
+import { Shield } from "@/components/pages/membership/Art";
 import { CompareTable } from "@/components/pages/membership/CompareTable";
+import { FoundersRequest } from "@/components/pages/membership/FoundersRequest";
 import { GuestPicker } from "@/components/pages/membership/GuestPicker";
 import { InView } from "@/components/pages/membership/InView";
 import { WindowStrips } from "@/components/pages/membership/WindowStrips";
@@ -12,15 +14,16 @@ import { Eyebrow } from "@/components/ui/Eyebrow";
 import { ImageSlot } from "@/components/ui/ImageSlot";
 import { LinkArrow } from "@/components/ui/LinkArrow";
 import { Row, Rows } from "@/components/ui/List";
-import { Item, Reveal, Stagger } from "@/components/ui/Reveal";
+import { Reveal } from "@/components/ui/Reveal";
 import { Section } from "@/components/ui/Section";
 import { cn } from "@/lib/cn";
 import { FOUNDERS_CAP, MEMBERSHIP_TIERS, tierByKey, type Tier } from "@/lib/content/membership";
 import {
   COMPARE_CAPTION,
+  COMPARE_DETAILS,
   COMPARE_ROWS,
-  FOUNDERS_COUNTER,
   FOUNDERS_PRICE_LINE,
+  FOUNDERS_WALL,
   FOUNDERS_WALL_ALT,
   GUEST_MAX,
   GUEST_NOTE,
@@ -31,8 +34,8 @@ import {
   MEMBERSHIP_APPLY,
   MEMBERSHIP_FOUNDERS,
   MEMBERSHIP_GUESTS,
-  MEMBERSHIP_HERO,
   MEMBERSHIP_META,
+  MEMBERSHIP_OPENING,
   MEMBERSHIP_TIERS_COPY,
   MEMBERSHIP_VETTING,
   MEMBERSHIP_WINDOWS,
@@ -45,13 +48,27 @@ import {
   WINDOW_STRIPS,
   type SectionCopy,
 } from "@/lib/content/pages/membership";
+import { foundersCount } from "@/lib/members/service";
 
-export const metadata: Metadata = {
+/** The Founders count is read from the members table on every request. */
+export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = pageMeta("/membership", {
   title: MEMBERSHIP_META.title,
   description: MEMBERSHIP_META.description,
-};
+});
 
 /* ------------------------------------------------------------ helpers */
+
+/** Names on the wall today. Null when the database cannot be reached, so the page still renders. */
+async function loadFoundersTaken(): Promise<number | null> {
+  try {
+    return await foundersCount();
+  } catch (err) {
+    console.error("[membership] founders count failed", err);
+    return null;
+  }
+}
 
 /** Headline block: eyebrow, headline, subhead (8px gap), body (24px of air), optional link. */
 function Head({ copy, align = "left", className }: { copy: SectionCopy; align?: "left" | "center"; className?: string }) {
@@ -59,7 +76,7 @@ function Head({ copy, align = "left", className }: { copy: SectionCopy; align?: 
     <Reveal className={cn("max-w-[720px]", align === "center" && "mx-auto text-center", className)}>
       {copy.eyebrow && <Eyebrow className="mb-4">{copy.eyebrow}</Eyebrow>}
       <h2 className="t-1">{copy.headline}</h2>
-      <p className="t-lead mt-2 text-muted">{copy.subhead}</p>
+      {copy.subhead && <p className="t-lead mt-2 text-muted">{copy.subhead}</p>}
       <p className={cn("t-body-lg mt-6 max-w-[40em] text-muted", align === "center" && "mx-auto")}>{copy.body}</p>
       {copy.cta && (
         <LinkArrow href={copy.cta.href} className="mt-6">
@@ -70,38 +87,73 @@ function Head({ copy, align = "left", className }: { copy: SectionCopy; align?: 
   );
 }
 
+/** A flat dark plane behind the two photo slots until the photographs exist. No beams, no grain. */
+function DarkPlane({ className }: { className?: string }) {
+  return <div aria-hidden="true" className={cn("absolute inset-0 bg-night", className)} />;
+}
+
+function tierCta(tier: Tier) {
+  return tier.key === "founders" ? TIER_CARD.foundersCta : TIER_CARD.cta;
+}
+
+/** Signature, the wide column: the numeral, the price, the buyer sentence, the three perks that differ, Apply. */
 function TierCard({ tier }: { tier: Tier }) {
-  const lifted = Boolean(tier.highlight);
+  const cta = tierCta(tier);
   return (
-    <article
-      className={cn(
-        "relative flex h-full flex-col rounded-card bg-white p-7 ring-1 ring-ink/10 sm:p-8",
-        lifted ? "shadow-[var(--shadow-card)] lg:-translate-y-2" : "shadow-[0_1px_3px_rgba(0,0,0,0.04)]",
-      )}
-    >
-      {lifted && <span aria-hidden="true" className="absolute inset-x-7 top-0 h-px bg-accent sm:inset-x-8" />}
+    <article className="relative flex flex-col rounded-card bg-white p-7 ring-1 ring-ink/10 sm:p-9">
+      {tier.highlight && <span aria-hidden="true" className="absolute inset-x-7 top-0 h-px bg-accent sm:inset-x-9" />}
       <div className="flex items-baseline justify-between gap-3">
-        <h3 className="t-4">{tier.name}</h3>
-        {lifted && <span className="t-eyebrow text-accent-deep">{TIER_CARD.mostChosen}</span>}
+        <h3 className="t-3">{tier.name}</h3>
+        {tier.highlight && <span className="t-eyebrow text-accent-deep">{TIER_CARD.mostChosen}</span>}
       </div>
-      <p className="mt-6 flex items-baseline gap-2">
-        <span className="t-numeral text-[clamp(4.5rem,9vw,7.5rem)]">{tier.bookingWindowDays}</span>
+      <p className="mt-6 flex items-baseline gap-3">
+        <span className="t-numeral">{tier.bookingWindowDays}</span>
         <span className="t-caption text-ink-muted">{TIER_CARD.windowUnit}</span>
       </p>
-      <p className="mt-6 flex flex-wrap items-baseline gap-x-2">
+      <p className="mt-8 flex flex-wrap items-baseline gap-x-2">
         <span className="t-3 tabular">{tier.price}</span>
         <span className="t-caption text-ink-muted">{tier.priceNote}</span>
       </p>
       {tier.altPrice && <p className="t-caption tabular mt-1 text-ink-muted">{tier.altPrice}</p>}
-      {tier.limited && <p className="mt-2 font-mono text-[0.75rem] text-accent-deep">{tier.limited}</p>}
-      <p className="t-body mt-4 text-ink">{tier.tagline}</p>
-      <Rows mark="check" size="sm" className="mt-6 flex-1">
-        {tier.perks.map((p) => (
+      <p className="t-body-lg mt-6 max-w-[30em] text-ink">{tier.forWhom}</p>
+      <Rows mark="check" size="sm" className="mt-6">
+        {tier.differs.map((p) => (
           <Row key={p}>{p}</Row>
         ))}
       </Rows>
-      <Button href={TIER_CARD.cta.href} variant={lifted ? "primary" : "secondary"} className="mt-7 w-full">
-        {TIER_CARD.cta.label}
+      <Button href={cta.href} variant="primary" className="mt-8 w-full sm:w-auto sm:self-start">
+        {cta.label}
+      </Button>
+    </article>
+  );
+}
+
+/** Club and Founders as hairline rows beside the card: same facts, less room. */
+function TierRow({ tier, last }: { tier: Tier; last?: boolean }) {
+  const cta = tierCta(tier);
+  return (
+    <article className={cn("border-t border-hairline py-8", last && "border-b")}>
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <h3 className="t-3">{tier.name}</h3>
+        {tier.limited && <span className="font-mono text-[0.75rem] text-accent-deep">{tier.limited}</span>}
+      </div>
+      <p className="mt-4 flex items-baseline gap-3">
+        <span className="t-2 tabular">{tier.bookingWindowDays}</span>
+        <span className="t-caption text-ink-muted">{TIER_CARD.windowUnit}</span>
+      </p>
+      <p className="mt-4 flex flex-wrap items-baseline gap-x-2">
+        <span className="t-4 tabular">{tier.price}</span>
+        <span className="t-caption text-ink-muted">{tier.priceNote}</span>
+      </p>
+      {tier.altPrice && <p className="t-caption tabular mt-1 text-ink-muted">{tier.altPrice}</p>}
+      <p className="t-body mt-4 max-w-[30em] text-ink">{tier.forWhom}</p>
+      <Rows mark="check" size="sm" className="mt-4">
+        {tier.differs.map((p) => (
+          <Row key={p}>{p}</Row>
+        ))}
+      </Rows>
+      <Button href={cta.href} variant="secondary" size="sm" className="mt-6">
+        {cta.label}
       </Button>
     </article>
   );
@@ -109,55 +161,124 @@ function TierCard({ tier }: { tier: Tier }) {
 
 /* --------------------------------------------------------------- page */
 
-export default function MembershipPage() {
+export default async function MembershipPage() {
   const founders = tierByKey("founders");
-  const foundersCap = FOUNDERS_CAP;
+  const taken = await loadFoundersTaken();
+  const remaining = taken === null ? null : Math.max(0, FOUNDERS_CAP - taken);
+  const full = remaining === 0;
+  const wide = MEMBERSHIP_TIERS.find((t) => t.highlight) ?? HIGHLIGHT_TIER;
+  const rows = MEMBERSHIP_TIERS.filter((t) => t.key !== wide.key);
 
   return (
     <>
-      {/* HERO */}
-      <Section theme="black" padded={false} className="grain flex min-h-[100dvh] items-center overflow-hidden pt-[var(--nav-h)] pb-20">
-        <HeroBeams />
-        <Container className="relative py-16 sm:py-24">
-          <Reveal className="mx-auto max-w-[820px] text-center">
-            {MEMBERSHIP_HERO.eyebrow && <Eyebrow className="mb-5">{MEMBERSHIP_HERO.eyebrow}</Eyebrow>}
-            <h1 className="t-hero gradient-text">{MEMBERSHIP_HERO.headline}</h1>
-            <p className="t-lead mt-2 text-mist">{MEMBERSHIP_HERO.subhead}</p>
-            <p className="t-body-lg mx-auto mt-6 max-w-[34em] text-mist">{MEMBERSHIP_HERO.body}</p>
-            <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-6">
-              {MEMBERSHIP_HERO.cta && (
-                <Button href={MEMBERSHIP_HERO.cta.href} variant="accent" size="lg">
-                  {MEMBERSHIP_HERO.cta.label}
-                </Button>
-              )}
-              {MEMBERSHIP_HERO.secondary && <LinkArrow href={MEMBERSHIP_HERO.secondary.href}>{MEMBERSHIP_HERO.secondary.label}</LinkArrow>}
-            </div>
-            <p className="t-caption mt-10 text-mist">
+      {/* OPENING: left-aligned on the member card photograph; a plain dark band until it exists. */}
+      <Section theme="black" padded={false} className="relative flex min-h-[88dvh] items-end overflow-hidden pt-[var(--nav-h)]">
+        <ImageSlot slot="MEMBER_CARD_01" alt={MEMBERSHIP_OPENING.photoAlt} fill priority sizes="100vw" art={<DarkPlane />} />
+        {/* Scrim so the headline sits on the photograph's darkest third; invisible on the plain band. */}
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,rgba(0,0,0,0.78)_0%,rgba(0,0,0,0.35)_45%,transparent_100%)]" />
+        <Container className="relative pt-24 pb-16 sm:pt-32 sm:pb-20">
+          <p className="enter font-mono text-[0.75rem] uppercase tracking-[0.08em] text-mist">{MEMBERSHIP_OPENING.runningHead}</p>
+          <h1 className="enter t-display mt-5 max-w-[9em] text-snow" style={{ "--enter-delay": "80ms" } as React.CSSProperties}>
+            {MEMBERSHIP_OPENING.headline}
+          </h1>
+          <p className="enter t-body-lg mt-6 max-w-[34em] text-mist" style={{ "--enter-delay": "160ms" } as React.CSSProperties}>
+            {MEMBERSHIP_OPENING.body}
+          </p>
+          <div className="enter mt-8 flex flex-col items-start gap-5 sm:flex-row sm:items-center sm:gap-8" style={{ "--enter-delay": "240ms" } as React.CSSProperties}>
+            <Button href={MEMBERSHIP_OPENING.secondary.href} variant="accent" size="lg">
+              {MEMBERSHIP_OPENING.secondary.label}
+            </Button>
+            <p className="t-caption text-mist">
               {HERO_SIGN_IN.prefix}{" "}
               <Link href={HERO_SIGN_IN.href} className="text-accent-2 underline underline-offset-4 hover:text-snow">
                 {HERO_SIGN_IN.label}
               </Link>
             </p>
-          </Reveal>
+          </div>
         </Container>
       </Section>
 
-      {/* TIERS */}
+      {/* THE WALL: the live count at display size, then the conversation. */}
+      <Section theme="dark" id="founders" padded={false} className="relative scroll-mt-[var(--nav-h)] overflow-hidden">
+        <ImageSlot slot="FOUNDERS_WALL_01" alt={FOUNDERS_WALL_ALT} fill sizes="100vw" art={<DarkPlane className="bg-night-2" />} />
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(29,29,31,0.92)_0%,rgba(29,29,31,0.7)_55%,rgba(29,29,31,0.5)_100%)]" />
+        <Container className="relative py-20 sm:py-28 lg:py-32">
+          <div className="grid gap-14 lg:grid-cols-12 lg:gap-10">
+            <div className="lg:col-span-5">
+              <p className="font-mono text-[0.75rem] uppercase tracking-[0.08em] text-mist">{FOUNDERS_WALL.runningHead}</p>
+              {remaining === null ? (
+                <p className="t-numeral mt-6 text-snow">{FOUNDERS_CAP}</p>
+              ) : (
+                <p className="mt-6 flex items-baseline gap-4">
+                  <span className="t-numeral text-snow" aria-live="polite">
+                    {remaining}
+                  </span>
+                  <span className="font-mono text-[0.8125rem] uppercase tracking-[0.08em] text-mist">{FOUNDERS_WALL.remainingLabel(remaining)}</span>
+                </p>
+              )}
+              {taken !== null && <p className="tabular mt-3 font-mono text-[0.8125rem] text-mist">{FOUNDERS_WALL.namesUp(taken)}</p>}
+              {FOUNDERS_WALL.firstOnWall && <p className="t-body mt-3 max-w-[30em] text-mist">{FOUNDERS_WALL.firstOnWall}</p>}
+
+              <div className="mt-12 border-t border-white/12 pt-8">
+                {full ? (
+                  <>
+                    <h2 className="t-2 text-snow">{FOUNDERS_WALL.full.headline}</h2>
+                    <p className="t-lead t-italic mt-2 text-mist">{FOUNDERS_WALL.full.subhead}</p>
+                    <p className="t-body-lg mt-6 max-w-[34em] text-mist">{FOUNDERS_WALL.full.body}</p>
+                  </>
+                ) : (
+                  <>
+                    <h2 className="t-2 text-snow">{MEMBERSHIP_FOUNDERS.subhead}</h2>
+                    <p className="t-body-lg mt-6 max-w-[34em] text-mist">{MEMBERSHIP_FOUNDERS.body}</p>
+                  </>
+                )}
+                {founders && <p className="t-caption tabular mt-6 text-mist">{FOUNDERS_PRICE_LINE}</p>}
+              </div>
+            </div>
+            <div className="lg:col-span-6 lg:col-start-7">
+              <FoundersRequest waitlist={full} />
+            </div>
+          </div>
+        </Container>
+      </Section>
+
+      {/* TIERS: Signature wide, Club and Founders as hairline rows; the only page that keeps the numerals. */}
       <Section theme="light" id="tiers" className="scroll-mt-[var(--nav-h)]">
         <Container>
           <Head copy={MEMBERSHIP_TIERS_COPY} />
-          <Stagger className="mt-12 grid gap-4 lg:mt-16 lg:grid-cols-3 lg:items-stretch">
-            {MEMBERSHIP_TIERS.map((t) => (
-              <Item key={t.key} className="h-full">
-                <TierCard tier={t} />
-              </Item>
-            ))}
-          </Stagger>
-          <Reveal className="mt-16 lg:mt-24">
-            <h3 className="t-2">Compare tiers.</h3>
-            <p className="t-body-lg mt-2 max-w-[40em] text-ink-muted">{COMPARE_CAPTION}</p>
-            <CompareTable rows={COMPARE_ROWS} tiers={MEMBERSHIP_TIERS} caption={COMPARE_CAPTION} requirements={REQUIREMENTS_LINK} className="mt-8" />
-          </Reveal>
+          <div className="mt-12 grid gap-10 lg:mt-16 lg:grid-cols-12 lg:gap-8">
+            <div className="lg:col-span-7 lg:self-start">
+              <TierCard tier={wide} />
+            </div>
+            <div className="lg:col-span-5 lg:pt-2">
+              {rows.map((t, i) => (
+                <TierRow key={t.key} tier={t} last={i === rows.length - 1} />
+              ))}
+            </div>
+          </div>
+
+          {/* The full grid, closed by default. */}
+          <details className="group mt-16 border-t border-hairline lg:mt-24">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-6 [&::-webkit-details-marker]:hidden">
+              <span>
+                <span className="t-2 block">{COMPARE_DETAILS.summary}</span>
+                <span className="t-caption mt-1 block text-ink-muted">{COMPARE_DETAILS.hint}</span>
+              </span>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                aria-hidden="true"
+                className="shrink-0 text-ink transition-transform duration-300 ease-[var(--ease-apple)] group-open:rotate-45"
+              >
+                <path d="M8 2v12M2 8h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            </summary>
+            <div className="pb-6">
+              <p className="t-body-lg max-w-[40em] text-ink-muted">{COMPARE_CAPTION}</p>
+              <CompareTable rows={COMPARE_ROWS} tiers={MEMBERSHIP_TIERS} caption={COMPARE_CAPTION} requirements={REQUIREMENTS_LINK} className="mt-8" />
+            </div>
+          </details>
         </Container>
       </Section>
 
@@ -242,23 +363,7 @@ export default function MembershipPage() {
         </Container>
       </Section>
 
-      {/* FOUNDERS */}
-      <Section theme="gray" id="founders" className="scroll-mt-[var(--nav-h)]">
-        <Container>
-          <div className="grid gap-12 lg:grid-cols-2 lg:items-center lg:gap-16">
-            <Head copy={MEMBERSHIP_FOUNDERS} />
-            <Reveal delay={0.1}>
-              <ImageSlot slot="FOUNDERS_WALL_01" alt={FOUNDERS_WALL_ALT} className="aspect-[16/9] rounded-card ring-1 ring-ink/10" art={<Nameplate cap={foundersCap} />} />
-              <div className="mt-5 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
-                <p className="tabular font-mono text-[0.8125rem] text-ink-muted">{FOUNDERS_COUNTER}</p>
-                {founders && <p className="t-caption tabular text-ink-muted">{FOUNDERS_PRICE_LINE}</p>}
-              </div>
-            </Reveal>
-          </div>
-        </Container>
-      </Section>
-
-      {/* APPLY */}
+      {/* APPLY: the page ends here. */}
       <Section theme="black" id="apply" className="grain scroll-mt-[var(--nav-h)] overflow-hidden">
         <Container className="relative" size="md">
           <Head copy={MEMBERSHIP_APPLY} align="center" />

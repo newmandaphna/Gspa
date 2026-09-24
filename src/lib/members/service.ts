@@ -195,6 +195,20 @@ export async function listMemberBookings(memberId: number, opts: { upcomingOnly?
     .orderBy(asc(bookings.startsAt));
 }
 
+/**
+ * Names on the Founders wall: members on the founders tier who are active or
+ * still pending. Pending counts because a plate is spoken for the day the
+ * application is accepted, not the day the portal login is activated.
+ */
+export async function foundersCount(): Promise<number> {
+  const db = await getDb();
+  const [row] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(members)
+    .where(and(eq(members.tier, "founders"), inArray(members.status, ["active", "pending"])));
+  return row?.n ?? 0;
+}
+
 export async function memberStats(): Promise<{ total: number; active: number; pending: number; openRequests: number }> {
   const db = await getDb();
   const [m] = await db

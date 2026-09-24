@@ -1,4 +1,5 @@
-import { LanePerspective } from "@/components/art";
+import Link from "next/link";
+import { LaneScroller } from "@/components/LaneScroller";
 import { cn } from "@/lib/cn";
 import { FACILITY } from "@/lib/config/site";
 import { AVATARS, BRACKET_ROUNDS, BRACKET_TEAMS, BRACKET_WINNER_LABEL, FLOOR_PLAN_LABELS } from "@/lib/content/pages/events";
@@ -6,6 +7,7 @@ import { AVATARS, BRACKET_ROUNDS, BRACKET_TEAMS, BRACKET_WINNER_LABEL, FLOOR_PLA
 /**
  * Photography-free visuals for /events. Pure SVG/CSS. Hairlines are 1px:
  * rgba(255,255,255,.12) on dark, #d2d2d7 on light. One gold element per piece.
+ * The top-down plan is the page's device; nothing else on the page draws the room.
  */
 
 const GOLD = "#c9a55a";
@@ -35,9 +37,57 @@ export function EventsFloorPlan({ className }: { className?: string }) {
   const suiteStart = count - suites * per;
   const laneX = (i: number) => pad + i * (laneW + gap);
   const label = { fontFamily: MONO, fontSize: 12, letterSpacing: "0.08em" } as const;
+  // Below sm the drawing is 1030 px wide so a lane is 72 px, plus a 24 px gutter each side.
+  const phoneWidth = Math.round((W / laneW) * 72) + 48;
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className={cn("block h-auto w-full", className)} aria-hidden="true">
+    <LaneScroller className={className}>
+      {/* The phone width rides a custom property so the sm: utility can release it; an inline min-width would win over the class. */}
+      <div className="relative min-w-[var(--plan-w)] px-6 sm:min-w-0 sm:px-0" style={{ "--plan-w": `${phoneWidth}px` } as React.CSSProperties}>
+        <EventsFloorPlanSvg W={W} H={H} pad={pad} count={count} suites={suites} per={per} laneW={laneW} laneTop={laneTop} laneH={laneH} fireY={fireY} loungeTop={loungeTop} loungeH={loungeH} suiteStart={suiteStart} laneX={laneX} label={label} />
+        {/* Lane links laid over the drawing; each is also a snap point for the phone scroll. */}
+        <div className="absolute inset-y-0 left-6 right-6 sm:inset-x-0">
+          {Array.from({ length: count }).map((_, i) => {
+            const n = String(i + 1).padStart(2, "0");
+            const isSuite = i >= suiteStart;
+            return (
+              <Link
+                key={i}
+                href={`/reserve?experience=${isSuite ? "private-suite" : "lane-session"}&lane=${n}`}
+                aria-label={isSuite ? `Reserve a suite, lane ${n}` : `Reserve lane ${n}`}
+                data-lane={n}
+                className="absolute snap-start rounded-[6px] ring-accent/70 transition-[box-shadow] duration-300 hover:ring-1 focus-visible:ring-1"
+                style={{ left: `${(laneX(i) / W) * 100}%`, width: `${(laneW / W) * 100}%`, top: `${(laneTop / H) * 100}%`, height: `${(laneH / H) * 100}%` }}
+              />
+            );
+          })}
+        </div>
+      </div>
+    </LaneScroller>
+  );
+}
+
+type PlanGeometry = {
+  W: number;
+  H: number;
+  pad: number;
+  count: number;
+  suites: number;
+  per: number;
+  laneW: number;
+  laneTop: number;
+  laneH: number;
+  fireY: number;
+  loungeTop: number;
+  loungeH: number;
+  suiteStart: number;
+  laneX: (i: number) => number;
+  label: { fontFamily: string; fontSize: number; letterSpacing: string };
+};
+
+function EventsFloorPlanSvg({ W, H, pad, count, suites, per, laneW, laneTop, laneH, fireY, loungeTop, loungeH, suiteStart, laneX, label }: PlanGeometry) {
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} className="block h-auto w-full" aria-hidden="true">
       {/* target line */}
       <text x={pad} y={40} fill="rgba(161,161,166,0.8)" style={label}>
         {FLOOR_PLAN_LABELS.targetLine.toUpperCase()}
@@ -107,41 +157,6 @@ export function EventsFloorPlan({ className }: { className?: string }) {
       <text x={laneX(suiteStart - 1) + laneW - 72} y={loungeTop + 84} fill="rgba(161,161,166,0.8)" textAnchor="middle" style={label}>
         {FLOOR_PLAN_LABELS.desk.toUpperCase()}
       </text>
-    </svg>
-  );
-}
-
-/** Behind the hero: the lane vanishing point, dimmed so the plan reads on top. */
-export function EventsPhotoArt() {
-  return (
-    <div className="absolute inset-0">
-      <LanePerspective className="opacity-70" target={false} />
-      <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.55)_0%,rgba(0,0,0,0.75)_45%,rgba(0,0,0,0.95)_100%)]" />
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------------
-   Formats: a hairline plan glyph, n lanes and a gold firing line.
-   --------------------------------------------------------------------- */
-export function PlanGlyph({ lanes, className }: { lanes: number; className?: string }) {
-  const W = 160;
-  const gap = 4;
-  const laneW = Math.min(26, (W - 10 - gap * (lanes - 1)) / lanes);
-  const total = lanes * laneW + gap * (lanes - 1);
-  const x0 = (W - total) / 2;
-  return (
-    <svg viewBox={`0 0 ${W} 56`} className={cn("block h-auto w-full", className)} aria-hidden="true">
-      {Array.from({ length: lanes }).map((_, i) => {
-        const x = x0 + i * (laneW + gap);
-        return (
-          <g key={i}>
-            <rect x={x} y={4} width={laneW} height={36} rx={3} fill="none" stroke={HAIR_LIGHT} strokeWidth={1} />
-            <path d={`M${x + laneW * 0.25} ${11}h${laneW * 0.5}`} stroke="rgba(29,29,31,0.3)" strokeWidth={1} />
-          </g>
-        );
-      })}
-      <path d={`M${x0} 48H${x0 + total}`} stroke={GOLD} strokeWidth={1} />
     </svg>
   );
 }

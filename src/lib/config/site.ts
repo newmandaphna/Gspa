@@ -4,6 +4,8 @@
  * Square brackets mark facts the owner has not confirmed yet.
  */
 
+import { isPlaceholder } from "@/lib/seo/placeholders";
+
 /** The production origin. Every absolute link, the sitemap, share tags, emails and Stripe redirects use it. */
 const CANONICAL_URL = "https://gunspa.com";
 
@@ -15,7 +17,7 @@ export const SITE = {
   tagline: "Ready? Aim. Relax!",
   taglineSecondary: "Precision, at ease.",
   description:
-    "A private shooting club and luxury indoor range in Jamaica, Queens. Twelve acoustic lanes, two private suites, two simulator bays. Three instructors and a lounge worth the trip.",
+    "A shooting club on Rockaway Blvd, five minutes from the JFK terminals. Twelve 25-yard lanes, two private suites, a simulator for anyone with ID, and a lounge with the line behind glass.",
   timezone: "America/New_York",
   phone: "(718) 000-0000", // TODO(owner): real phone
   email: "desk@gunspa.com", // TODO(owner): real email
@@ -42,6 +44,22 @@ export const SITE = {
     NODE_ENV: process.env.NODE_ENV,
   }),
 } as const;
+
+/**
+ * The desk phone, or null while site.ts still holds the 000-0000 placeholder.
+ * Every "call the desk" line (emails, error pages, the confirmation page, the
+ * availability outage state) goes through here, so a fake number never
+ * reaches a guest; callers fall back to the desk email or to replying.
+ */
+export function deskPhone(): string | null {
+  return isPlaceholder(SITE.phone) ? null : SITE.phone;
+}
+
+/** A tel: link for the desk phone, or null while it is a placeholder. */
+export function deskPhoneHref(): string | null {
+  const phone = deskPhone();
+  return phone ? `tel:${phone.replace(/[^\d+]/g, "")}` : null;
+}
 
 /**
  * The public origin. NEXT_PUBLIC_SITE_URL wins when set. Otherwise a

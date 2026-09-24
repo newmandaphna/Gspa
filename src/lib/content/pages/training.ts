@@ -66,7 +66,7 @@ function rungFrom(item: CatalogItem | undefined, label: string, fallbackSlug: st
 export const LADDER = {
   eyebrow: "The ladder",
   headline: "The ladder has five rungs.",
-  subhead: "It starts on the simulator and ends with a state certificate.",
+  subhead: "It starts on the simulator and runs through the state certificate to defensive scenarios.",
   body: "Simulator, First Session, Private Instruction, the NYS 18-hour course, Defensive Scenarios. Each step assumes only the one before it, and the first assumes nothing.",
   rungs: [
     rungFrom(simulatorBay, "Simulator", "simulator-bay"),
@@ -84,9 +84,9 @@ export const LADDER = {
    --------------------------------------------------------------------- */
 export const FIRST_SESSION = {
   eyebrow: "First Session",
-  headline: "First Session.",
-  subhead: "Ninety minutes with an instructor who assumes nothing.",
-  body: "Safety and stance in the classroom, grip and sight picture next, then 50 rounds through a house .22 with your instructor at your elbow. No experience needed.",
+  headline: "Fifty rounds through a .22.",
+  subhead: "An instructor watches your feet before your hands.",
+  body: "Safety and stance in the classroom, grip and sight picture next, then the line, with your instructor at your elbow the whole ninety minutes. No experience needed, and a second student joins at half price.",
   steps: ["Safety", "Stance", "Grip", "Sights", "Live fire"],
   cta: { label: "Reserve First Session", href: "/reserve?experience=first-session" },
   requirements: { label: "See requirements", href: "/visit#requirements" },
@@ -108,9 +108,9 @@ export type Instructor = { slot: string; name: string; credential: string; alt: 
 
 export const PRIVATE = {
   eyebrow: "Private instruction",
-  headline: "One on one.",
-  subhead: "An instructor to yourself, at the hour you choose.",
-  body: "Drills built around whatever you came to fix, written up and saved to your profile. A second student joins at half price. For a longer session, reserve consecutive hours.",
+  headline: "An hour with one instructor",
+  subhead: "The drills get written up and saved to your profile. A second student joins at half price.",
+  body: "Built around whatever you came to fix. Bring your own firearm where the law allows, or work on a house long gun. For a longer session, reserve consecutive hours.",
   cta: { label: "Reserve private instruction", href: "/reserve?experience=private-instruction" },
   requirements: { label: "See requirements", href: "/visit#requirements" },
   price: privateInstruction ? `${formatMoney(privateInstruction.priceCents)} · ${privateInstruction.durationMin} minutes · lane fee included` : "",

@@ -1,5 +1,8 @@
 export type NavItem = { label: string; href: string };
 
+/** The house rules page. The footer, the club page and the legal page all point here. */
+export const HOUSE_RULES_LINK: NavItem = { label: "House rules", href: "/house-rules" };
+
 /** Primary navigation (order matters). Edit here to rename or reorder. */
 export const NAV: NavItem[] = [
   { label: "The Club", href: "/club" },
@@ -52,7 +55,7 @@ export const FOOTER_COLUMNS: { title: string; links: NavItem[] }[] = [
   {
     title: "Legal",
     links: [
-      { label: "Range rules", href: "/legal#range-rules" },
+      HOUSE_RULES_LINK,
       { label: "Acknowledgement", href: "/legal#waiver" },
       { label: "Terms", href: "/legal#terms" },
       { label: "Membership agreement", href: "/legal#membership-agreement" },

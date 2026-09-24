@@ -1,19 +1,22 @@
 import type { Metadata } from "next";
-import { Glow } from "@/components/art";
-import { AvatarRow, Bracket, DateNightArt, EventsFloorPlan, EventsPhotoArt, LogoStripArt, PlanGlyph } from "@/components/pages/events/Art";
+import { pageMeta } from "@/lib/seo/meta";
+import { AvatarRow, Bracket, DateNightArt, EventsFloorPlan, LogoStripArt } from "@/components/pages/events/Art";
 import { InquiryForm } from "@/components/pages/events/InquiryForm";
 import { InView } from "@/components/pages/events/InView";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
-import { Eyebrow } from "@/components/ui/Eyebrow";
+import { Headline } from "@/components/ui/Headline";
 import { ImageSlot } from "@/components/ui/ImageSlot";
 import { LinkArrow } from "@/components/ui/LinkArrow";
-import { Row, Rows, Specs } from "@/components/ui/List";
-import { Item, Reveal, Stagger } from "@/components/ui/Reveal";
+import { Row, Rows } from "@/components/ui/List";
+import { PullQuote } from "@/components/ui/PullQuote";
 import { Section } from "@/components/ui/Section";
 import { cn } from "@/lib/cn";
-import { ELIGIBILITY_LABELS, type Eligibility } from "@/lib/content/catalog";
+import { deskPhone, deskPhoneHref, FACILITY } from "@/lib/config/site";
+import { ELIGIBILITY_LABELS } from "@/lib/content/catalog";
 import {
+  CORPORATE,
+  CORPORATE_MIN_GUESTS,
   DATE_NIGHT,
   DATE_NIGHT_CHIPS,
   DATE_PHOTO_ALT,
@@ -24,90 +27,36 @@ import {
   EVENTS_INQUIRE,
   EVENTS_META,
   EVENTS_PARTIES,
-  EVENTS_PHOTO_ALT,
   FORMAT_CARDS,
-  FORMAT_LABELS,
-  HERO_NUMERALS,
+  FOUNDERS_SUITE,
   INQUIRE_FOOTNOTE,
   LOGO_STRIP_ALT,
   LOGO_STRIP_CAPTION,
+  PRIVATE_SUITE,
+  SHOOTERS_PER_OFFICER,
+  numberWord,
   type FormatCard,
-  type SectionCopy,
 } from "@/lib/content/pages/events";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta("/events", {
   title: EVENTS_META.title,
   description: EVENTS_META.description,
-};
+});
 
 /* ------------------------------------------------------------ helpers */
 
-/** Headline block: eyebrow, headline, subhead (8px gap), body (24px of air). */
-function Head({ copy, align = "left", className }: { copy: SectionCopy; align?: "left" | "center"; className?: string }) {
-  return (
-    <Reveal className={cn("max-w-[720px]", align === "center" && "mx-auto text-center", className)}>
-      {copy.eyebrow && <Eyebrow className="mb-4">{copy.eyebrow}</Eyebrow>}
-      <h2 className="t-1">{copy.headline}</h2>
-      <p className="t-lead mt-2 text-muted">{copy.subhead}</p>
-      <p className={cn("t-body-lg mt-6 max-w-[40em] text-muted", align === "center" && "mx-auto")}>{copy.body}</p>
-    </Reveal>
-  );
-}
+/** Three widths, so the strip reads as a row of different rooms rather than three matching cards. */
+const CARD_WIDTHS = ["w-[272px] sm:w-[280px]", "w-[304px] sm:w-[360px]", "w-[336px] sm:w-[440px]"];
 
-/** Pill CTA plus optional secondary arrow link, 24px under the copy. */
-function Ctas({ copy, className }: { copy: SectionCopy; className?: string }) {
-  if (!copy.cta && !copy.secondary) return null;
-  return (
-    <div className={cn("flex flex-wrap items-center gap-x-6 gap-y-3", className)}>
-      {copy.cta && <Button href={copy.cta.href}>{copy.cta.label}</Button>}
-      {copy.secondary && <LinkArrow href={copy.secondary.href}>{copy.secondary.label}</LinkArrow>}
-    </div>
-  );
-}
-
-/** Eligibility badge derived from catalog tags (never typed by hand). */
-function Badge({ eligibility, tone }: { eligibility: Eligibility; tone: "light" | "dark" }) {
-  return (
-    <span className={cn("inline-flex items-center rounded-pill px-3 py-1 font-mono text-[0.75rem] ring-1 ring-inset", tone === "dark" ? "text-mist ring-white/15" : "text-ink-muted ring-ink/15")}>
-      {ELIGIBILITY_LABELS[eligibility]}
-    </span>
-  );
-}
-
-/** Small status chip ("Coming") in gold, contrast-safe per band. */
-function Chip({ children, tone }: { children: React.ReactNode; tone: "light" | "dark" }) {
-  return (
-    <span className={cn("inline-flex items-center rounded-pill px-3 py-1 font-mono text-[0.75rem] uppercase tracking-[0.08em] ring-1 ring-inset", tone === "dark" ? "text-accent ring-accent/40" : "text-accent-deep ring-accent-deep/40")}>
-      {children}
-    </span>
-  );
-}
-
-function FormatCardView({ card }: { card: FormatCard }) {
+function FormatCardView({ card, className }: { card: FormatCard; className?: string }) {
   const { item } = card;
-  const bookable = item.bookable;
+  const facts = `Up to ${numberWord(item.maxGuestsPerUnit)} guests on ${numberWord(card.lanes)} lanes, ${card.duration}, ${card.price.toLowerCase()}.`;
   return (
-    <article className="flex h-full flex-col rounded-card bg-paper-2 p-7 sm:p-8">
-      <h3 className="t-eyebrow text-ink-muted">{item.name}</h3>
-      <p className="mt-6 flex items-baseline gap-2">
-        <span className="t-numeral text-[clamp(4rem,7vw,6rem)] text-ink">{item.maxGuestsPerUnit}</span>
-        <span className="t-caption text-ink-muted">{FORMAT_LABELS.guests}</span>
-      </p>
-      <div className="mt-6">
-        <PlanGlyph lanes={card.lanes} />
-        <p className="mt-2 text-center font-mono text-[0.75rem] uppercase tracking-[0.08em] text-ink-muted">{FORMAT_LABELS.lanes(card.lanes)}</p>
-      </div>
-      <Specs
-        className="mt-6"
-        items={[
-          { label: "Duration", value: card.duration },
-          { label: "Price", value: card.price },
-        ]}
-      />
+    <article className={cn("flex h-full shrink-0 snap-start flex-col rounded-card bg-paper-2 p-7 sm:p-8", className)}>
+      <h3 className="t-3">{item.name}</h3>
+      <p className="t-subhead mt-3 text-ink-muted">{facts}</p>
       <p className="t-body mt-4 text-ink-muted">{item.tagline}</p>
-      <div className="mt-4">
-        <Badge eligibility={item.eligibility} tone="light" />
-      </div>
+      <p className="mt-3 font-mono text-[0.75rem] leading-[1.6] text-ink-muted">{ELIGIBILITY_LABELS[item.eligibility]}.</p>
       {item.includes.length > 0 && (
         <Rows mark="check" size="sm" className="mt-6">
           {item.includes.map((line) => (
@@ -116,15 +65,7 @@ function FormatCardView({ card }: { card: FormatCard }) {
         </Rows>
       )}
       <div className="mt-8 pt-2 sm:mt-auto sm:pt-8">
-        {bookable ? (
-          <Button href={card.cta.href} size="md">
-            {card.cta.label}
-          </Button>
-        ) : (
-          <Button href={card.cta.href} variant="secondary" size="md">
-            {card.cta.label}
-          </Button>
-        )}
+        <LinkArrow href={card.cta.href}>{card.cta.label}</LinkArrow>
       </div>
     </article>
   );
@@ -135,86 +76,91 @@ function FormatCardView({ card }: { card: FormatCard }) {
 export default function EventsPage() {
   return (
     <>
-      {/* ---------------------------------------------------------- hero */}
-      <Section theme="black" id="hero" className="grain overflow-hidden pt-[calc(var(--nav-h)+3rem)] sm:pt-[calc(var(--nav-h)+4.5rem)]">
-        <ImageSlot slot="EVENTS_PHOTO_01" fill alt={EVENTS_PHOTO_ALT} art={<EventsPhotoArt />} priority />
-        <Container className="relative">
-          <Reveal className="mx-auto max-w-[760px] text-center">
-            {EVENTS_HERO.eyebrow && <Eyebrow className="mb-4">{EVENTS_HERO.eyebrow}</Eyebrow>}
-            <h1 className="t-hero">{EVENTS_HERO.headline}</h1>
-            <p className="t-lead mt-2 text-mist">{EVENTS_HERO.subhead}</p>
-            <p className="t-body-lg mx-auto mt-6 max-w-[40em] text-mist">{EVENTS_HERO.body}</p>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
-              {EVENTS_HERO.cta && (
-                <Button href={EVENTS_HERO.cta.href} variant="accent" size="lg">
-                  {EVENTS_HERO.cta.label}
-                </Button>
-              )}
-              {EVENTS_HERO.secondary && <LinkArrow href={EVENTS_HERO.secondary.href}>{EVENTS_HERO.secondary.label}</LinkArrow>}
+      {/* -------------------------------- hero: the form, because this is a lead page */}
+      <Section theme="light" id="hero" className="pt-[calc(var(--nav-h)+2.5rem)] sm:pt-[calc(var(--nav-h)+3.5rem)]">
+        <Container>
+          <div className="grid gap-12 lg:grid-cols-12 lg:gap-10">
+            <div className="lg:col-span-5">
+              <Headline
+                as="h1"
+                head={`Suites for ${PRIVATE_SUITE.maxGuestsPerUnit} and ${FOUNDERS_SUITE.maxGuestsPerUnit} · the floor for ${CORPORATE.maxGuestsPerUnit} · a reply within one business day`}
+                headline={EVENTS_HERO.headline}
+                subhead={EVENTS_HERO.subhead}
+                body={EVENTS_HERO.body}
+              >
+                <p className="t-caption mt-8 text-ink-muted">
+                  {INQUIRE_FOOTNOTE.lead}{" "}
+                  {deskPhone() && (
+                    <>
+                      <a href={deskPhoneHref() ?? undefined} className="tabular underline underline-offset-4 hover:text-ink">
+                        {deskPhone()}
+                      </a>
+                      {" or "}
+                    </>
+                  )}
+                  <a href={`mailto:${INQUIRE_FOOTNOTE.email}`} className="underline underline-offset-4 hover:text-ink">
+                    {INQUIRE_FOOTNOTE.email}
+                  </a>
+                  .
+                </p>
+              </Headline>
             </div>
-          </Reveal>
+            <div id="inquire" className="scroll-mt-[calc(var(--nav-h)+1rem)] lg:col-span-7">
+              <h2 className="t-3">{EVENTS_INQUIRE.headline}</h2>
+              <p className="t-caption mt-2 text-ink-muted">
+                {EVENTS_INQUIRE.subhead} {EVENTS_INQUIRE.body}
+              </p>
+              <InquiryForm className="mt-6" />
+            </div>
+          </div>
+        </Container>
+      </Section>
 
-          <Reveal delay={0.15} className="mt-14 sm:mt-20">
+      {/* ------------------------ silent: the plan alone, bleeding off the right edge */}
+      <Section theme="black" padding="vast" id="plan" className="overflow-hidden" aria-label="Floor plan">
+        <Container>
+          <div className="lg:w-[128%]">
             <EventsFloorPlan />
-          </Reveal>
-
-          <Stagger className="mt-10 grid grid-cols-3 gap-4 sm:mt-14 sm:gap-8">
-            {HERO_NUMERALS.map((n) => (
-              <Item key={n.label}>
-                <div className="border-t border-white/15 pt-4">
-                  <p className="t-numeral text-[clamp(3.25rem,9vw,10rem)] text-accent">{n.value}</p>
-                  <p className="t-caption mt-2 text-mist">{n.label}</p>
-                </div>
-              </Item>
-            ))}
-          </Stagger>
+          </div>
         </Container>
       </Section>
 
       {/* ------------------------------------------------------- formats */}
       <Section theme="light" id="formats">
         <Container>
-          <Head copy={EVENTS_FORMATS} />
-          <Stagger className="mt-12 grid gap-4 md:grid-cols-3">
-            {FORMAT_CARDS.map((card) => (
-              <Item key={card.item.slug} className="h-full">
-                <FormatCardView card={card} />
-              </Item>
+          <Headline layout="beside" head="Suites reserve online · buyouts are quoted per group" headline={EVENTS_FORMATS.headline} subhead={EVENTS_FORMATS.subhead} body={EVENTS_FORMATS.body}>
+            {EVENTS_FORMATS.cta && (
+              <LinkArrow href={EVENTS_FORMATS.cta.href} className="mt-6">
+                {EVENTS_FORMATS.cta.label}
+              </LinkArrow>
+            )}
+          </Headline>
+          {/* A horizontal strip at three widths; it scrolls where it does not fit. */}
+          <div className="no-scrollbar -mx-5 mt-12 flex snap-x gap-4 overflow-x-auto px-5 pb-2 sm:-mx-8 sm:px-8 lg:mx-0 lg:px-0">
+            {FORMAT_CARDS.map((card, i) => (
+              <FormatCardView key={card.item.slug} card={card} className={CARD_WIDTHS[i] ?? CARD_WIDTHS[0]} />
             ))}
-          </Stagger>
-          {EVENTS_FORMATS.cta && (
-            <Reveal className="mt-10">
-              <LinkArrow href={EVENTS_FORMATS.cta.href}>{EVENTS_FORMATS.cta.label}</LinkArrow>
-            </Reveal>
-          )}
+          </div>
         </Container>
       </Section>
 
       {/* ---------------------------------------------------- date night */}
-      <Section theme="dark" id="date-night" className="overflow-hidden">
-        <Glow className="-right-40 top-1/3 h-[520px] w-[520px] opacity-60" />
-        <Container className="relative">
-          <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
-            <Reveal>
-              <Chip tone="dark">{EVENTS_DATE_NIGHT.eyebrow}</Chip>
-              <h2 className="t-1 mt-5">{EVENTS_DATE_NIGHT.headline}</h2>
-              <p className="t-lead mt-2 text-mist">{EVENTS_DATE_NIGHT.subhead}</p>
-              <p className="t-body-lg mt-6 max-w-[40em] text-mist">{EVENTS_DATE_NIGHT.body}</p>
-              <div className="mt-6 flex flex-wrap items-center gap-2">
-                {DATE_NIGHT_CHIPS.map((c) => (
-                  <span key={c} className="inline-flex items-center rounded-pill px-3 py-1 font-mono text-[0.75rem] tabular text-mist ring-1 ring-inset ring-white/15">
-                    {c}
-                  </span>
-                ))}
-                <Badge eligibility={DATE_NIGHT.eligibility} tone="dark" />
-              </div>
-              <Ctas copy={EVENTS_DATE_NIGHT} className="mt-8" />
-            </Reveal>
-            <Reveal delay={0.1}>
-              <InView>
-                <ImageSlot slot="DATE_PHOTO_01" alt={DATE_PHOTO_ALT} className="aspect-[3/2] rounded-card ring-1 ring-white/10" art={<DateNightArt />} />
-              </InView>
-            </Reveal>
+      <Section theme="light" padding="tight" id="date-night" className="border-t border-hairline">
+        <Container>
+          <div className="grid items-center gap-10 lg:grid-cols-12 lg:gap-10">
+            <div className="lg:col-span-6">
+              <Headline head={`Coming · ${DATE_NIGHT_CHIPS.join(" · ")}`} headline={EVENTS_DATE_NIGHT.headline} subhead={EVENTS_DATE_NIGHT.subhead} body={EVENTS_DATE_NIGHT.body}>
+                <p className="mt-4 font-mono text-[0.8125rem] leading-[1.6] text-ink-muted">{ELIGIBILITY_LABELS[DATE_NIGHT.eligibility]}.</p>
+                {EVENTS_DATE_NIGHT.cta && (
+                  <LinkArrow href={EVENTS_DATE_NIGHT.cta.href} className="mt-6">
+                    {EVENTS_DATE_NIGHT.cta.label}
+                  </LinkArrow>
+                )}
+              </Headline>
+            </div>
+            <InView className="lg:col-span-6">
+              <ImageSlot slot="DATE_PHOTO_01" alt={DATE_PHOTO_ALT} className="aspect-[3/2] rounded-card ring-1 ring-ink/10" art={<DateNightArt />} sizes="(min-width: 1024px) 560px, 100vw" />
+            </InView>
           </div>
         </Container>
       </Section>
@@ -222,65 +168,43 @@ export default function EventsPage() {
       {/* ------------------------------------------------------- parties */}
       <Section theme="gray" id="parties">
         <Container>
-          <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
-            <div>
-              <Head copy={EVENTS_PARTIES} />
-              <Reveal delay={0.1}>
-                <Ctas copy={EVENTS_PARTIES} className="mt-8" />
-              </Reveal>
+          <div className="grid items-center gap-10 lg:grid-cols-12 lg:gap-10">
+            <div className="lg:col-span-6">
+              <Headline head={`One range officer per ${SHOOTERS_PER_OFFICER} shooters · a host on every party`} headline={EVENTS_PARTIES.headline} subhead={EVENTS_PARTIES.subhead} body={EVENTS_PARTIES.body}>
+                {EVENTS_PARTIES.cta && (
+                  <div className="mt-8">
+                    <Button href={EVENTS_PARTIES.cta.href}>{EVENTS_PARTIES.cta.label}</Button>
+                  </div>
+                )}
+              </Headline>
             </div>
-            <Reveal delay={0.15}>
+            <div className="lg:col-span-6">
               <div className="rounded-card bg-paper p-7 ring-1 ring-ink/10 sm:p-10">
                 <AvatarRow />
               </div>
-            </Reveal>
+            </div>
           </div>
+          <PullQuote className="mt-14 sm:mt-20">No alcohol, ever.</PullQuote>
         </Container>
       </Section>
 
-      {/* ----------------------------------------------------- corporate */}
+      {/* ------------------------------------------ corporate: the page ends here */}
       <Section theme="black" id="corporate" className="grain overflow-hidden">
         <Container className="relative">
-          <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
-            <div>
-              <Head copy={EVENTS_CORPORATE} />
-              <Reveal delay={0.1}>
-                <Ctas copy={EVENTS_CORPORATE} className="mt-8" />
-              </Reveal>
-            </div>
-            <Reveal delay={0.15}>
-              <InView as="figure" className="rounded-card bg-white/[0.03] p-5 ring-1 ring-white/10 sm:p-8">
-                <Bracket />
-              </InView>
-            </Reveal>
-          </div>
-          <Reveal delay={0.1} className="mt-14 sm:mt-20">
-            <p className="mb-4 font-mono text-[0.75rem] uppercase tracking-[0.08em] text-mist/80">{LOGO_STRIP_CAPTION}</p>
+          <Headline layout="beside" head={`${CORPORATE_MIN_GUESTS} to ${CORPORATE.maxGuestsPerUnit} guests · ${FACILITY.laneCount} lanes and ${FACILITY.simulatorBays} bays · quoted per group`} headline={EVENTS_CORPORATE.headline} subhead={EVENTS_CORPORATE.subhead} body={EVENTS_CORPORATE.body}>
+            {EVENTS_CORPORATE.cta && (
+              <div className="mt-8">
+                <Button href={EVENTS_CORPORATE.cta.href}>{EVENTS_CORPORATE.cta.label}</Button>
+              </div>
+            )}
+          </Headline>
+          <InView as="figure" className="m-0 mt-14 rounded-card bg-white/[0.03] p-5 ring-1 ring-white/10 sm:mt-20 sm:p-8 lg:ml-[41.667%]">
+            <Bracket />
+          </InView>
+          <div className="mt-14 sm:mt-20">
+            <p className="mb-4 font-mono text-[0.75rem] uppercase tracking-[0.12em] text-mist">{LOGO_STRIP_CAPTION}</p>
             <ImageSlot slot="CLIENT_LOGOS_01" alt={LOGO_STRIP_ALT} className="aspect-[3/1] sm:aspect-[8/1]" art={<LogoStripArt />} />
-          </Reveal>
-        </Container>
-      </Section>
-
-      {/* ------------------------------------------------------- inquire */}
-      <Section theme="light" id="inquire" className="overflow-hidden">
-        <Glow className="-left-32 top-10 h-[420px] w-[420px] opacity-50" />
-        <Container size="md" className="relative">
-          <Head copy={EVENTS_INQUIRE} />
-          <Reveal delay={0.1} className="mt-10">
-            <InquiryForm />
-          </Reveal>
-          <Reveal delay={0.15}>
-            <p className="t-caption mt-6 text-ink-muted">
-              {INQUIRE_FOOTNOTE.lead}{" "}
-              <a href={`tel:${INQUIRE_FOOTNOTE.phone.replace(/[^\d+]/g, "")}`} className="tabular underline underline-offset-4 hover:text-ink">
-                {INQUIRE_FOOTNOTE.phone}
-              </a>
-              {" · "}
-              <a href={`mailto:${INQUIRE_FOOTNOTE.email}`} className="underline underline-offset-4 hover:text-ink">
-                {INQUIRE_FOOTNOTE.email}
-              </a>
-            </p>
-          </Reveal>
+          </div>
         </Container>
       </Section>
     </>
