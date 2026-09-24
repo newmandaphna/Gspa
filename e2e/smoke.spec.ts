@@ -49,7 +49,8 @@ test("books a lane end to end (pay on arrival)", async ({ page }) => {
   await page.goto("/reserve");
   // Step 1: first bookable card
   await page.getByRole("tab", { name: "Lanes" }).click();
-  await page.locator("li button").first().click();
+  // Experience cards are buttons inside the <ul> grid (the step indicator is an <ol>).
+  await page.locator("ul li > button").first().click();
   // Step 2: pick a date at least two days out, then the first enabled slot
   await expect(page.getByRole("heading", { name: "When?" })).toBeVisible();
   const enabledDays = page.locator('[role="gridcell"] button:not([disabled])');
