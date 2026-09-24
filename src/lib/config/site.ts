@@ -11,7 +11,7 @@ export const SITE = {
   tagline: "Ready? Aim. Relax!",
   taglineSecondary: "Precision, at ease.",
   description:
-    "A private shooting club and luxury indoor range in Jamaica, Queens. Twelve acoustic lanes, two private suites, two simulator bays, instruction, and a lounge worth the trip.",
+    "A private shooting club and luxury indoor range in Jamaica, Queens. Twelve acoustic lanes, two private suites, two simulator bays. Three instructors and a lounge worth the trip.",
   timezone: "America/New_York",
   phone: "(718) 000-0000", // TODO(owner): real phone
   email: "desk@thegunspa.com", // TODO(owner): real email
@@ -65,9 +65,9 @@ export const HOURS: Record<number, Hours> = {
 };
 
 export const HOURS_DISPLAY: { days: string; hours: string; dow: number[] }[] = [
-  { days: "Monday – Friday", hours: "10 AM – 10 PM", dow: [1, 2, 3, 4, 5] },
-  { days: "Saturday", hours: "9 AM – 10 PM", dow: [6] },
-  { days: "Sunday", hours: "9 AM – 8 PM", dow: [0] },
+  { days: "Monday to Friday", hours: "10 AM to 10 PM", dow: [1, 2, 3, 4, 5] },
+  { days: "Saturday", hours: "9 AM to 10 PM", dow: [6] },
+  { days: "Sunday", hours: "9 AM to 8 PM", dow: [0] },
 ];
 
 /**

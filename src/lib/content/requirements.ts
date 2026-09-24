@@ -106,9 +106,9 @@ export const ACK_SUMMARY =
   "I understand that everyone in my party must present valid government photo ID, that handguns require a valid NYC pistol license, and that all guests complete the safety briefing and sign the range acknowledgement on arrival.";
 
 export const CANCELLATION_POLICY =
-  "Lanes, training and the simulator: cancel free up to 24 hours before your session. Suites and events: 72 hours. Inside the window, half the fee is held as lane credit for 12 months. No-shows forfeit the session.";
+  "Cancel free up to 24 hours before a lane, training or simulator session, and up to 72 hours before a suite or event. Inside the window, half the fee is held as lane credit for 12 months. No-shows forfeit the session.";
 
-/** The four rules, verbatim, for the Club page and Legal. */
+/** The four rules, verbatim. Shown on the Club page and in Legal. */
 export const RANGE_RULES: string[] = [
   "Treat every firearm as if it is loaded.",
   "Keep the muzzle pointed downrange.",
