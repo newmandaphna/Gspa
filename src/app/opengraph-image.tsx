@@ -39,7 +39,7 @@ export default function OpenGraphImage() {
           <span>Ready? Aim.</span>
           <span style={{ color: GOLD }}>Relax!</span>
         </div>
-        <div style={{ marginTop: 40, fontSize: 24, color: "#a1a1a6" }}>A private shooting club in {SITE.address.neighborhood}</div>
+        <div style={{ marginTop: 40, fontSize: 24, color: "#a1a1a6" }}>{`A private shooting club in ${SITE.address.neighborhood}`}</div>
       </div>
     ),
     { ...size },
