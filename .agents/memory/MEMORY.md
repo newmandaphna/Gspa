@@ -1,1 +1,2 @@
 - [Next.js preview hydration](next-preview-hydration.md) — Replit's injected devtools and browser extensions can mutate HTML before hydration; distinguish those mismatches from app defects.
+- [Publish schema partial failure](publish-schema-partial-failure.md) — a failed publish may still apply its production schema diff; verify read-only before diagnosing migrations.
