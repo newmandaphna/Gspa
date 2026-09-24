@@ -25,7 +25,7 @@ Marketing site, real-time reservations, members portal, and a front-desk admin.
 | --- | --- | --- |
 | `ADMIN_PASSWORD` | yes (6+ chars) | Front desk at `/admin` |
 | `SESSION_SECRET` | yes (production) | Signs member and admin session cookies. A long random value (`openssl rand -base64 32`); member sign-in is disabled in production without it |
-| `NEXT_PUBLIC_SITE_URL` | yes (production) | Canonical `https://` URL, e.g. `https://thegunspa.com`. Replit does not set it; without it the app falls back to the first `REPLIT_DOMAINS` entry |
+| `NEXT_PUBLIC_SITE_URL` | no | Overrides the public origin. Production builds default to `https://gunspa.com` (`canonicalUrl` in `src/lib/config/site.ts`); set this only for a staging address. Replit's deployment builder does not pass secrets to `next build`, so a value set here reaches the runtime but not the prerendered sitemap and share tags |
 | `DATABASE_URL` | yes (production) | Postgres connection string; a deployment without it refuses to start |
 | `TRUSTED_PROXY_HOPS` | optional | Which `X-Forwarded-For` entry (from the right) is the real client for rate limiting. Default 1 |
 | `STRIPE_SECRET_KEY` | optional | Turns on card payment at reservation time |

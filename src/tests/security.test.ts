@@ -63,12 +63,20 @@ describe("clientIp", () => {
 });
 
 describe("resolveSiteUrl", () => {
-  it("prefers the explicit URL, then the Replit domains, and never throws", () => {
-    expect(resolveSiteUrl({ NEXT_PUBLIC_SITE_URL: "https://thegunspa.com/" })).toBe("https://thegunspa.com");
-    expect(resolveSiteUrl({ NEXT_PUBLIC_SITE_URL: "thegunspa.com" })).toBe("https://thegunspa.com");
-    expect(resolveSiteUrl({ REPLIT_DOMAINS: "gunspa.replit.app,other.replit.app" })).toBe("https://gunspa.replit.app");
+  it("prefers the explicit URL, then the workspace domain in development, and never throws", () => {
+    expect(resolveSiteUrl({ NEXT_PUBLIC_SITE_URL: "https://staging.gunspa.com/" })).toBe("https://staging.gunspa.com");
+    expect(resolveSiteUrl({ NEXT_PUBLIC_SITE_URL: "staging.gunspa.com" })).toBe("https://staging.gunspa.com");
     expect(resolveSiteUrl({ REPLIT_DEV_DOMAIN: "abc.riker.replit.dev" })).toBe("https://abc.riker.replit.dev");
     expect(resolveSiteUrl({})).toBe("http://localhost:5000");
     expect(resolveSiteUrl({ NEXT_PUBLIC_SITE_URL: "http://[bad" })).toBe("http://localhost:5000");
+  });
+
+  it("uses the canonical domain for every production build, whatever the build host exposes", () => {
+    // Replit's deployment builder runs `next build` without the workspace secrets, and the sitemap,
+    // robots file and Open Graph tags are rendered at build time. Only the canonical domain may win there.
+    expect(resolveSiteUrl({ NODE_ENV: "production" })).toBe("https://gunspa.com");
+    expect(resolveSiteUrl({ NODE_ENV: "production", REPLIT_DOMAINS: "0hdm0b8.y_", REPLIT_DEV_DOMAIN: "0hdm0b8.y_" })).toBe("https://gunspa.com");
+    expect(resolveSiteUrl({ NODE_ENV: "production", NEXT_PUBLIC_SITE_URL: "https://www.gunspa.com" })).toBe("https://www.gunspa.com");
+    expect(resolveSiteUrl({ NODE_ENV: "production", NEXT_PUBLIC_SITE_URL: "http://[bad" })).toBe("https://gunspa.com");
   });
 });
