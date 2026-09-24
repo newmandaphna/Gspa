@@ -1,3 +1,4 @@
+import { mkdirSync } from "node:fs";
 import path from "node:path";
 import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core";
 import * as schema from "./schema";
@@ -50,6 +51,8 @@ async function init(): Promise<Db> {
     const { drizzle } = await import("drizzle-orm/pglite");
     const dir = process.env.PGLITE_DATA_DIR ?? path.join(process.cwd(), ".data", "pglite");
     // "memory://" gives an ephemeral in-memory database (used by tests).
+    // PGlite does not create parent directories, so make sure ./.data exists on a fresh clone.
+    if (dir !== "memory://") mkdirSync(dir, { recursive: true });
     const client = dir === "memory://" ? new PGlite() : new PGlite(dir);
     await client.waitReady;
     db = drizzle(client, { schema }) as unknown as Db;
