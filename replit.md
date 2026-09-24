@@ -5,6 +5,7 @@ Marketing site, real-time reservations, members portal, and a front-desk admin.
 
 ## Run
 
+- Install: `npm ci` (Node.js 22; required by the project's test runner).
 - Dev: `npm run dev` (port 5000, bound to 0.0.0.0). The Run button does this.
 - Build: `npm run build` · Start: `npm run start` (Autoscale deployment uses these).
 - Tests: `npm test` (Vitest, in-memory Postgres) · `npm run e2e` (Playwright, needs a built app).
