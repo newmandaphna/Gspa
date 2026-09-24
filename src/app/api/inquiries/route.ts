@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { inquiries } from "@/lib/db/schema";
+import { expectedJson, isJsonRequest } from "@/lib/http";
 import { clientKey, rateLimit } from "@/lib/ratelimit";
 import { firstIssue, inquiryInputSchema } from "@/lib/validation";
 
@@ -10,6 +11,7 @@ export async function POST(req: Request) {
   if (!rateLimit(`inquiry:${clientKey(req)}`, { limit: 5, windowMs: 10 * 60_000 })) {
     return NextResponse.json({ error: "Too many messages. Please try again later." }, { status: 429 });
   }
+  if (!isJsonRequest(req)) return expectedJson();
   let json: unknown;
   try {
     json = await req.json();

@@ -133,13 +133,13 @@ const cancelDays = ccwCourse?.cancelHours ? Math.round(ccwCourse.cancelHours / 2
 export const COURSES = {
   eyebrow: "State course",
   headline: "The 18-hour course.",
-  subhead: "The concealed carry course, taught here over one weekend.",
+  subhead: "The concealed carry course, taught here over two consecutive days.",
   body: `Sixteen hours in the classroom and two on the line, with lunch both days. ${cap(spell(FACILITY.classroomSeats))} seats per date. New dates post monthly.`,
   numeral: "16 + 2",
   numeralCaption: "classroom + live fire",
   seats: FACILITY.classroomSeats,
   seatsCaption: `${FACILITY.classroomSeats} seats per date`,
-  calendarCaption: "Two consecutive days, one weekend",
+  calendarCaption: "Two consecutive days",
   /** Day numbers ringed in the month grid. Placeholder until dates post. */
   ringedDays: [13, 14],
   cta: { label: "Ask about dates", href: "/visit#contact" },

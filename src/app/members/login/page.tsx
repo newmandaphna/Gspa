@@ -5,14 +5,15 @@ import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
 import { TargetRings } from "@/components/art";
 import { getCurrentMember } from "@/lib/members/auth";
+import { safeNext } from "@/lib/members/safe-next";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Member sign in", robots: { index: false } };
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
-  const { next } = await searchParams;
+  const next = safeNext((await searchParams).next);
   const member = await getCurrentMember();
-  if (member) redirect(next && next.startsWith("/") ? next : "/members");
+  if (member) redirect(next);
 
   return (
     <Section theme="light" className="pt-[calc(var(--nav-h)+3rem)] sm:pt-[calc(var(--nav-h)+4.5rem)]">
@@ -20,7 +21,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         <div>
           <p className="t-eyebrow text-accent-deep">Members</p>
           <h1 className="t-hero mt-3">Welcome back.</h1>
-          <p className="t-lead mt-4 max-w-[480px] text-ink-muted">Sign in to reserve at member rates, book the bench, and manage your locker and guests.</p>
+          <p className="t-lead mt-4 max-w-[480px] text-ink-muted">Sign in to reserve at member rates, use the bench, and manage your locker and guests.</p>
           <div className="mt-10 max-w-[480px]">
             <SignInForm next={next} />
           </div>

@@ -19,8 +19,9 @@
   --color-snow: #f5f5f7;
   --color-mist: #a1a1a6;
   /* Brand gold from the logo: the one accent. Use --color-accent for display type, rules, buttons
-     with dark labels and anything on near-black; use --color-accent-deep for small text on light
-     backgrounds (the pure gold is ~3:1 on white and fails AA). --color-charcoal is the logo's "GUN". */
+     with dark labels and anything on near-black; use --color-accent-deep for small text and small
+     marks on light backgrounds (the pure gold is about 2.3:1 on white and fails AA and the 3:1
+     non-text minimum). --color-charcoal is the logo's "GUN". */
   --color-accent: #c9a55a;
   --color-accent-2: #e0c98a;
   --color-accent-deep: #7f6430;
@@ -101,11 +102,16 @@ body {
   html {
     scroll-behavior: auto;
   }
+  /* Collapse every animation to a single instant run and drop staggers, so infinite
+     loops (pulse, ping, breathing art) rest at their base state instead of cycling. */
   *,
   *::before,
   *::after {
     animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0s !important;
     transition-duration: 0.001ms !important;
+    transition-delay: 0s !important;
   }
 }
 
@@ -288,9 +294,18 @@ body {
   color: var(--color-ink-muted);
 }
 
-/* Focus rings that look intentional */
+/* Focus rings that look intentional. The color follows the nearest theme scope
+   (an inherited custom property, so nested scopes resolve by ancestry, not source
+   order): ink on light bands (about 16:1), gold on dark bands (about 13:1). */
+:root,
+[data-theme="light"] {
+  --focus-ring: var(--color-ink);
+}
+[data-theme="dark"] {
+  --focus-ring: var(--color-link);
+}
 :focus-visible {
-  outline: 2px solid var(--color-link);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 3px;
   border-radius: 6px;
 }

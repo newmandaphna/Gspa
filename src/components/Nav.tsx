@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { NAV } from "@/lib/content/nav";
 import { SITE } from "@/lib/config/site";
@@ -17,6 +17,8 @@ export function Nav() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [memberName, setMemberName] = useState<string | null>(null);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  const sheetRef = useRef<HTMLDivElement>(null);
   const close = () => setOpen(false);
 
   // Session probe: swaps the "Members" link to the member's name when signed in.
@@ -33,10 +35,34 @@ export function Nav() {
     };
   }, [pathname]);
 
+  // While the sheet is open: lock scroll, make the page behind it inert (it is
+  // rendered by the server layout, so the attribute is toggled on the DOM),
+  // close on Escape or when the viewport widens past the mobile breakpoint
+  // (the sheet is md:hidden), move focus into the sheet, and hand it back to
+  // the toggle on close.
   useEffect(() => {
-    document.documentElement.style.overflow = open ? "hidden" : "";
+    if (!open) return;
+    document.documentElement.style.overflow = "hidden";
+    const behind = [document.getElementById("main"), document.getElementById("site-footer")].filter((el): el is HTMLElement => Boolean(el));
+    for (const el of behind) el.setAttribute("inert", "");
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    const desktop = window.matchMedia("(min-width: 768px)");
+    const onResize = () => {
+      if (desktop.matches) setOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    desktop.addEventListener("change", onResize);
+    const raf = requestAnimationFrame(() => sheetRef.current?.querySelector("a")?.focus());
+    const toggle = toggleRef.current;
     return () => {
+      cancelAnimationFrame(raf);
+      document.removeEventListener("keydown", onKey);
+      desktop.removeEventListener("change", onResize);
       document.documentElement.style.overflow = "";
+      for (const el of behind) el.removeAttribute("inert");
+      requestAnimationFrame(() => toggle?.focus());
     };
   }, [open]);
 
@@ -78,6 +104,7 @@ export function Nav() {
               Reserve
             </Link>
             <button
+              ref={toggleRef}
               type="button"
               aria-expanded={open}
               aria-controls="mobile-menu"
@@ -106,6 +133,7 @@ export function Nav() {
         {open && (
           <motion.div
             id="mobile-menu"
+            ref={sheetRef}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

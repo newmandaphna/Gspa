@@ -115,7 +115,7 @@ export function EventsFloorPlan({ className }: { className?: string }) {
 export function EventsPhotoArt() {
   return (
     <div className="absolute inset-0">
-      <LanePerspective className="opacity-70" />
+      <LanePerspective className="opacity-70" target={false} />
       <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.55)_0%,rgba(0,0,0,0.75)_45%,rgba(0,0,0,0.95)_100%)]" />
     </div>
   );
@@ -255,14 +255,14 @@ export function Bracket({ className }: { className?: string }) {
 
   return (
     <svg viewBox="0 0 420 380" className={cn("block h-auto w-full", className)} aria-hidden="true">
-      {/* round labels */}
-      <text x={x.r1} y={18} fill="rgba(161,161,166,0.7)" style={roundStyle}>
+      {/* round labels, centred over each column so "Round of 8" cannot run into "Semis" */}
+      <text x={(x.r1 + x.r2) / 2} y={18} fill="rgba(161,161,166,0.7)" textAnchor="middle" style={roundStyle}>
         {BRACKET_ROUNDS[0].toUpperCase()}
       </text>
-      <text x={x.r2 + 4} y={18} fill="rgba(161,161,166,0.7)" style={roundStyle}>
+      <text x={(x.r2 + x.r3) / 2} y={18} fill="rgba(161,161,166,0.7)" textAnchor="middle" style={roundStyle}>
         {BRACKET_ROUNDS[1].toUpperCase()}
       </text>
-      <text x={x.r3 + 4} y={18} fill="rgba(161,161,166,0.7)" style={roundStyle}>
+      <text x={(x.r3 + x.final) / 2} y={18} fill="rgba(161,161,166,0.7)" textAnchor="middle" style={roundStyle}>
         {BRACKET_ROUNDS[2].toUpperCase()}
       </text>
       {/* team labels */}

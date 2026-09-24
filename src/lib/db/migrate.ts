@@ -4,8 +4,21 @@ import type { Db } from "./index";
 /**
  * Idempotent schema creation. Runs on first DB access so a fresh Replit
  * (or a fresh laptop) needs zero setup. Mirrors schema.ts exactly.
+ *
+ * Serialized with a transaction-level advisory lock: several Autoscale
+ * instances can cold-start at once against an empty database, and Postgres'
+ * CREATE ... IF NOT EXISTS is not race-free (the loser hits a duplicate-key
+ * error on pg_type/pg_class). The lock makes the second instance wait until
+ * the first has committed, after which every statement is a no-op.
  */
 export async function ensureSchema(db: Db): Promise<void> {
+  await db.transaction(async (tx) => {
+    await tx.execute(sql`SELECT pg_advisory_xact_lock(7264001)`);
+    await createSchema(tx as unknown as Db);
+  });
+}
+
+async function createSchema(db: Db): Promise<void> {
   await db.execute(sql`
     CREATE TABLE IF NOT EXISTS experiences (
       id SERIAL PRIMARY KEY,

@@ -35,6 +35,11 @@ function wantsSsl(url: string): boolean {
 
 async function init(): Promise<Db> {
   const url = process.env.DATABASE_URL;
+  // A published Replit deployment (Autoscale) has an ephemeral, per-instance filesystem: PGlite there
+  // would silently split and then lose every reservation. Refuse to start unless explicitly allowed.
+  if (!url && process.env.REPLIT_DEPLOYMENT && process.env.ALLOW_PGLITE !== "1") {
+    throw new Error("DATABASE_URL is required in a Replit deployment: create a PostgreSQL database under Database, or set ALLOW_PGLITE=1 to accept an ephemeral per-instance store.");
+  }
   let db: Db;
   if (url) {
     const { Pool } = await import("pg");

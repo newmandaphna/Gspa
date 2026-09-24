@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { cancelBooking } from "@/lib/booking";
+import { expectedJson, isJsonRequest } from "@/lib/http";
 import { clientKey, rateLimit } from "@/lib/ratelimit";
 
 export const dynamic = "force-dynamic";
@@ -9,6 +10,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ code: string }
     return NextResponse.json({ error: "Too many attempts. Please try again later." }, { status: 429 });
   }
   const { code } = await ctx.params;
+  if (!isJsonRequest(req)) return expectedJson();
   let email = "";
   try {
     const body = (await req.json()) as { email?: string };

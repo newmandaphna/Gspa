@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
-import { cancelBySession, getBookingByCode, markPaidBySession } from "@/lib/booking";
+import { cancelBySession, getBookingByCode, getBookingBySession, markPaidBySession, markRefundedBySession } from "@/lib/booking";
 import { sendBookingConfirmation } from "@/lib/email";
-import { getStripe, stripeEnabled } from "@/lib/stripe";
+import { checkAmountCollected, getStripe, paymentIntentIdOf, refundPaymentIntent, stripeEnabled } from "@/lib/stripe";
 
 export const dynamic = "force-dynamic";
 
@@ -31,11 +31,23 @@ export async function POST(req: Request) {
       case "checkout.session.async_payment_succeeded": {
         const session = event.data.object;
         if (session.payment_status === "paid") {
-          const pi = typeof session.payment_intent === "string" ? session.payment_intent : (session.payment_intent?.id ?? null);
+          const pi = paymentIntentIdOf(session);
           const booking = await markPaidBySession(session.id, pi);
           if (booking) {
+            checkAmountCollected(booking, session);
             const found = await getBookingByCode(booking.code);
             if (found) void sendBookingConfirmation(found.booking, found.experience);
+          } else {
+            // Paid after the hold was cancelled (sweep, guest or staff cancel): the slot may be gone,
+            // so reverse the charge rather than silently keeping the money. Idempotent on retries.
+            const stale = await getBookingBySession(session.id);
+            if (stale && stale.status === "cancelled" && stale.paymentStatus === "unpaid" && pi) {
+              console.error(`[stripe] payment ${pi} arrived for cancelled booking ${stale.code}; refunding`);
+              await refundPaymentIntent(pi, stale.code);
+              await markRefundedBySession(session.id, pi);
+            } else if (!stale) {
+              console.error(`[stripe] paid session ${session.id} matches no booking (code ${session.metadata?.bookingCode ?? "?"})`);
+            }
           }
         }
         break;

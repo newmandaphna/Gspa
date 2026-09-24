@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { cn } from "@/lib/cn";
 import { HOURS, HOURS_DISPLAY, SITE } from "@/lib/config/site";
 import { OPEN_STATUS_LABELS } from "@/lib/content/pages/visit";
@@ -34,7 +34,10 @@ function compute(now: Date): Live {
 
 /**
  * Hairline hours table. Today's row carries a gold left rule and a live pill.
- * The live state is set after mount so the server and client markup match.
+ * The pill gets its own full-width row under the day name: the hours cell is
+ * `whitespace-nowrap` at t-2, which leaves the day cell too narrow for the
+ * pill on phones. The live state is set after mount so the server and client
+ * markup match.
  */
 export function HoursTable({ className }: { className?: string }) {
   const [live, setLive] = useState<Live | null>(null);
@@ -59,30 +62,37 @@ export function HoursTable({ className }: { className?: string }) {
           {HOURS_DISPLAY.map((row) => {
             const today = live !== null && row.dow.includes(live.dow);
             return (
-              <tr key={row.days} className="border-t border-hairline" aria-current={today ? "date" : undefined}>
-                <th
-                  scope="row"
-                  className={cn(
-                    "border-l-2 py-6 pl-5 pr-4 text-left align-baseline transition-colors duration-500 sm:pl-6",
-                    today ? "border-l-accent" : "border-l-transparent",
-                  )}
-                >
-                  <span className="t-eyebrow text-mist">{row.days}</span>
-                  {today && (
-                    <span
-                      className={cn(
-                        "mt-3 inline-flex items-center gap-2 rounded-pill px-3 py-1 font-mono text-[0.75rem] ring-1 ring-inset",
-                        isOpen ? "text-accent ring-accent/40" : "text-mist ring-white/15",
-                      )}
-                      aria-live="polite"
-                    >
-                      <span className={cn("h-1.5 w-1.5 rounded-full", isOpen ? "bg-accent" : "bg-mist")} aria-hidden="true" />
-                      {live?.status}
-                    </span>
-                  )}
-                </th>
-                <td className="t-2 tabular py-6 pr-2 text-right align-baseline whitespace-nowrap">{row.hours}</td>
-              </tr>
+              <Fragment key={row.days}>
+                <tr className="border-t border-hairline" aria-current={today ? "date" : undefined}>
+                  <th
+                    scope="row"
+                    className={cn(
+                      "border-l-2 pl-5 pr-4 text-left align-baseline transition-colors duration-500 sm:pl-6",
+                      today ? "border-l-accent pt-6 pb-3" : "border-l-transparent py-6",
+                    )}
+                  >
+                    <span className="t-eyebrow text-mist">{row.days}</span>
+                  </th>
+                  <td className={cn("t-2 tabular pr-2 text-right align-baseline whitespace-nowrap", today ? "pt-6 pb-3" : "py-6")}>{row.hours}</td>
+                </tr>
+                {today && (
+                  <tr>
+                    {/* The gold rule repeats here so it runs unbroken through the pill row. */}
+                    <td colSpan={2} className="border-l-2 border-l-accent pb-6 pl-5 sm:pl-6">
+                      <span
+                        className={cn(
+                          "inline-flex items-start gap-2 rounded-pill px-3 py-1 font-mono text-[0.75rem] ring-1 ring-inset",
+                          isOpen ? "text-accent ring-accent/40" : "text-mist ring-white/15",
+                        )}
+                        aria-live="polite"
+                      >
+                        <span className={cn("mt-[0.5em] h-1.5 w-1.5 shrink-0 rounded-full", isOpen ? "bg-accent" : "bg-mist")} aria-hidden="true" />
+                        {live?.status}
+                      </span>
+                    </td>
+                  </tr>
+                )}
+              </Fragment>
             );
           })}
           <tr className="border-t border-hairline">

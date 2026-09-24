@@ -92,7 +92,8 @@ export const HERO_SIGN_IN = { prefix: "Already a member?", label: "Sign in", hre
 export const SCREENING_FEE_SENTENCE = (() => {
   const paying = MEMBERSHIP_TIERS.filter((t) => !t.screeningFeeWaived).map((t) => t.name);
   const waived = MEMBERSHIP_TIERS.filter((t) => t.screeningFeeWaived).map((t) => t.name);
-  const first = `${joinNames(paying)} pay a ${formatMoney(SCREENING_FEE_CENTS)} screening fee with the application. If we decline you, we refund it.`;
+  // No timing here: the Apply section says when it is collected, and that changes when online payment goes live.
+  const first = `${joinNames(paying)} pay a ${formatMoney(SCREENING_FEE_CENTS)} screening fee, refunded if we decline you.`;
   return waived.length ? `${first} ${joinNames(waived)} skip it.` : first;
 })();
 
@@ -225,7 +226,7 @@ export const APPLY_FORM = {
   },
   links: { screening: "/legal#screening", privacy: "/legal#privacy" },
   stripe: {
-    label: "Payment step mounts here when Stripe goes live",
+    label: "Screening fee",
     waived: (tierName: string) => `No screening fee for ${tierName}.`,
     due: `${formatMoney(SCREENING_FEE_CENTS)} screening fee, collected at orientation. Refunded if declined.`,
   },

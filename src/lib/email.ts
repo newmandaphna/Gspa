@@ -8,13 +8,13 @@ function escape(s: string): string {
 
 export function confirmationText(booking: Booking, experience: Experience): { subject: string; text: string; html: string } {
   const when = formatInstant(booking.startsAt);
-  const paid = booking.paymentStatus === "paid" ? "Paid" : booking.paymentStatus === "pay_on_arrival" ? "Due on arrival" : "Pending";
+  const paid = booking.amountCents === 0 ? "Included with membership" : booking.paymentStatus === "paid" ? "Paid" : booking.paymentStatus === "pay_on_arrival" ? "Due on arrival" : "Pending";
   const url = `${SITE.url.replace(/\/$/, "")}/reserve/confirmation/${booking.code}`;
   const subject = `Your reservation at ${SITE.name}: ${booking.code}`;
   const lines = [
     `${SITE.name}`,
     ``,
-    `You're booked, ${booking.firstName}.`,
+    `Your reservation is set, ${booking.firstName}.`,
     ``,
     `${experience.name}`,
     `${when}`,
@@ -32,7 +32,7 @@ export function confirmationText(booking: Booking, experience: Experience): { su
   const html = `<!doctype html><html><body style="margin:0;background:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',Inter,Helvetica,Arial,sans-serif;color:#1d1d1f">
   <div style="max-width:560px;margin:0 auto;padding:40px 24px">
     <p style="font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#6e6e73;margin:0 0 24px">${escape(SITE.name)}</p>
-    <h1 style="font-size:32px;line-height:1.1;letter-spacing:-.02em;margin:0 0 24px">You're booked, ${escape(booking.firstName)}.</h1>
+    <h1 style="font-size:32px;line-height:1.1;letter-spacing:-.02em;margin:0 0 24px">Your reservation is set, ${escape(booking.firstName)}.</h1>
     <div style="background:#fff;border-radius:18px;padding:24px">
       <p style="margin:0 0 4px;font-size:20px;font-weight:600">${escape(experience.name)}</p>
       <p style="margin:0 0 16px;color:#6e6e73">${escape(when)} · ${booking.guests} guest${booking.guests === 1 ? "" : "s"}</p>

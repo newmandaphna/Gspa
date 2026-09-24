@@ -27,15 +27,14 @@ function Segmented<T extends string>({
   onChange: (v: T) => void;
 }) {
   return (
-    <div role="radiogroup" aria-label={name} className="inline-flex w-full rounded-pill bg-white/[0.07] p-1 ring-1 ring-inset ring-white/10">
+    <div role="group" aria-label={name} className="inline-flex w-full rounded-pill bg-white/[0.07] p-1 ring-1 ring-inset ring-white/10">
       {options.map((o) => {
         const selected = o.key === value;
         return (
           <button
             key={o.key}
             type="button"
-            role="radio"
-            aria-checked={selected}
+            aria-pressed={selected}
             onClick={() => onChange(o.key)}
             className={cn(
               "h-9 flex-1 rounded-pill px-3 text-[0.9375rem] font-medium transition-[background-color,color] duration-200 ease-[var(--ease-apple)]",

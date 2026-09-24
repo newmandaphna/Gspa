@@ -15,7 +15,7 @@ export default async function ActivatePage() {
       <Container size="sm">
         <p className="t-eyebrow text-accent-deep">Members</p>
         <h1 className="t-hero mt-3">Activate your account.</h1>
-        <p className="t-lead mt-4 text-ink-muted">Your welcome packet includes a one-time activation code. Enter it once, choose a password, and you&apos;re in.</p>
+        <p className="t-lead mt-4 text-ink-muted">You were given a one-time activation code when you joined. Enter it once, choose a password, and you&apos;re in.</p>
         <div className="mt-10">
           <ActivateForm />
         </div>

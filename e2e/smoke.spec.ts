@@ -49,15 +49,15 @@ test("books a lane end to end (pay on arrival)", async ({ page }) => {
   test.skip(Boolean(process.env.STRIPE_SECRET_KEY), "Stripe enabled: checkout redirect is external");
   await page.goto("/reserve");
   // Step 1: first bookable card
-  await page.getByRole("tab", { name: "Lanes" }).click();
+  await page.getByRole("group", { name: "Experience type" }).getByRole("button", { name: "Lanes" }).click();
   // Experience cards are buttons inside the <ul> grid (the step indicator is an <ol>).
   await page.locator("ul li > button").first().click();
   // Step 2: pick a date at least two days out, then the first enabled slot
   await expect(page.getByRole("heading", { name: "When?" })).toBeVisible();
-  const enabledDays = page.locator('[role="gridcell"] button:not([disabled])');
+  const enabledDays = page.locator("button[data-calendar-day]:not([disabled])");
   const count = await enabledDays.count();
   await enabledDays.nth(Math.min(2, count - 1)).click();
-  const slot = page.locator('[role="option"]:not([disabled])').first();
+  const slot = page.locator("button[data-time-slot]:not([disabled])").first();
   await expect(slot).toBeVisible({ timeout: 15_000 });
   await slot.click();
   await page.getByRole("button", { name: "Continue" }).click();

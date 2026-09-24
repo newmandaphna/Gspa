@@ -79,7 +79,7 @@ export default async function ReservePage() {
       <Section theme="black" id="help" className="grain overflow-hidden">
         <Container className="relative">
           <h2 className="t-2">Rather talk to a person.</h2>
-          <p className="t-lead mt-2 max-w-[560px] text-mist">Concierge desk, ten to ten, every day. Groups over ten and buyouts start with a conversation.</p>
+          <p className="t-lead mt-2 max-w-[560px] text-mist">Concierge desk, every hour the club is open. Groups over ten and buyouts start with a conversation.</p>
           <p className="mt-10 flex items-center gap-4">
             <span className="relative flex h-3 w-3" aria-hidden="true">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-60" />

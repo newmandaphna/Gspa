@@ -20,11 +20,18 @@ export type SectionCopy = {
   secondary?: Cta;
 };
 
-const WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"];
+const ONES = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"];
+const TENS = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
 
-/** One through twelve spelled out (voice rule); larger numbers stay numerals. */
+/** Numbers under 100 spelled out for running copy (voice rule), so a range like "twelve to forty" keeps one style. Display numerals stay numerals. */
 export function numberWord(n: number): string {
-  return WORDS[n] ?? String(n);
+  if (n < 20) return ONES[n] ?? String(n);
+  if (n < 100) {
+    const t = TENS[Math.floor(n / 10)];
+    const o = n % 10;
+    return o ? `${t}-${ONES[o]}` : t;
+  }
+  return String(n);
 }
 
 function cap(s: string): string {

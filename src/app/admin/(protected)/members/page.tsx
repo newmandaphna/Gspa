@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { requireAdmin } from "@/lib/auth";
 import Link from "next/link";
 import { CreateMemberForm } from "@/components/admin/AdminForms";
 import { tierByKey } from "@/lib/content/membership";
@@ -15,6 +16,7 @@ const TONE: Record<string, string> = {
 };
 
 export default async function AdminMembers() {
+  await requireAdmin();
   const rows = await listMembers();
   return (
     <div>

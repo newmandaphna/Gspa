@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { applyLoad, buildSlotWindows, canFit, unitsFor, unitsInUse } from "@/lib/availability";
+import { applyLoad, buildSlotWindows, canFit, cancelWindowHours, peakUnits, unitsFor, unitsInUse } from "@/lib/availability";
+import { BOOKING } from "@/lib/config/site";
 import { zonedToUtc } from "@/lib/time";
 
 const DAY = "2026-10-14"; // Wednesday
@@ -74,5 +75,47 @@ describe("load and capacity", () => {
     expect(canFit(at("13:00"), at("14:00"), 2, load, 3)).toBe(true);
     expect(canFit(at("13:00"), at("14:00"), 3, load, 3)).toBe(false);
     expect(canFit(at("17:30"), at("18:30"), 1, load, 3)).toBe(false);
+  });
+
+  it("does not double count back-to-back bookings inside one slot window", () => {
+    // 7 lanes 10:00-11:00 and 7 lanes 11:00-12:00 on 12 lanes: never more than 7 in use at once.
+    const sequential = [
+      { startsAt: at("10:00"), endsAt: at("11:00"), units: 7 },
+      { startsAt: at("11:00"), endsAt: at("12:00"), units: 7 },
+    ];
+    expect(peakUnits(at("10:30"), at("11:30"), sequential)).toBe(7);
+    const w = buildSlotWindows({ dateISO: DAY, durationMin: 60, hours: { open: "10:00", close: "13:00" }, now: early });
+    const by = Object.fromEntries(applyLoad(w, sequential, 12).map((s) => [s.time, s.available]));
+    expect(by["10:30"]).toBe(5);
+    expect(canFit(at("10:30"), at("11:30"), 5, sequential, 12)).toBe(true);
+    expect(canFit(at("10:30"), at("11:30"), 6, sequential, 12)).toBe(false);
+
+    // Two suites 10-12 and 12-14 on capacity 2: one suite is free at 11:00 for two hours.
+    const suites = [
+      { startsAt: at("10:00"), endsAt: at("12:00"), units: 1 },
+      { startsAt: at("12:00"), endsAt: at("14:00"), units: 1 },
+    ];
+    const two = buildSlotWindows({ dateISO: DAY, durationMin: 120, hours: { open: "10:00", close: "16:00" }, now: early });
+    const suiteBy = Object.fromEntries(applyLoad(two, suites, 2).map((s) => [s.time, s.available]));
+    expect(suiteBy["11:00"]).toBe(1);
+    expect(canFit(at("11:00"), at("13:00"), 1, suites, 2)).toBe(true);
+  });
+
+  it("calendar and writer agree on every slot", () => {
+    const w = buildSlotWindows({ dateISO: DAY, durationMin: 60, hours, now: early });
+    for (const s of applyLoad(w, load, 3)) {
+      for (let units = 1; units <= 3; units++) {
+        expect(s.available >= units).toBe(canFit(s.startsAt, s.endsAt, units, load, 3));
+      }
+    }
+  });
+});
+
+describe("cancelWindowHours", () => {
+  it("uses the catalog window for suites and the default elsewhere", () => {
+    expect(cancelWindowHours({ slug: "private-suite", category: "suite" })).toBe(72);
+    expect(cancelWindowHours({ slug: "founders-suite", category: "suite" })).toBe(72);
+    expect(cancelWindowHours({ slug: "lane-session", category: "lane" })).toBe(BOOKING.freeCancelHours);
+    expect(cancelWindowHours({ slug: "removed-suite", category: "suite" })).toBe(BOOKING.suiteFreeCancelHours);
   });
 });

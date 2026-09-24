@@ -12,6 +12,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "e2e": "playwright test",
+    "e2e:setup": "playwright install chromium",
     "db:studio": "drizzle-kit studio"
   },
   "engines": {

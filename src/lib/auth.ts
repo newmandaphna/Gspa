@@ -1,6 +1,7 @@
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
-import { SITE } from "@/lib/config/site";
+import { redirect } from "next/navigation";
+import { ADMIN_SESSION_TTL_SEC, signAdminSession, verifyAdminSession } from "@/lib/admin-session";
 
 const COOKIE = "gs_admin";
 
@@ -10,18 +11,31 @@ function safeEqual(a: string, b: string): boolean {
   return ba.length === bb.length && timingSafeEqual(ba, bb);
 }
 
-function sessionToken(): string {
-  return createHmac("sha256", process.env.ADMIN_PASSWORD ?? "").update("gunspa-admin-session-v1").digest("hex");
-}
-
 export function adminConfigured(): boolean {
   return Boolean(process.env.ADMIN_PASSWORD && process.env.ADMIN_PASSWORD.length >= 6);
+}
+
+/**
+ * Session cookies carry Secure in production regardless of how the public
+ * URL is configured; behind Replit's TLS edge the browser sees https.
+ */
+export function cookieSecure(): boolean {
+  return process.env.NODE_ENV === "production";
 }
 
 export async function isAdmin(): Promise<boolean> {
   if (!adminConfigured()) return false;
   const value = (await cookies()).get(COOKIE)?.value;
-  return Boolean(value) && safeEqual(value!, sessionToken());
+  return verifyAdminSession(value);
+}
+
+/**
+ * Guard for every protected admin page. Layouts are not an auth boundary in
+ * Next.js (a crafted RSC request can render a page segment alone), so each
+ * page calls this as its first statement.
+ */
+export async function requireAdmin(): Promise<void> {
+  if (!(await isAdmin())) redirect("/admin/login");
 }
 
 export function checkAdminPassword(password: string): boolean {
@@ -29,12 +43,12 @@ export function checkAdminPassword(password: string): boolean {
 }
 
 export async function setAdminSession(): Promise<void> {
-  (await cookies()).set(COOKIE, sessionToken(), {
+  (await cookies()).set(COOKIE, signAdminSession(), {
     httpOnly: true,
     sameSite: "lax",
-    secure: SITE.url.startsWith("https://"),
+    secure: cookieSecure(),
     path: "/",
-    maxAge: 60 * 60 * 12,
+    maxAge: ADMIN_SESSION_TTL_SEC,
   });
 }
 

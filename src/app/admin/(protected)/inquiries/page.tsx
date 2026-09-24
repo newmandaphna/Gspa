@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import { requireAdmin } from "@/lib/auth";
 import { listInquiries } from "@/lib/inquiries";
 import { formatInstant } from "@/lib/time";
 
 export const metadata: Metadata = { title: "Front desk · Inquiries", robots: { index: false } };
 
 export default async function AdminInquiries() {
+  await requireAdmin();
   const rows = await listInquiries(200);
   return (
     <div>

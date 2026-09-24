@@ -104,23 +104,28 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
       <Section theme="light">
         <Container>
           <h2 className="t-1">Members only.</h2>
-          <p className="t-lead mt-3 max-w-[640px] text-ink-muted">Everything the card unlocks. Book it, or ask and we&apos;ll handle it.</p>
+          <p className="t-lead mt-3 max-w-[640px] text-ink-muted">Everything the card unlocks. Reserve it, or ask and we&apos;ll handle it.</p>
           <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {MEMBER_SERVICES.map((s) => {
+            {MEMBER_SERVICES.map((s, i) => {
               const allowed = tierSatisfies(member.tier, s.minTier);
               return (
                 <li key={s.title}>
                   <Link
                     href={allowed ? s.href : "/membership#tiers"}
+                    aria-labelledby={`service-${i}-title service-${i}-cta`}
                     className={cn(
                       "group flex h-full flex-col rounded-card bg-white p-6 ring-1 ring-ink/8 shadow-[var(--shadow-card)] transition-[transform,box-shadow] duration-300 ease-[var(--ease-apple)] hover:-translate-y-0.5",
                       !allowed && "opacity-60",
                     )}
                   >
-                    <span className="t-eyebrow text-ink-faint">{s.kind === "book" ? "Book" : "Request"}</span>
-                    <span className="t-3 mt-2">{s.title}</span>
+                    <span className="t-eyebrow text-ink-faint">{s.kind === "book" ? "Reserve" : "Request"}</span>
+                    <span className="t-3 mt-2" id={`service-${i}-title`}>
+                      {s.title}
+                    </span>
                     <span className="t-body mt-1 text-ink-muted">{s.description}</span>
-                    <span className="link-arrow mt-auto pt-6 text-[0.9375rem]">{allowed ? (s.kind === "book" ? "Reserve" : "Ask the team") : `${tierByKey(s.minTier!)?.name} and above`}</span>
+                    <span className="link-arrow mt-auto pt-6 text-[0.9375rem]" id={`service-${i}-cta`}>
+                      {allowed ? (s.kind === "book" ? "Reserve" : "Ask the team") : `${tierByKey(s.minTier!)?.name} and above`}
+                    </span>
                   </Link>
                 </li>
               );

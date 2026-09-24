@@ -93,7 +93,7 @@ export default function HomePage() {
       {/* ---------------------------------------------------------------- Hero */}
       <Section as="header" theme="black" bleed id="hero" className="grain min-h-[100dvh] overflow-hidden pt-[var(--nav-h)]" aria-labelledby="hero-title">
         <div className="absolute inset-0">
-          <ImageSlot slot={HERO.imageSlot} alt={HERO.imageAlt} priority className="h-full w-full" art={<LanePerspective />} />
+          <ImageSlot slot={HERO.imageSlot} alt={HERO.imageAlt} priority className="h-full w-full" art={<LanePerspective target={false} />} />
         </div>
         <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.55)_0%,rgba(0,0,0,0)_35%,rgba(0,0,0,0.15)_70%,rgba(0,0,0,0.85)_100%)]" />
         <Container className="relative flex min-h-[calc(100dvh-var(--nav-h))] flex-col items-center justify-center py-20 text-center">
@@ -280,13 +280,15 @@ export default function HomePage() {
       <Section theme="gray" id="membership" aria-labelledby="membership-title">
         <Container size="lg">
           <Headline id="membership" tone="light" kicker={MEMBERSHIP.eyebrow} headline={MEMBERSHIP.headline} subhead={MEMBERSHIP.subhead} body={MEMBERSHIP.body} center />
-          <Stagger className="mt-14 grid gap-5 sm:mt-20 lg:grid-cols-3 lg:items-end lg:gap-6">
+          <Stagger className="mt-14 grid gap-5 sm:mt-20 lg:grid-cols-3 lg:items-stretch lg:gap-6">
             {MEMBERSHIP.tiers.map((t) => (
-              <Item key={t.key}>
+              <Item key={t.key} className="h-full">
                 <Link
                   href={MEMBERSHIP.cta.href}
+                  aria-labelledby={`tier-${t.key}-name`}
+                  aria-describedby={`tier-${t.key}-tagline`}
                   className={cn(
-                    "group relative block overflow-hidden rounded-card bg-paper p-7 ring-1 ring-ink/5 transition-[transform,box-shadow] duration-300 ease-[var(--ease-apple)] hover:-translate-y-1 hover:shadow-[var(--shadow-card)] sm:p-9",
+                    "group relative block h-full overflow-hidden rounded-card bg-paper p-7 ring-1 ring-ink/5 transition-[transform,box-shadow] duration-300 ease-[var(--ease-apple)] hover:-translate-y-1 hover:shadow-[var(--shadow-card)] sm:p-9",
                     t.highlight && "shadow-[var(--shadow-card)] lg:-translate-y-2 lg:hover:-translate-y-3",
                   )}
                 >
@@ -294,12 +296,16 @@ export default function HomePage() {
                   <p className="t-numeral tabular text-ink">{t.days}</p>
                   <p className="t-eyebrow mt-2 text-ink-muted">{MEMBERSHIP.caption}</p>
                   <div className="mt-8 flex items-baseline justify-between gap-4 border-t border-hairline pt-6">
-                    <h3 className="t-3">{t.name}</h3>
+                    <h3 className="t-3" id={`tier-${t.key}-name`}>
+                      {t.name}
+                    </h3>
                     <p className="tabular text-right text-ink-muted">
                       <span className="t-body font-medium text-ink">{t.price}</span> <span className="t-caption">{t.priceNote}</span>
                     </p>
                   </div>
-                  <p className="t-body mt-3 text-ink-muted">{t.tagline}</p>
+                  <p className="t-body mt-3 text-ink-muted" id={`tier-${t.key}-tagline`}>
+                    {t.tagline}
+                  </p>
                   {t.limited && <p className="t-footnote mt-3 text-accent-deep">{t.limited}</p>}
                   <Rows mark="check" size="sm" className="mt-6">
                     {(tierByKey(t.key)?.perks ?? []).slice(0, 3).map((p) => (
@@ -314,7 +320,7 @@ export default function HomePage() {
           </Stagger>
           <Reveal delay={0.1} className="mt-12 flex flex-col items-center gap-4 text-center">
             <Button href={MEMBERSHIP.cta.href}>{MEMBERSHIP.cta.label}</Button>
-            <p className="t-caption text-ink-faint">{MEMBERSHIP.publicWindowNote}</p>
+            <p className="t-caption text-ink-muted">{MEMBERSHIP.publicWindowNote}</p>
           </Reveal>
         </Container>
       </Section>

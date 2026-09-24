@@ -35,6 +35,9 @@ export function BookingRow({ row, compact = false }: { row: Row; compact?: boole
       <div className="flex shrink-0 items-center gap-2">
         <span className={cn("t-footnote rounded-pill px-2 py-0.5 font-semibold capitalize", TONE[booking.status] ?? TONE.cancelled)}>{booking.status}</span>
         <span className="t-footnote rounded-pill bg-paper-2 px-2 py-0.5 font-semibold capitalize text-ink-muted">{booking.paymentStatus.replace(/_/g, " ")}</span>
+        {booking.status === "cancelled" && booking.paymentStatus === "paid" && booking.amountCents > 0 && (
+          <span className="t-footnote rounded-pill bg-[#fff2f0] px-2 py-0.5 font-semibold text-[#c0392b]">Refund owed</span>
+        )}
         {!compact && booking.status !== "cancelled" && (
           <>
             {booking.paymentStatus !== "paid" && (

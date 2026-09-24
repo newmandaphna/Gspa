@@ -50,15 +50,15 @@ export function GuestPicker({
       </div>
 
       <div className="flex flex-col gap-3">
-        <div role="radiogroup" aria-label={labels.legend} className="inline-flex rounded-pill bg-paper-3 p-1">
+        {/* Toggle buttons in a group: a real radiogroup would promise arrow-key movement these buttons do not have. */}
+        <div role="group" aria-label={labels.legend} className="inline-flex rounded-pill bg-paper-3 p-1">
           {options.map((o) => {
             const selected = o.key === key;
             return (
               <button
                 key={o.key}
                 type="button"
-                role="radio"
-                aria-checked={selected}
+                aria-pressed={selected}
                 onClick={() => setKey(o.key)}
                 className={cn(
                   "h-9 rounded-pill px-4 text-[0.9375rem] font-medium transition-[background-color,color,box-shadow] duration-200 ease-[var(--ease-apple)]",
