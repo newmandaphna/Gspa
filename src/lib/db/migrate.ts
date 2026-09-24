@@ -1,9 +1,11 @@
 import { sql } from "drizzle-orm";
 import type { Db } from "./index";
+import { ensureClassSchema } from "./class-schema";
+import { ensureClassMailSchema } from "./class-mail-schema";
 
 /**
- * Idempotent schema creation. Runs on first DB access so a fresh Replit
- * (or a fresh laptop) needs zero setup. Mirrors schema.ts exactly.
+ * Legacy idempotent schema creation on first DB access. New scheduled-class
+ * DDL is local PGlite-only; managed PostgreSQL receives it through Publish.
  *
  * Serialized with a transaction-level advisory lock: several Autoscale
  * instances can cold-start at once against an empty database, and Postgres'
@@ -15,6 +17,10 @@ export async function ensureSchema(db: Db): Promise<void> {
   await db.transaction(async (tx) => {
     await tx.execute(sql`SELECT pg_advisory_xact_lock(7264001)`);
     await createSchema(tx as unknown as Db);
+    if (!process.env.DATABASE_URL && !process.env.REPLIT_DEPLOYMENT) {
+      await ensureClassSchema(tx as unknown as Db);
+      await ensureClassMailSchema(tx as unknown as Db);
+    }
   });
 }
 

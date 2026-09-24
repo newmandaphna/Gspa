@@ -16,8 +16,11 @@ Marketing site, real-time reservations, members portal, and a front-desk admin.
   Fine for development. **Not for production** — Autoscale deployments have an ephemeral filesystem,
   so a published deployment without `DATABASE_URL` refuses to start (set `ALLOW_PGLITE=1` only to
   knowingly accept a per-instance, wiped-on-redeploy store).
-- For production: open the **Database** tool in Replit and create a PostgreSQL database. Replit
-  sets `DATABASE_URL` automatically; the app creates its tables on first request (`src/lib/db/migrate.ts`).
+- Replit provides PostgreSQL and sets `DATABASE_URL`. Apply scheduled-class schema changes to
+  development using the database tool, then Publish syncs the development schema to managed production.
+  The new class tables, booking columns, and `class_mail_outbox` are **not** created at production
+  startup. Local PGlite initializes them automatically. `src/lib/db/migrate.ts` retains legacy
+  startup schema initialization for older features only; do not add new production DDL there.
 
 ## Secrets (Tools → Secrets)
 

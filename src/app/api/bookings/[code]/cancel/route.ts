@@ -23,7 +23,8 @@ export async function POST(req: Request, ctx: { params: Promise<{ code: string }
   if (!result.ok) return NextResponse.json({ error: result.error }, { status: 400 });
   // The guest asked, so the guest hears back. cancelBooking hands back the row
   // and its experience, so there is no second read to fail, and sendEmail
-  // never throws. Never blocks the response.
-  void sendBookingCancellation(result.booking, result.experience, "guest");
+  // never throws. Class mail must finish durable queue insertion before responding.
+  if (result.booking.classSessionId != null) await sendBookingCancellation(result.booking, result.experience, "guest");
+  else void sendBookingCancellation(result.booking, result.experience, "guest");
   return NextResponse.json({ ok: true, code: result.booking.code, status: result.booking.status });
 }

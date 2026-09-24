@@ -1,5 +1,5 @@
 import { randomInt } from "node:crypto";
-import { and, asc, eq, gt, inArray, lt, ne, sql, type SQL } from "drizzle-orm";
+import { and, asc, eq, gt, inArray, isNull, lt, ne, sql, type SQL } from "drizzle-orm";
 import { getDb, type Db } from "@/lib/db";
 import { bookings, experiences, type Booking, type Experience } from "@/lib/db/schema";
 import { BOOKING, RESOURCES, tierSatisfies, type ResourceKey } from "@/lib/config/site";
@@ -266,7 +266,7 @@ export async function getBookingByCode(code: string): Promise<{ booking: Booking
     .innerJoin(experiences, eq(bookings.experienceId, experiences.id))
     .where(eq(bookings.code, code.toUpperCase().trim()))
     .limit(1);
-  return rows[0] ?? null;
+  return rows[0] ? snapshotBookingExperience(rows[0]) : null;
 }
 
 export async function attachStripeSession(bookingId: number, sessionId: string): Promise<void> {
@@ -294,14 +294,17 @@ export async function markPaidBySession(sessionId: string, paymentIntentId: stri
  * markPaidBySession plus the confirmation email, sent only by the call that
  * made the row paid, whichever of the webhook, the confirmation page or a
  * cancel that found the payment landed gets there first. The email never
- * blocks or fails the caller.
+ * fails the caller. Class mail awaits durable queue insertion.
  */
 export async function confirmPaidSession(sessionId: string, paymentIntentId: string | null, opts: SendOptions = {}): Promise<Booking | null> {
   const paid = await markPaidBySession(sessionId, paymentIntentId);
   if (!paid) return null;
   try {
     const found = await getBookingByCode(paid.code);
-    if (found) void sendBookingConfirmation(found.booking, found.experience, opts);
+    if (found) {
+      if (found.booking.classSessionId != null) await sendBookingConfirmation(found.booking, found.experience, opts);
+      else void sendBookingConfirmation(found.booking, found.experience, opts);
+    }
   } catch (err) {
     console.error(`[booking] could not prepare the confirmation email for ${paid.code}`, err);
   }
@@ -359,6 +362,8 @@ export type CancelResult = { ok: true; booking: Booking; experience: Experience 
 export type CancelOptions = {
   email?: string;
   byAdmin?: boolean;
+  /** Explicit staff refund; class cancellations always refund card payments. */
+  refundPaid?: boolean;
   now?: Date;
   /** Refunds a paid card booking; defaults to Stripe. Injectable for tests. */
   refund?: (paymentIntentId: string, bookingCode: string) => Promise<void>;
@@ -368,9 +373,9 @@ export type CancelOptions = {
  * Cancellation. Guests must match the email on file and respect the free
  * window for the experience (24 h for lanes, 72 h for suites and events).
  * Inside that window a guest's card is refunded in full before the row is
- * cancelled; if the refund fails the reservation stays active. Staff cancel
- * without a refund (no-shows and inside-window cancels keep the fee per the
- * Terms) and issue any refund deliberately. A pending hold is marked
+ * cancelled; if the refund fails the reservation stays active. Class staff
+ * cancellations always refund paid cards; other staff cancellations keep
+ * the fee unless refundPaid was explicitly requested. A pending hold is marked
  * cancelled before its Checkout page is closed: Stripe reports the expiry
  * at once, and the webhook must find the row already cancelled so it does
  * not mail "your payment did not complete" on top of "cancelled".
@@ -380,17 +385,24 @@ export async function cancelBooking(code: string, opts: CancelOptions): Promise<
   const found = await getBookingByCode(code);
   if (!found) return { ok: false, error: "Reservation not found." };
   const { booking, experience } = found;
-  if (booking.status === "cancelled") return { ok: false, error: "This reservation is already cancelled." };
+  const isClass = booking.classSessionId != null;
+  const reconcileCancelled = isClass && booking.status === "cancelled" && booking.paymentStatus === "paid" && !!booking.stripePaymentIntentId;
   if (!opts.byAdmin) {
     if (!opts.email || opts.email.trim().toLowerCase() !== booking.email) return { ok: false, error: "The email address does not match this reservation." };
     const hours = cancelWindowHours(experience);
     const cutoff = new Date(booking.startsAt.getTime() - hours * 3_600_000);
-    if (now > cutoff) return { ok: false, error: `Online cancellation closes ${hours} hours before your session. Please call us.` };
+    if (!reconcileCancelled && now > cutoff) return { ok: false, error: `Online cancellation closes ${hours} hours before your session. Please call us.` };
+  }
+  if (booking.status === "cancelled" && !reconcileCancelled) {
+    if (isClass && booking.paymentStatus === "refunded") return { ok: true, booking, experience };
+    return { ok: false, error: "This reservation is already cancelled." };
   }
 
   const patch: { status: string; paymentStatus?: string; updatedAt: Date } = { status: "cancelled", updatedAt: now };
-  const refundable = !opts.byAdmin && booking.paymentStatus === "paid" && booking.stripePaymentIntentId && booking.amountCents > 0;
-  if (refundable && (opts.refund || stripeEnabled())) {
+  if (isClass && booking.paymentStatus === "paid" && booking.stripeSessionId && !booking.stripePaymentIntentId)
+    return { ok: false, error: "Payment reconciliation is required before cancelling." };
+  const refundable = (!opts.byAdmin || isClass || opts.refundPaid) && booking.paymentStatus === "paid" && booking.stripePaymentIntentId && booking.amountCents > 0;
+  if (refundable && (isClass || opts.refundPaid || opts.refund || stripeEnabled())) {
     try {
       await (opts.refund ?? refundPaymentIntent)(booking.stripePaymentIntentId!, booking.code);
       patch.paymentStatus = "refunded";
@@ -400,14 +412,24 @@ export async function cancelBooking(code: string, opts: CancelOptions): Promise<
     }
   }
 
-  // Conditional on the status just read: a hold whose payment landed in the meantime is confirmed now, not cancelled.
+  // Refund and cancellation bookkeeping commit together. Match all payment
+  // state read before the external call; a concurrent payment/refund cannot
+  // be overwritten. A crash before this update retries Stripe's idempotent
+  // refund, including legacy cancelled-but-paid class rows.
   const db = await getDb();
   const [row] = await db
     .update(bookings)
     .set(patch)
-    .where(and(eq(bookings.id, booking.id), eq(bookings.status, booking.status)))
+    .where(and(eq(bookings.id, booking.id), eq(bookings.status, booking.status),
+      eq(bookings.paymentStatus, booking.paymentStatus),
+      booking.stripePaymentIntentId === null ? isNull(bookings.stripePaymentIntentId) : eq(bookings.stripePaymentIntentId, booking.stripePaymentIntentId)))
     .returning();
-  if (!row) return { ok: false, error: "This reservation just changed. Reload the page and try again." };
+  if (!row) {
+    const current = await getBookingByCode(code);
+    if (isClass && current?.booking.status === "cancelled" && current.booking.paymentStatus === "refunded")
+      return { ok: true, ...current };
+    return { ok: false, error: "This reservation just changed. Reload the page and try again." };
+  }
 
   if (booking.status === "pending" && booking.stripeSessionId) {
     const result = await expireCheckoutSession(booking.stripeSessionId);
@@ -418,17 +440,27 @@ export async function cancelBooking(code: string, opts: CancelOptions): Promise<
 
 export type BookingRow = { booking: Booking; experience: Experience };
 
+/** Class receipts retain the purchased title, duration and price, not later catalog edits. */
+export function snapshotBookingExperience(row: BookingRow): BookingRow {
+  const { booking, experience } = row;
+  if (!booking.classSessionId || !booking.classDetails) return row;
+  return { booking, experience: { ...experience, name: booking.classDetails.title,
+    durationMin: Math.round((booking.endsAt.getTime() - booking.startsAt.getTime()) / 60_000),
+    priceCents: booking.amountCents / booking.guests, resource: booking.resource } };
+}
+
 export async function listBookings(opts: { from: Date; to: Date; includeCancelled?: boolean }): Promise<BookingRow[]> {
   const db = await getDb();
   const where = opts.includeCancelled
     ? and(gt(bookings.startsAt, opts.from), lt(bookings.startsAt, opts.to))
     : and(gt(bookings.startsAt, opts.from), lt(bookings.startsAt, opts.to), inArray(bookings.status, [...ACTIVE]));
-  return db
+  const rows = await db
     .select({ booking: bookings, experience: experiences })
     .from(bookings)
     .innerJoin(experiences, eq(bookings.experienceId, experiences.id))
     .where(where)
     .orderBy(asc(bookings.startsAt));
+  return rows.map(snapshotBookingExperience);
 }
 
 /**
@@ -440,6 +472,10 @@ export async function listBookings(opts: { from: Date; to: Date; includeCancelle
  */
 export async function adminSetStatus(id: number, patch: { status?: string; paymentStatus?: string }): Promise<void> {
   const db = await getDb();
+  const [target] = await db.select({ classSessionId: bookings.classSessionId }).from(bookings).where(eq(bookings.id, id)).limit(1);
+  if (target?.classSessionId != null) {
+    throw new Error("Manage class enrollments from the class roster so payment reconciliation, refunds and notifications are preserved.");
+  }
   const set: { status?: string | SQL; paymentStatus?: string; updatedAt: Date } = { ...patch, updatedAt: new Date() };
   if (patch.status === "cancelled") {
     const [row] = await db.select({ status: bookings.status, code: bookings.code, stripeSessionId: bookings.stripeSessionId }).from(bookings).where(eq(bookings.id, id)).limit(1);

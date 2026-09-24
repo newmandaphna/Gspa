@@ -1,4 +1,5 @@
-import { boolean, index, integer, jsonb, pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
+export { classMailOutbox } from "./class-mail-schema";
+import { boolean, index, integer, jsonb, pgTable, serial, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
 
 /**
  * Bookable products. Seeded from src/lib/content/catalog.ts (upsert by slug),
@@ -82,11 +83,38 @@ export const memberRequests = pgTable(
   (t) => [index("member_requests_member_idx").on(t.memberId)],
 );
 
+export const classSessions = pgTable("class_sessions", {
+  id: serial("id").primaryKey(),
+  experienceId: integer("experience_id").notNull().references(() => experiences.id),
+  title: text("title").notNull(),
+  startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
+  endsAt: timestamp("ends_at", { withTimezone: true }).notNull(),
+  priceCents: integer("price_cents").notNull(),
+  capacity: integer("capacity").notNull(),
+  maxPerBooking: integer("max_per_booking").notNull(),
+  status: text("status").notNull().default("draft"),
+  instructor: text("instructor"),
+  requirements: text("requirements").notNull().default(""),
+  staffNotes: text("staff_notes"),
+  collectId: boolean("collect_id").notNull().default(false),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export type MailingAddress = { line1: string; line2?: string; city: string; state: string; postalCode: string; country: string };
+export type ClassAttendee = { firstName: string; lastName: string };
+export type ClassDetails = { title: string; instructor: string | null; requirements: string; collectId: boolean };
+export type ClassSession = typeof classSessions.$inferSelect;
+
 export const bookings = pgTable(
   "bookings",
   {
     id: serial("id").primaryKey(),
     code: text("code").notNull().unique(),
+    classSessionId: integer("class_session_id").references(() => classSessions.id),
+    mailingAddress: jsonb("mailing_address").$type<MailingAddress>(),
+    attendees: jsonb("attendees").$type<ClassAttendee[]>(),
+    classDetails: jsonb("class_details").$type<ClassDetails>(),
     experienceId: integer("experience_id")
       .notNull()
       .references(() => experiences.id),
@@ -113,8 +141,19 @@ export const bookings = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [index("bookings_resource_starts_idx").on(t.resource, t.startsAt), index("bookings_email_idx").on(t.email)],
+  (t) => [index("bookings_resource_starts_idx").on(t.resource, t.startsAt), index("bookings_email_idx").on(t.email), index("bookings_class_session_idx").on(t.classSessionId)],
 );
+
+export const classDocuments = pgTable("class_documents", {
+  id: serial("id").primaryKey(),
+  bookingId: integer("booking_id").notNull().references(() => bookings.id, { onDelete: "cascade" }),
+  attendeeIndex: integer("attendee_index").notNull(),
+  ciphertext: text("ciphertext").notNull(),
+  iv: text("iv").notNull(),
+  authTag: text("auth_tag").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+}, (t) => [uniqueIndex("class_documents_booking_attendee_idx").on(t.bookingId, t.attendeeIndex)]);
 
 export const inquiries = pgTable("inquiries", {
   id: serial("id").primaryKey(),

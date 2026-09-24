@@ -154,6 +154,9 @@ export default function TrainingPage() {
               </div>
               <div className="mt-8">
                 <Button href={COURSES.cta.href}>{COURSES.cta.label}</Button>
+                <LinkArrow href="/training/classes" className="ml-5">
+                  Browse scheduled classes
+                </LinkArrow>
               </div>
             </div>
             <div className="lg:col-span-6 lg:col-start-7">

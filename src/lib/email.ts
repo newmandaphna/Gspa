@@ -89,7 +89,26 @@ function paymentLine(booking: Booking): string {
   return `${formatMoney(booking.amountCents)}, ${state}`;
 }
 
+function bookingTitle(booking: Booking, experience: Experience): string {
+  return booking.classDetails?.title ?? experience.name;
+}
+
+function bookingDurationMinutes(booking: Booking): number {
+  return Math.max(0, Math.round((booking.endsAt.getTime() - booking.startsAt.getTime()) / 60_000));
+}
+
+function instructorLine(booking: Booking): string | null {
+  return booking.classDetails?.instructor ? `Instructor: ${booking.classDetails.instructor}` : null;
+}
+
 function bringLines(booking: Booking, experience: Experience): string[] {
+  if (booking.classDetails) {
+    const requirements = booking.classDetails.requirements
+      .split(/\r?\n/)
+      .map((line) => line.replace(/^[-*]\s*/, "").trim())
+      .filter(Boolean);
+    return requirements.slice(0, 6);
+  }
   return requirementsFor(experience.eligibility as "handgun" | "longgun" | "simulator" | "anyone", Boolean(booking.memberId))
     .slice(0, 3)
     .map((r) => r.text);
@@ -110,8 +129,10 @@ export function calendarEventFor(booking: Booking, experience: Experience, stamp
   const { hours, cutoff } = freeCancelCutoff(booking, experience);
   const alarmAt = new Date(cutoff.getTime() - 3_600_000);
   const lane = requestedLane(booking.notes, experience);
+  const title = bookingTitle(booking, experience);
   const description = [
-    `${experience.name} for ${booking.guests} guest${booking.guests === 1 ? "" : "s"}. Confirmation ${booking.code}.`,
+    `${title} for ${booking.guests} guest${booking.guests === 1 ? "" : "s"}. Confirmation ${booking.code}.`,
+    instructorLine(booking),
     lane ? `Lane ${lane} requested; the desk confirms at check-in.` : null,
     "Arrive 15 minutes early for check-in and the safety briefing.",
     ...bringLines(booking, experience),
@@ -123,7 +144,7 @@ export function calendarEventFor(booking: Booking, experience: Experience, stamp
     uid: `${booking.code}@${SITE.domain}`,
     start: booking.startsAt,
     end: booking.endsAt,
-    summary: `${experience.name} at ${SITE.name}`,
+    summary: `${title} at ${SITE.name}`,
     description,
     location: `${SITE.name}, ${fullAddress()}`,
     url: manageUrl(booking),
@@ -140,7 +161,7 @@ export function icsFor(booking: Booking, experience: Experience, stamp?: Date): 
 /** The Google link carries a short note; the full bring list lives in the .ics, so the URL stays readable in plain text. */
 export function googleCalendarUrlFor(booking: Booking, experience: Experience): string {
   const ev = calendarEventFor(booking, experience);
-  return googleCalendarUrl({ ...ev, description: `${experience.name} for ${booking.guests} guest${booking.guests === 1 ? "" : "s"}. Confirmation ${booking.code}. ${manageUrl(booking)}` });
+  return googleCalendarUrl({ ...ev, description: `${bookingTitle(booking, experience)} for ${booking.guests} guest${booking.guests === 1 ? "" : "s"}. Confirmation ${booking.code}. ${manageUrl(booking)}` });
 }
 
 /* ------------------------------------------------------------------------ */
@@ -232,13 +253,20 @@ export function confirmationText(booking: Booking, experience: Experience, opts:
     : `The attached calendar file puts this on your phone.`;
   const hostLine = opts.host?.name ? `Tonight's host: ${opts.host.name}${opts.host.until ? `, until ${opts.host.until}` : ""}.` : null;
   const bring = bringLines(booking, experience);
+  const title = bookingTitle(booking, experience);
+  const duration = bookingDurationMinutes(booking);
+  const instructor = instructorLine(booking);
+  const classEnd = booking.classDetails ? `Ends: ${formatInstant(booking.endsAt)}` : null;
+  const idLine = booking.classDetails?.collectId ? `Identification is required for this class; follow the secure upload instructions shown on your reservation page.` : null;
   const subject = `Your reservation at ${SITE.name}: ${booking.code}`;
 
   const text = [
     `Your reservation is set, ${booking.firstName}.`,
     ``,
-    `${experience.name}`,
-    `${when}, ${experience.durationMin} minutes`,
+    `${title}`,
+    `${when}, ${duration} minutes`,
+    classEnd,
+    instructor,
     guests,
     laneLine,
     `Total: ${paymentLine(booking)}`,
@@ -246,7 +274,8 @@ export function confirmationText(booking: Booking, experience: Experience, opts:
     ``,
     `The attached calendar file puts this on your phone. Google Calendar: ${gcal}`,
     ``,
-    `Bring a valid government photo ID. Arrive 15 minutes early for check-in and the safety briefing.`,
+    booking.classDetails ? `Arrive 15 minutes early for check-in and the safety briefing.` : `Bring a valid government photo ID. Arrive 15 minutes early for check-in and the safety briefing.`,
+    idLine,
     ...bring.map((b) => `- ${b}`),
     ``,
     `Doors: ${fullAddress()}. ${drivingLine()}`,
@@ -261,8 +290,10 @@ export function confirmationText(booking: Booking, experience: Experience, opts:
 
   const body = [
     `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:100%;border-top:1px solid rgba(29,29,31,.12);border-bottom:1px solid rgba(29,29,31,.12);margin:0 0 24px">
-      ${row("What", experience.name)}
-      ${row("When", `${when}, ${experience.durationMin} minutes`)}
+      ${row("What", title)}
+      ${row("When", `${when}, ${duration} minutes`)}
+      ${classEnd ? row("Ends", formatInstant(booking.endsAt)) : ""}
+      ${instructor ? row("Instructor", booking.classDetails!.instructor!) : ""}
       ${row("Guests", guests)}
       ${laneLine ? row("Lane", laneLine) : ""}
       ${row("Total", paymentLine(booking))}
@@ -270,14 +301,15 @@ export function confirmationText(booking: Booking, experience: Experience, opts:
     </table>`,
     `<p style="margin:0 0 28px">${button(url, "Manage reservation")} &nbsp; ${button(gcal, "Add to Google Calendar", "secondary")}</p>`,
     para(escape(calendarLine), { muted: true, size: 14 }),
-    para(`<strong>Bring a valid government photo ID.</strong> Arrive 15 minutes early for check-in and the safety briefing.`),
+    para(booking.classDetails ? `Arrive 15 minutes early for check-in and the safety briefing.` : `<strong>Bring a valid government photo ID.</strong> Arrive 15 minutes early for check-in and the safety briefing.`),
+    idLine ? para(escape(idLine)) : "",
     `<ul style="margin:0 0 20px;padding-left:20px;font-size:15px;line-height:1.55;color:${INK}">${bring.map((b) => `<li style="margin:0 0 6px">${escape(b)}</li>`).join("")}</ul>`,
     para(`<strong>Doors:</strong> <a href="${escape(SITE.address.googleMapsUrl)}" style="color:${INK}">${escape(fullAddress())}</a>. ${escape(drivingLine())}`),
     hostLine ? para(escape(hostLine)) : "",
     para(escape(cancelLine), { muted: true, size: 14 }),
   ].join("\n");
 
-  const html = shell({ title: subject, preheader: `${experience.name}, ${when}. Code ${booking.code}.`, headline: `Your reservation is set, ${booking.firstName}.`, body });
+  const html = shell({ title: subject, preheader: `${title}, ${when}. Code ${booking.code}.`, headline: `Your reservation is set, ${booking.firstName}.`, body });
   return {
     subject,
     text,
@@ -294,13 +326,14 @@ export type CancellationReason = "guest" | "expired";
 
 export function cancellationText(booking: Booking, experience: Experience, reason: CancellationReason): EmailMessage {
   const when = formatInstant(booking.startsAt);
+  const title = bookingTitle(booking, experience);
   const reserve = `${origin()}/reserve`;
   const subject = reason === "expired" ? `Your hold at ${SITE.name} was released: ${booking.code}` : `Your reservation at ${SITE.name} is cancelled: ${booking.code}`;
   const headline = reason === "expired" ? "We released your hold." : "Reservation cancelled.";
   const lead =
     reason === "expired"
-      ? `Payment for ${experience.name} on ${when} did not complete within ${BOOKING.pendingHoldMin} minutes, so the time went back on the calendar. Nothing was charged.`
-      : `${experience.name} on ${when} is cancelled, ${booking.firstName}. The time is back on the calendar.`;
+      ? `Payment for ${title} on ${when} did not complete within ${BOOKING.pendingHoldMin} minutes, so the time went back on the calendar. Nothing was charged.`
+      : `${title} on ${when} is cancelled, ${booking.firstName}. The time is back on the calendar.`;
   const money =
     reason === "expired" || booking.amountCents === 0
       ? null
@@ -310,9 +343,24 @@ export function cancellationText(booking: Booking, experience: Experience, reaso
           ? `Your card was charged ${formatMoney(booking.amountCents)}. The desk will settle the refund; reply here if it has not landed in a week.`
           : `Nothing was charged.`;
   const again = reason === "expired" ? "If you still want the time, book it again. The calendar may still have it." : "When you are ready to come back, the calendar is open.";
+  const classFacts = booking.classDetails
+    ? [
+        instructorLine(booking),
+        `Starts: ${when}`,
+        `Ends: ${formatInstant(booking.endsAt)}`,
+        ...bringLines(booking, experience).map((line) => `- ${line}`),
+        `Location: ${SITE.name}, ${fullAddress()}`,
+      ].filter((line): line is string => Boolean(line))
+    : [];
 
-  const text = [headline, ``, lead, money, ``, again, `Reserve: ${reserve}`, ...textFooter()].filter((l): l is string => l !== null).join("\n");
-  const body = [para(escape(lead)), money ? para(escape(money)) : "", para(escape(again), { muted: true, size: 14 }), `<p style="margin:0">${button(reserve, reason === "expired" ? "Reserve again" : "Make another reservation")}</p>`].join("\n");
+  const text = [headline, ``, lead, ...classFacts, money, ``, again, `Reserve: ${reserve}`, ...textFooter()].filter((l): l is string => l !== null).join("\n");
+  const body = [
+    para(escape(lead)),
+    booking.classDetails ? para(classFacts.map(escape).join("<br>")) : "",
+    money ? para(escape(money)) : "",
+    para(escape(again), { muted: true, size: 14 }),
+    `<p style="margin:0">${button(reserve, reason === "expired" ? "Reserve again" : "Make another reservation")}</p>`,
+  ].join("\n");
   const html = shell({ title: subject, preheader: lead, headline, body });
   return { subject, text, html };
 }
@@ -334,20 +382,27 @@ export function reminderText(booking: Booking, experience: Experience, now: Date
       : `Plans changed? Online cancellation has closed for this reservation. ${deskContact(true)} and the desk will sort it out.`;
   const lateLine = `Arrive 15 minutes early for check-in and the safety briefing. More than ${LATE_NO_SHOW_MIN} minutes late counts as a no-show.`;
   const bring = bringLines(booking, experience);
-  const subject = `Tomorrow at ${startLabel}: ${experience.name} at ${SITE.name}`;
+  const title = bookingTitle(booking, experience);
+  const instructor = instructorLine(booking);
+  const classEnd = booking.classDetails ? `Ends: ${formatInstant(booking.endsAt)}` : null;
+  const idLine = booking.classDetails?.collectId ? `Identification is required for this class; use the secure instructions on your reservation page.` : null;
+  const subject = `Tomorrow at ${startLabel}: ${title} at ${SITE.name}`;
   const headline = `Tomorrow at ${startLabel}, ${booking.firstName}.`;
 
   const text = [
     headline,
     ``,
-    `${experience.name}, ${when}, ${guests}.`,
+    `${title}, ${when}, ${guests}.`,
+    classEnd,
+    instructor,
     lane ? `Lane ${lane} requested; the desk confirms at check-in.` : null,
     `Confirmation code: ${booking.code}`,
     ``,
     `Doors: ${fullAddress()}. ${drivingLine()}`,
     `Map: ${SITE.address.googleMapsUrl}`,
     ``,
-    `Bring a valid government photo ID. ${lateLine}`,
+    booking.classDetails ? lateLine : `Bring a valid government photo ID. ${lateLine}`,
+    idLine,
     ...bring.map((b) => `- ${b}`),
     ``,
     cancelLine,
@@ -360,16 +415,19 @@ export function reminderText(booking: Booking, experience: Experience, now: Date
     .join("\n");
 
   const body = [
-    para(`${escape(experience.name)}, ${escape(when)}, ${guests}.${lane ? ` Lane ${lane} requested; the desk confirms at check-in.` : ""} Code <span style="font-family:${MONO};letter-spacing:.04em">${booking.code}</span>.`),
+    para(`${escape(title)}, ${escape(when)}, ${guests}.${lane ? ` Lane ${lane} requested; the desk confirms at check-in.` : ""} Code <span style="font-family:${MONO};letter-spacing:.04em">${booking.code}</span>.`),
+    classEnd ? para(escape(classEnd)) : "",
+    instructor ? para(escape(instructor)) : "",
     para(`<strong>Doors:</strong> <a href="${escape(SITE.address.googleMapsUrl)}" style="color:${INK}">${escape(fullAddress())}</a>. ${escape(drivingLine())}`),
-    para(`<strong>Bring a valid government photo ID.</strong> ${escape(lateLine)}`),
+    para(booking.classDetails ? escape(lateLine) : `<strong>Bring a valid government photo ID.</strong> ${escape(lateLine)}`),
+    idLine ? para(escape(idLine)) : "",
     `<ul style="margin:0 0 20px;padding-left:20px;font-size:15px;line-height:1.55;color:${INK}">${bring.map((b) => `<li style="margin:0 0 6px">${escape(b)}</li>`).join("")}</ul>`,
     para(escape(cancelLine), { muted: true, size: 14 }),
     `<p style="margin:0 0 24px">${button(url, "Manage reservation")} &nbsp; ${button(SITE.address.googleMapsUrl, "Directions", "secondary")}</p>`,
     para(`To stop reminders for this reservation, reply with the word STOP.`, { muted: true, size: 13 }),
   ].join("\n");
 
-  const html = shell({ title: subject, preheader: `${experience.name} at ${startLabel} tomorrow. Bring ID.`, headline, body });
+  const html = shell({ title: subject, preheader: `${title} at ${startLabel} tomorrow.`, headline, body });
   const unsubscribe = `mailto:${SITE.email}?subject=${encodeURIComponent(`STOP reminders ${booking.code}`)}`;
   return { subject, text, html, headers: { "List-Unsubscribe": `<${unsubscribe}>` } };
 }
@@ -444,13 +502,25 @@ export async function sendEmail(kind: "confirmation" | "cancellation" | "reminde
 
 export async function sendBookingConfirmation(booking: Booking, experience: Experience, opts: { host?: HostOnDuty | null; now?: Date } & SendOptions = {}): Promise<SendResult> {
   const { idempotencyKey, ...text } = opts;
+  if (booking.classSessionId != null && booking.classDetails) {
+    const { deliverClassMail } = await import("@/lib/class-mail");
+    return deliverClassMail(booking, "confirmation", confirmationText(booking, experience, text));
+  }
   return sendEmail("confirmation", booking.email, confirmationText(booking, experience, text), { idempotencyKey });
 }
 
 export async function sendBookingCancellation(booking: Booking, experience: Experience, reason: CancellationReason, opts: SendOptions = {}): Promise<SendResult> {
+  if (booking.classSessionId != null && booking.classDetails) {
+    const { deliverClassMail } = await import("@/lib/class-mail");
+    return deliverClassMail(booking, "cancellation", cancellationText(booking, experience, reason));
+  }
   return sendEmail("cancellation", booking.email, cancellationText(booking, experience, reason), opts);
 }
 
 export async function sendBookingReminder(booking: Booking, experience: Experience, now: Date = new Date()): Promise<SendResult> {
+  if (booking.classSessionId != null && booking.classDetails) {
+    const { deliverClassMail } = await import("@/lib/class-mail");
+    return deliverClassMail(booking, "reminder", reminderText(booking, experience, now));
+  }
   return sendEmail("reminder", booking.email, reminderText(booking, experience, now));
 }

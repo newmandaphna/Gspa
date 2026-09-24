@@ -28,6 +28,12 @@ export async function GET(req: Request) {
   const auth = req.headers.get("authorization") ?? "";
   const presented = auth.startsWith("Bearer ") ? auth.slice(7).trim() : "";
   if (!presented || !safeEqual(presented, secret)) return unauthorized();
+  try {
+    const { purgeExpiredClassDocuments } = await import("@/lib/class-documents");
+    await purgeExpiredClassDocuments();
+  } catch (err) {
+    console.error("[cron] class document purge failed", err);
+  }
   if (!process.env.RESEND_API_KEY) {
     console.error("[cron] RESEND_API_KEY is not set; reminders not sent");
     return NextResponse.json({ ok: false, error: "Email is not configured" }, { status: 503 });
@@ -35,8 +41,11 @@ export async function GET(req: Request) {
 
   try {
     const result = await runReminders(new Date());
+    const { processClassMailQueue, reconcileClassMailOutbox } = await import("@/lib/class-mail");
+    const classMailReconciled = await reconcileClassMailOutbox();
+    const classMail = await processClassMailQueue();
     console.info(`[cron] reminders for ${result.window}: ${result.sent.length} sent, ${result.failed.length} failed`);
-    return NextResponse.json({ ok: true, ...result });
+    return NextResponse.json({ ok: true, ...result, classMailReconciled, classMail });
   } catch (err) {
     console.error("[cron] reminders failed", err);
     return NextResponse.json({ ok: false, error: "Reminder run failed" }, { status: 500 });

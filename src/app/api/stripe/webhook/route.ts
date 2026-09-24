@@ -63,7 +63,10 @@ export async function POST(req: Request) {
         const released = await cancelBySession(event.data.object.id);
         if (released) {
           const found = await getBookingByCode(released.code);
-          if (found) void sendBookingCancellation(found.booking, found.experience, "expired", { idempotencyKey: event.id });
+          if (found) {
+            if (found.booking.classSessionId != null) await sendBookingCancellation(found.booking, found.experience, "expired", { idempotencyKey: event.id });
+            else void sendBookingCancellation(found.booking, found.experience, "expired", { idempotencyKey: event.id });
+          }
         }
         break;
       }
