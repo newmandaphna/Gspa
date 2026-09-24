@@ -1,9 +1,14 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { fontClassName } from "@/app/fonts";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { MotionProvider } from "@/components/MotionProvider";
 import { SITE } from "@/lib/config/site";
+import { computeOpenStatus } from "@/lib/hours";
+import { getCurrentMember } from "@/lib/members/auth";
+import { JsonLd } from "@/lib/seo/JsonLd";
+import { localBusinessJsonLd } from "@/lib/seo/jsonld";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
@@ -32,9 +37,14 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // The session probe lives here rather than in a client fetch from the nav, so the
+  // member's name is in the first HTML. A database hiccup must never take the chrome down.
+  const member = await getCurrentMember().catch(() => null);
+  const memberName = member?.firstName ?? null;
+  const initialStatus = computeOpenStatus(new Date());
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className={fontClassName} suppressHydrationWarning>
       <body suppressHydrationWarning className="min-h-dvh flex flex-col bg-paper text-ink antialiased">
         <a
           href="#main"
@@ -43,12 +53,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           Skip to content
         </a>
         <MotionProvider>
-          <Nav />
+          <Nav memberName={memberName} initialStatus={initialStatus} />
           <main id="main" className="flex-1">
             {children}
           </main>
           <Footer id="site-footer" />
         </MotionProvider>
+        {/* LocalBusiness record for search engines, built from site.ts and the catalog (src/lib/seo/jsonld.ts). */}
+        <JsonLd data={localBusinessJsonLd()} />
       </body>
     </html>
   );

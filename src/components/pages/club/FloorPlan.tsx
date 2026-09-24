@@ -7,8 +7,10 @@ import { cn } from "@/lib/cn";
 
 /**
  * Isometric floor plan built from FACILITY counts. Flat #1c1c20 polygons with
- * hairline edges; hovering, focusing or tapping a zone caption outlines that
- * zone in gold (the artwork's one accent element).
+ * hairline edges. One zone at a time is outlined in gold (the artwork's one
+ * accent element): the one under the pointer, or the one the page passes in
+ * through `active` (ZoneWatch sets it from the section scrolling past).
+ * The zone names are listed under the drawing in mono so they read at any size.
  */
 
 type Zone = { key: ZoneKey; x: number; y: number; w: number; h: number; cx: number; cy: number };
@@ -48,8 +50,10 @@ const ZONES: Zone[] = [
   { key: "desk", x: 78, y: 41, w: 20, h: 9, cx: 88, cy: 45.5 },
 ];
 
-export function FloorPlan({ className }: { className?: string }) {
-  const [active, setActive] = useState<ZoneKey | null>(null);
+export function FloorPlan({ active: controlled = null, className }: { active?: ZoneKey | null; className?: string }) {
+  const [hovered, setHovered] = useState<ZoneKey | null>(null);
+  const active = hovered ?? controlled;
+  const setActive = setHovered;
 
   const laneCount = FACILITY.laneCount;
   const laneW = 72 / laneCount;
@@ -187,15 +191,15 @@ export function FloorPlan({ className }: { className?: string }) {
               y={py}
               textAnchor="middle"
               dominantBaseline="middle"
-              fontSize="11"
-              fontWeight="600"
-              letterSpacing="1.3"
+              fontSize="14"
+              fontWeight="500"
+              letterSpacing="1.2"
               fill={active === z.key ? GOLD : "rgba(255,255,255,0.6)"}
               stroke={FILL}
               strokeWidth="5"
               paintOrder="stroke"
               strokeLinejoin="round"
-              style={{ fontFamily: "var(--font-sans)", transition: "fill 200ms" }}
+              style={{ fontFamily: "var(--font-mono)", transition: "fill 200ms" }}
               className="pointer-events-none select-none"
             >
               {FLOOR_ZONE_LABELS[z.key].toUpperCase()}
@@ -204,24 +208,10 @@ export function FloorPlan({ className }: { className?: string }) {
         })}
       </svg>
 
-      <ul className="mt-6 flex flex-wrap justify-center gap-2" aria-label="Zones on the floor plan">
+      <ul className="mt-5 flex flex-wrap gap-x-4 gap-y-1 font-mono text-[0.75rem] uppercase tracking-[0.12em]" aria-label="Zones on the floor plan">
         {ZONES.map((z) => (
-          <li key={z.key}>
-            <button
-              type="button"
-              aria-pressed={active === z.key}
-              onMouseEnter={() => setActive(z.key)}
-              onMouseLeave={() => setActive((cur) => (cur === z.key ? null : cur))}
-              onFocus={() => setActive(z.key)}
-              onBlur={() => setActive((cur) => (cur === z.key ? null : cur))}
-              onClick={() => setActive((cur) => (cur === z.key ? null : z.key))}
-              className={cn(
-                "t-eyebrow rounded-pill px-3 py-2 ring-1 ring-inset transition-[color,box-shadow] duration-200",
-                active === z.key ? "text-accent ring-accent/60" : "text-mist ring-white/10 hover:text-snow",
-              )}
-            >
-              {FLOOR_ZONE_LABELS[z.key]}
-            </button>
+          <li key={z.key} className={cn("transition-colors duration-200", active === z.key ? "text-accent" : "text-mist")}>
+            {FLOOR_ZONE_LABELS[z.key]}
           </li>
         ))}
       </ul>

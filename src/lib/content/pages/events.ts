@@ -107,7 +107,7 @@ export const FLOOR_PLAN_LABELS = {
 
 export const EVENTS_FORMATS: SectionCopy = {
   eyebrow: "Formats",
-  headline: "How many are coming?",
+  headline: `${cap(numberWord(PRIVATE_SUITE.maxGuestsPerUnit))}, ${numberWord(FOUNDERS_SUITE.maxGuestsPerUnit)}, or the whole floor`,
   subhead: "Suites reserve online. Buyouts start with the form below.",
   body: `The Private Suite for ${numberWord(PRIVATE_SUITE.maxGuestsPerUnit)} and the Founders' Suite for ${numberWord(FOUNDERS_SUITE.maxGuestsPerUnit)} reserve on the Reserve page. The whole floor, ${numberWord(CORPORATE.maxGuestsPerUnit)} guests, is quoted per group.`,
   cta: { label: "Reserve a suite", href: "/reserve?category=suite" },

@@ -30,6 +30,7 @@ Set `ADMIN_PASSWORD` in `.env.local` to use the front desk at `/admin`.
 2. Open **Database** and create a PostgreSQL database. This sets `DATABASE_URL`.
 3. Add secrets: `ADMIN_PASSWORD`, `SESSION_SECRET` (a long random value, e.g. `openssl rand -base64 32`; member sign-in refuses to run in production without it), and optionally the Stripe and Resend keys. The public origin for Stripe redirects, emails, the sitemap and Open Graph tags is `canonicalUrl` in `src/lib/config/site.ts` (`https://gunspa.com`); `NEXT_PUBLIC_SITE_URL` overrides it for a staging address. Replit's deployment builder does not pass secrets to `next build`, so keep the canonical domain in the config rather than in a secret.
 4. Deploy. Tables are created automatically on first request. A deployment without `DATABASE_URL` refuses to start rather than silently using the embedded, per-instance database.
+5. For the day-before reminder email, add a `CRON_SECRET` secret (a long random value) and create a Scheduled Deployment that runs `curl -fsS -H "Authorization: Bearer $CRON_SECRET" https://gunspa.com/api/cron/reminders` once a day at 10:00 America/New_York. Each confirmed reservation starting the next day is mailed once (`bookings.reminder_sent_at` records it).
 
 ## How reservations work
 
@@ -38,6 +39,7 @@ Set `ADMIN_PASSWORD` in `.env.local` to use the front desk at `/admin`.
 - Creation runs inside a transaction with a Postgres advisory lock per resource and day, so two guests cannot take the last lane.
 - With `STRIPE_SECRET_KEY` unset, reservations confirm immediately as pay-on-arrival. With it set, a Stripe Checkout session is created for the booking's computed total, the slot is held for 30 minutes (plus a short grace so a last-second payment still lands), and the webhook (or the confirmation page) marks it paid. Member-included ($0) services confirm without Checkout.
 - Guests can cancel online up to 24 hours before start (72 hours for suites) via the confirmation page. A card payment cancelled online is refunded automatically; staff cancellations never refund by themselves, and a cancelled-but-paid row is flagged "Refund owed" in the front desk.
+- Email (`src/lib/email.ts`, sent through Resend when `RESEND_API_KEY` is set, logged otherwise): the confirmation attaches an `.ics` built by `src/lib/ics.ts` (New York timezone block, alarm an hour before the free-cancel window closes) and links Google Calendar and the map; a cancellation goes out when a guest cancels or a Stripe hold expires unpaid; the reminder goes out the day before from `/api/cron/reminders`. Reply-To is the desk address.
 
 ## Members
 

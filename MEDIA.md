@@ -16,10 +16,15 @@ read its ID.
    the table below. Name it after the slot ID in lowercase, for example
    `hero_photo_01.jpg`.
 2. Put it in `/public/media/`, for example `/public/media/hero_photo_01.jpg`.
-3. Tell the integrator, or pass the path yourself: find the `<ImageSlot>` with
-   that slot ID and add `src="/media/hero_photo_01.jpg"`. The component
-   switches from art to the photo automatically (it uses `next/image` with
-   `object-cover`, so the photo is cropped to the frame, never stretched).
+3. That is the whole integration. `scripts/media-manifest.mjs` runs before
+   every build (`npm run media` runs it by hand) and writes
+   `src/lib/media/manifest.ts` with the file's size and a blur placeholder;
+   `<ImageSlot>` looks its slot ID up there and switches from art to the
+   photo, served as AVIF or WebP through `next/image` with `object-cover`
+   (cropped to the frame, never stretched). Add a portrait export named
+   `hero_photo_01-portrait.jpg` beside it and phones held upright get that
+   file instead. A 12-second loop goes in as `video={{ mp4, webm }}` on the
+   slot; it stays a still under reduced motion or Save-Data.
 
 Where the slot ID is passed:
 
@@ -29,9 +34,8 @@ Where the slot ID is passed:
 | `/training` | `src/lib/content/pages/training.ts` (`imageSlot` for the hero, `slot` per instructor), rendered by `src/app/training/page.tsx` |
 | `/club`, `/membership`, `/events`, `/visit` | inline in `src/app/<page>/page.tsx` |
 
-The integrator will later wire a central map from slot ID to file path, so
-that adding a photo means adding one line rather than touching page code.
-Until then, `src=` on the component is the only thing needed.
+The manifest is that central map: adding a correctly named file is the only
+step. `src=` on the component still works as a manual override.
 
 ## Recommended dimensions by aspect
 

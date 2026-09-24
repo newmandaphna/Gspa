@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { pageMeta } from "@/lib/seo/meta";
+import { Owner } from "@/components/ui/Owner";
 import Link from "next/link";
 import { Suspense } from "react";
 import { ReserveFlow } from "@/components/reserve/ReserveFlow";
@@ -13,10 +15,10 @@ import { getCurrentMember } from "@/lib/members/auth";
 import { stripeEnabled } from "@/lib/stripe";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta("/reserve", {
   title: "Reserve",
   description: "Reserve a lane, a private suite, a simulator bay, or a seat with an instructor. Real availability, not a callback.",
-};
+});
 
 export default async function ReservePage() {
   const member = await getCurrentMember();
@@ -33,12 +35,8 @@ export default async function ReservePage() {
       }
     : null;
 
-  const stats = [
-    { value: String(BOOKING.maxAdvanceDays), unit: "days", label: `Public window. Members see ${TIER_WINDOW_DAYS.club}, ${TIER_WINDOW_DAYS.signature} or ${TIER_WINDOW_DAYS.founders}.` },
-    { value: String(BOOKING.slotStepMin), unit: "min", label: "Slot grid. Sessions start on the half hour." },
-    { value: String(BOOKING.leadTimeMin / 60), unit: "hr", label: "Notice. Same-day works, with two hours' lead." },
-    { value: String(BOOKING.freeCancelHours), unit: "hr", label: `Free cancellation. Suites and events, ${BOOKING.suiteFreeCancelHours}.` },
-  ];
+  /** The four policy numbers as one sentence, read from the same BOOKING constants the calendar uses. */
+  const policy = `Cancel free up to ${BOOKING.freeCancelHours} hours before, ${BOOKING.suiteFreeCancelHours} for suites and events. The public calendar opens ${BOOKING.maxAdvanceDays} days ahead (members see ${TIER_WINDOW_DAYS.club}, ${TIER_WINDOW_DAYS.signature} or ${TIER_WINDOW_DAYS.founders}), sessions start every ${BOOKING.slotStepMin} minutes, and same-day works with ${BOOKING.leadTimeMin / 60} hours' notice.`;
 
   return (
     <>
@@ -57,18 +55,7 @@ export default async function ReservePage() {
       <Section theme="gray" id="policies">
         <Container>
           <h2 className="t-2">Change of plans.</h2>
-          <p className="t-lead mt-2 max-w-[640px] text-ink-muted">Cancel free up to {BOOKING.freeCancelHours} hours before. The numbers below are the same ones the calendar uses.</p>
-          <dl className="mt-10 grid grid-cols-2 gap-6 lg:grid-cols-4">
-            {stats.map((s) => (
-              <div key={s.label} className="border-t border-hairline pt-4">
-                <dt className="flex items-baseline gap-1">
-                  <span className="t-numeral text-[clamp(3.5rem,8vw,6rem)]">{s.value}</span>
-                  <span className="t-3 text-ink-muted">{s.unit}</span>
-                </dt>
-                <dd className="t-caption mt-2 text-ink-muted">{s.label}</dd>
-              </div>
-            ))}
-          </dl>
+          <p className="t-lead mt-2 max-w-[40em] text-ink-muted">{policy}</p>
           <p className="t-caption mt-8 max-w-[640px] text-ink-muted">{CANCELLATION_POLICY}</p>
           <LinkArrow href="/legal#terms" className="mt-3">
             Read full terms
@@ -80,7 +67,8 @@ export default async function ReservePage() {
         <Container className="relative">
           <h2 className="t-2">Rather talk to a person.</h2>
           <p className="t-lead mt-2 max-w-[560px] text-mist">Concierge desk, every hour the club is open. Groups over ten and buyouts start with a conversation.</p>
-          <p className="mt-10 flex items-center gap-4">
+          {/* The phone band is faint in development and hidden in production until the owner replaces 000-0000 in site.ts. */}
+          <Owner as="p" value={SITE.phone} className="mt-10 flex items-center gap-4">
             <span className="relative flex h-3 w-3" aria-hidden="true">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-60" />
               <span className="relative inline-flex h-3 w-3 rounded-full bg-accent" />
@@ -88,7 +76,7 @@ export default async function ReservePage() {
             <a href={`tel:${SITE.phone.replace(/[^\d+]/g, "")}`} className="t-1 tabular hover:text-accent-2">
               {SITE.phone}
             </a>
-          </p>
+          </Owner>
           <p className="t-body mt-4 text-mist">
             <a href={`mailto:${SITE.email}`} className="underline underline-offset-4 hover:text-snow">
               {SITE.email}

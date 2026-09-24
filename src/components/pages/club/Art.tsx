@@ -1,10 +1,9 @@
 import { cn } from "@/lib/cn";
-import { Glow, LanePerspective } from "@/components/art";
-import type { LoungeIconKind } from "@/lib/content/pages/club";
 
 /**
  * Pure SVG/CSS visuals for /club. Hairlines are 1px: rgba(255,255,255,.12)
  * on dark, #d2d2d7 on light. Each artwork carries at most one accent element.
+ * The isometric plan (FloorPlan.tsx) is the page's one drawing of the room.
  */
 
 const DARK_LINE = "rgba(255,255,255,0.12)";
@@ -15,21 +14,22 @@ const GOLD = "#c9a55a";
 /* ---------------------------------------------------------------- air */
 
 /** Twelve parallel arrows that draw left to right once a parent gets `.in-view`. */
-export function AirFlow({ className }: { className?: string }) {
+export function AirFlow({ className, tone = "light" }: { className?: string; tone?: "light" | "dark" }) {
   const rows = 12;
+  const LINE = tone === "dark" ? DARK_LINE_STRONG : LIGHT_LINE;
   return (
     <svg viewBox="0 0 1200 380" className={cn("h-auto w-full", className)} aria-hidden="true">
       {Array.from({ length: rows }).map((_, i) => {
         const y = 30 + i * 29;
         return (
-          <g key={i} fill="none" stroke={LIGHT_LINE} strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+          <g key={i} fill="none" stroke={LINE} strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
             <path d={`M40 ${y}H1088`} pathLength={1} className="draw" style={{ transitionDelay: `${i * 55}ms` }} />
             <path d={`M1078 ${y - 8}L1088 ${y}L1078 ${y + 8}`} pathLength={1} className="draw" style={{ transitionDelay: `${700 + i * 55}ms` }} />
           </g>
         );
       })}
       {/* filter at the right edge */}
-      <g fill="none" stroke={LIGHT_LINE} strokeWidth="1">
+      <g fill="none" stroke={LINE} strokeWidth="1">
         <rect x="1118" y="16" width="56" height="348" rx="6" />
         <path d="M1132 16v348M1160 16v348" />
       </g>
@@ -40,38 +40,12 @@ export function AirFlow({ className }: { className?: string }) {
 
 /* ------------------------------------------------------------- suites */
 
-/**
- * Two suites with the shared wall dashed. The caller owns the width: `cn` does not
- * merge conflicting utilities, so a base `w-full` would beat a passed `w-28`.
- */
-export function SuitePlan({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 240 100" className={cn("h-auto", className ?? "w-full")} aria-hidden="true">
-      <g fill="none" stroke={LIGHT_LINE} strokeWidth="1">
-        <rect x="10.5" y="10.5" width="110" height="80" rx="3" />
-        <rect x="120.5" y="10.5" width="110" height="80" rx="3" />
-        {/* two lanes per suite */}
-        <path d="M65.5 10.5v52M175.5 10.5v52" />
-        <path d="M10.5 62.5h110M120.5 62.5h110" />
-        {/* targets */}
-        <circle cx="38" cy="18" r="2.5" />
-        <circle cx="93" cy="18" r="2.5" />
-        <circle cx="148" cy="18" r="2.5" />
-        <circle cx="203" cy="18" r="2.5" />
-        {/* sofas */}
-        <rect x="40" y="70" width="50" height="10" rx="3" />
-        <rect x="150" y="70" width="50" height="10" rx="3" />
-      </g>
-      <path d="M120.5 10.5v80" fill="none" stroke={GOLD} strokeWidth="1" strokeDasharray="4 3" />
-    </svg>
-  );
-}
-
 /** Fallback art for SUITE_PHOTO_02: a dark suite, two lanes behind glass and a sofa. */
 export function SuitePhotoArt() {
   return (
     <div className="absolute inset-0 overflow-hidden bg-[linear-gradient(160deg,#2c2c2e_0%,#151516_60%,#0a0a0b_100%)]">
-      <Glow variant="accent" className="left-1/2 top-[30%] h-[70%] w-[46%] -translate-x-1/2" />
+      {/* the lane downlight, a static gradient (no Glow outside the simulator band) */}
+      <div aria-hidden="true" className="absolute left-1/2 top-[30%] h-[70%] w-[46%] -translate-x-1/2 rounded-full" style={{ background: "radial-gradient(closest-side, rgba(226,201,138,0.2), transparent 70%)" }} />
       <svg viewBox="0 0 800 342" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 h-full w-full" aria-hidden="true">
         <g fill="none" stroke={DARK_LINE} strokeWidth="1">
           <rect x="220.5" y="50.5" width="140" height="190" rx="2" />
@@ -132,43 +106,6 @@ export function Scanline({ className, label }: { className?: string; label?: str
 }
 
 /* ------------------------------------------------------------- lounge */
-
-export function LoungeIcon({ kind, className }: { kind: LoungeIconKind; className?: string }) {
-  const common = { fill: "none", stroke: "currentColor", strokeWidth: 1.2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
-  return (
-    <svg viewBox="0 0 28 28" className={cn("h-7 w-7", className)} aria-hidden="true" {...common}>
-      {kind === "cup" && (
-        <>
-          <path d="M5 9h13v6a5 5 0 0 1-5 5h-3a5 5 0 0 1-5-5V9z" />
-          <path d="M18 11h2a3 3 0 0 1 0 6h-2" />
-          <path d="M4 24h16" />
-        </>
-      )}
-      {kind === "towel" && (
-        <>
-          <rect x="4" y="6" width="20" height="5" rx="1" />
-          <rect x="6" y="12" width="16" height="5" rx="1" />
-          <rect x="8" y="18" width="12" height="5" rx="1" />
-        </>
-      )}
-      {kind === "wifi" && (
-        <>
-          <path d="M3 11a15.5 15.5 0 0 1 22 0" />
-          <path d="M7 15a10 10 0 0 1 14 0" />
-          <path d="M11 19a5 5 0 0 1 6 0" />
-          <circle cx="14" cy="23" r="1" fill="currentColor" />
-        </>
-      )}
-      {kind === "glass" && (
-        <>
-          <rect x="4" y="5" width="20" height="18" rx="1.5" />
-          <path d="M8 21L20 7" />
-          <path d="M13 21l7-8" />
-        </>
-      )}
-    </svg>
-  );
-}
 
 /** Fallback art for LOUNGE_PHOTO_02: a light room, the window to the line, a table and a cup. */
 export function LoungePhotoArt() {
@@ -266,11 +203,4 @@ export function ServiceTools({ className }: { className?: string }) {
       </g>
     </svg>
   );
-}
-
-/* --------------------------------------------------------------- hero */
-
-/** Fallback art for CLUB_PHOTO_01. */
-export function ClubPhotoArt() {
-  return <LanePerspective />;
 }

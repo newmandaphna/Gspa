@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import type { Member } from "@/lib/db/schema";
 import { cookieSecure } from "@/lib/auth";
 import { MEMBER_SESSION_TTL_SEC, passwordFingerprint, signMemberSession, verifyMemberSession } from "@/lib/members/crypto";
@@ -30,4 +31,18 @@ export async function getCurrentMember(): Promise<Member | null> {
   if (!member || member.status !== "active") return null;
   if (claims.fingerprint !== passwordFingerprint(member.passwordHash)) return null;
   return member;
+}
+
+/**
+ * A layout for a members-only segment: anonymous visitors get a real 307 to sign
+ * in and back to `next`. A layout runs outside its segment's loading.tsx boundary,
+ * so the redirect is an HTTP one; the same redirect() thrown from a page under a
+ * loading.tsx streams a 200 shell with a meta refresh instead. Pages still call
+ * getCurrentMember() themselves for the member record.
+ */
+export function memberGateLayout(next: string) {
+  return async function MemberGateLayout({ children }: { children: React.ReactNode }) {
+    if (!(await getCurrentMember())) redirect(`/members/login?next=${next}`);
+    return children;
+  };
 }

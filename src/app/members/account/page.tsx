@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { ChangePasswordForm } from "@/components/members/AuthForms";
 import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
-import { SITE } from "@/lib/config/site";
+import { deskPhone, SITE } from "@/lib/config/site";
 import { tierByKey } from "@/lib/content/membership";
 import { getCurrentMember } from "@/lib/members/auth";
 
@@ -29,7 +29,7 @@ export default async function AccountPage() {
             <Row label="Status" value={member.status} />
           </dl>
           <p className="t-caption mt-6 text-ink-muted">
-            To change your name, email or phone, contact the front desk at {SITE.phone} or {SITE.email}.
+            To change your name, email or phone, contact the front desk at {[deskPhone(), SITE.email].filter(Boolean).join(" or ")}.
           </p>
         </div>
         <div>

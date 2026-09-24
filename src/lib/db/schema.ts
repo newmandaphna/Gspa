@@ -108,6 +108,8 @@ export const bookings = pgTable(
     memberId: integer("member_id"),
     notes: text("notes"),
     ackRequirements: boolean("ack_requirements").notNull().default(false),
+    /** When the day-before reminder went out (null until the daily cron mails it). */
+    reminderSentAt: timestamp("reminder_sent_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
@@ -127,6 +129,23 @@ export const inquiries = pgTable("inquiries", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+/**
+ * From the desk: dated one-liners written by whoever is on, shown above the
+ * footer on / and /visit. Text is capped at 90 characters in the action.
+ */
+export const deskLog = pgTable(
+  "desk_log",
+  {
+    id: serial("id").primaryKey(),
+    date: text("date").notNull(), // YYYY-MM-DD in the club's timezone
+    text: text("text").notNull(),
+    initials: text("initials").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("desk_log_date_idx").on(t.date)],
+);
+
+export type DeskLogEntry = typeof deskLog.$inferSelect;
 export type Experience = typeof experiences.$inferSelect;
 export type Booking = typeof bookings.$inferSelect;
 export type NewBooking = typeof bookings.$inferInsert;

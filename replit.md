@@ -30,7 +30,23 @@ Marketing site, real-time reservations, members portal, and a front-desk admin.
 | `TRUSTED_PROXY_HOPS` | optional | Which `X-Forwarded-For` entry (from the right) is the real client for rate limiting. Default 1 |
 | `STRIPE_SECRET_KEY` | optional | Turns on card payment at reservation time |
 | `STRIPE_WEBHOOK_SECRET` | with Stripe | Webhook endpoint `/api/stripe/webhook` |
-| `RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_BCC` | optional | Confirmation emails via Resend |
+| `RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_BCC` | optional | Confirmation, cancellation and reminder emails via Resend. Reply-To is `SITE.email` (`src/lib/config/site.ts`), so the sending domain needs SPF and DKIM verified in Resend and someone reading the desk inbox |
+| `CRON_SECRET` | with reminders | Bearer token for `GET /api/cron/reminders`, the day-before reminder run. Without it the route answers 401 to every caller (the missing secret is logged, not disclosed) and no reminder is sent. Without `RESEND_API_KEY` it answers 503 and stamps nothing, so the guests stay due |
+
+## Scheduled Deployment (day-before reminders)
+
+Reminders go out from a Replit **Scheduled Deployment**, not from the web server. Create one that runs
+once a day at 10:00 America/New_York with the command
+
+```
+curl -fsS -H "Authorization: Bearer $CRON_SECRET" https://gunspa.com/api/cron/reminders
+```
+
+and give it the same `CRON_SECRET` secret as the Autoscale deployment. The route mails every confirmed
+reservation that starts the next day in New York time and stamps `bookings.reminder_sent_at` before
+each email goes out, so a second run the same day, or one that overlaps a slow first run, sends
+nothing twice. Sends are spaced half a second apart for Resend's rate limit and a refused one is
+left unstamped for a retry. The response lists the codes sent, any Resend refused, and any skipped.
 
 ## Where things live
 

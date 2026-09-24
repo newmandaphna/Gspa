@@ -114,7 +114,7 @@ export const CATALOG: CatalogItem[] = [
     extraGuestCents: 14750,
     maxGuestsPerUnit: 2,
     maxUnitsPerBooking: 1,
-    tagline: "Never fired a gun? Start here.",
+    tagline: "Never fired a gun? Ninety minutes and 50 rounds.",
     description:
       "Ninety minutes with one instructor. The classroom comes first: safety, stance, grip, sight picture. Then 50 rounds on a house .22 rifle with the instructor at your shoulder. You need no experience at all, and a second student joins at half price.",
     includes: ["Certified instructor, 90 minutes", "House .22 rifle and 50 rounds", "Lane and targets", "Eye and ear protection", "Written fundamentals card to take home", "Second student at 50%"],

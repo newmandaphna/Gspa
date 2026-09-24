@@ -1,122 +1,88 @@
 import type { Metadata } from "next";
-import { GlassPanel, Glow } from "@/components/art";
+import { pageMeta } from "@/lib/seo/meta";
+import { JsonLd } from "@/lib/seo/JsonLd";
+import { courseJsonLd } from "@/lib/seo/jsonld";
+import { GlassPanel } from "@/components/art";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
+import { Headline } from "@/components/ui/Headline";
 import { ImageSlot } from "@/components/ui/ImageSlot";
 import { LinkArrow } from "@/components/ui/LinkArrow";
 import { Row, Rows } from "@/components/ui/List";
-import { Item, Reveal, Stagger } from "@/components/ui/Reveal";
+import { PullQuote } from "@/components/ui/PullQuote";
 import { Section } from "@/components/ui/Section";
-import { DecisionTree, GroupingTarget, Ladder, MonthGrid, PairDiagram, ProcessLine, SeatDots, StepRail } from "@/components/pages/training/Art";
+import { DecisionTree, GroupingTarget, Ladder, MonthGrid, PortraitArt, ProcessLine, SeatDots, StepRail } from "@/components/pages/training/Art";
 import { InView } from "@/components/pages/training/InView";
-import { cn } from "@/lib/cn";
+import { FACILITY } from "@/lib/config/site";
 import { COURSES, FIRST_SESSION, HERO, LADDER, LICENSE, PRIVATE, SIMULATOR, TRAINING_META } from "@/lib/content/pages/training";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta("/training", {
   title: TRAINING_META.title,
   description: TRAINING_META.description,
-};
+});
 
-/* Page-local helpers. Gold small text on light must be accent-deep for contrast. */
-
-function Kicker({ children, tone }: { children: React.ReactNode; tone: "light" | "dark" }) {
-  return <p className={cn("t-eyebrow", tone === "dark" ? "text-accent" : "text-accent-deep")}>{children}</p>;
-}
-
-function Badge({ children, tone }: { children: React.ReactNode; tone: "light" | "dark" }) {
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-2 rounded-pill px-3 py-1.5 text-[0.8125rem] ring-1 ring-inset",
-        tone === "dark" ? "text-mist ring-white/15" : "text-ink-muted ring-ink/15",
-      )}
-    >
-      <span aria-hidden="true" className={cn("h-1.5 w-1.5 rounded-full", tone === "dark" ? "bg-accent" : "bg-accent-deep")} />
-      {children}
-    </span>
-  );
-}
-
-function Headline({
-  kicker,
-  headline,
-  subhead,
-  body,
-  tone,
-  center = false,
-  as: Tag = "h2",
-  className,
-}: {
-  kicker: string;
-  headline: string;
-  subhead: string;
-  body?: string;
-  tone: "light" | "dark";
-  center?: boolean;
-  as?: "h1" | "h2";
-  className?: string;
-}) {
-  return (
-    <Reveal className={cn(center ? "mx-auto text-center" : "", "max-w-[720px]", className)}>
-      <Kicker tone={tone}>{kicker}</Kicker>
-      <Tag className={cn(Tag === "h1" ? "t-hero" : "t-1", "mt-3")}>{headline}</Tag>
-      <p className={cn("t-lead mt-2", tone === "dark" ? "text-mist" : "text-ink-muted")}>{subhead}</p>
-      {body && <p className={cn("t-body-lg mt-6 max-w-[40em]", center && "mx-auto", tone === "dark" ? "text-mist" : "text-ink-muted")}>{body}</p>}
-    </Reveal>
-  );
-}
+/** The house line that stands in the hero until an instructor's own words arrive. Never attributed to a name. */
+const HOUSE_LINE = "Nobody skips a step.";
 
 export default function TrainingPage() {
+  const lead = PRIVATE.instructors[0];
   return (
     <>
-      {/* ---------------------------------------------------------------- Hero */}
-      <Section theme="black" id="hero" className="grain overflow-hidden pt-[calc(var(--nav-h)+3rem)] sm:pt-[calc(var(--nav-h)+4.5rem)]">
-        <Glow className="-top-40 left-1/2 h-[520px] w-[820px] -translate-x-1/2" />
+      <JsonLd data={courseJsonLd()} />
+      {/* ------------------------------------------------------------ Hero */}
+      <Section theme="black" id="hero" className="grain overflow-hidden pt-[calc(var(--nav-h)+2.5rem)] sm:pt-[calc(var(--nav-h)+3.5rem)]">
         <Container className="relative">
-          <Headline as="h1" kicker={HERO.eyebrow} headline={HERO.headline} subhead={HERO.subhead} body={HERO.body} tone="dark" center />
-          <Reveal delay={0.15} className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
-            <Button href={HERO.cta.href} size="lg">
-              {HERO.cta.label}
-            </Button>
-            <LinkArrow href={HERO.link.href}>{HERO.link.label}</LinkArrow>
-          </Reveal>
-          <Reveal delay={0.25} className="mt-14 sm:mt-20">
-            <ImageSlot slot={HERO.imageSlot} alt={HERO.imageAlt} className="aspect-[16/9] rounded-card ring-1 ring-white/10" art={<GroupingTarget />} priority />
-          </Reveal>
+          <div className="grid gap-10 lg:grid-cols-12 lg:items-end lg:gap-10">
+            {/* The portrait fills the left five columns at 4:5; the photo drops in at the same crop. */}
+            <figure className="m-0 lg:col-span-5">
+              <ImageSlot slot={lead.slot} alt={lead.alt} className="aspect-[4/5] rounded-card ring-1 ring-white/10" art={<PortraitArt />} sizes="(min-width: 1024px) 480px, 100vw" priority />
+              <figcaption className="t-caption mt-3 text-mist">{PRIVATE.instructorsHeadline}</figcaption>
+            </figure>
+            <div className="lg:col-span-6 lg:col-start-7 lg:pb-10">
+              <Headline
+                as="h1"
+                size="2"
+                head={`${FACILITY.instructors} instructors · classroom for ${FACILITY.classroomSeats}`}
+                headline={HERO.headline}
+                subhead={HERO.subhead}
+              />
+              {/* The quote position: t-1 on the right, reserved for an instructor's own line. */}
+              <blockquote className="m-0 mt-10">
+                <p className="t-1 t-italic max-w-[12em]">{HOUSE_LINE}</p>
+              </blockquote>
+              <div className="mt-10">
+                <Button href={HERO.cta.href} size="lg">
+                  {HERO.cta.label}
+                </Button>
+              </div>
+            </div>
+          </div>
         </Container>
       </Section>
 
-      {/* -------------------------------------------------------------- Ladder */}
+      {/* ---------------------------------------------------------- Ladder */}
       <Section theme="light" id="ladder">
         <Container>
-          <Headline kicker={LADDER.eyebrow} headline={LADDER.headline} subhead={LADDER.subhead} body={LADDER.body} tone="light" />
-          <Reveal delay={0.1} className="mt-12 sm:mt-16">
-            <Ladder rungs={LADDER.rungs} />
-          </Reveal>
-          <Reveal delay={0.15} className="mt-8">
-            <LinkArrow href={LADDER.requirements.href}>{LADDER.requirements.label}</LinkArrow>
-          </Reveal>
+          <Headline layout="beside" head={`${LADDER.rungs.length} rungs · the first needs only photo ID`} headline={LADDER.headline} subhead={LADDER.subhead} body={LADDER.body} />
+          <Ladder rungs={LADDER.rungs} className="mt-12 sm:mt-16" />
         </Container>
       </Section>
 
-      {/* ------------------------------------------------------- First Session */}
+      {/* --------------------------------------------------- First Session */}
       <Section theme="dark" id="first-session" className="overflow-hidden">
-        <Glow className="-right-40 top-1/3 h-[480px] w-[480px]" />
         <Container className="relative">
           <div className="grid gap-12 lg:grid-cols-12 lg:gap-10">
             <div className="lg:col-span-6">
-              <Headline kicker={FIRST_SESSION.eyebrow} headline={FIRST_SESSION.headline} subhead={FIRST_SESSION.subhead} body={FIRST_SESSION.body} tone="dark" />
-              <Reveal delay={0.1} className="mt-10">
-                <InView>
-                  <StepRail steps={FIRST_SESSION.steps} />
-                </InView>
-              </Reveal>
-              <Reveal delay={0.15} className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3">
-                <Button href={FIRST_SESSION.cta.href}>{FIRST_SESSION.cta.label}</Button>
-                <LinkArrow href={FIRST_SESSION.requirements.href}>{FIRST_SESSION.requirements.label}</LinkArrow>
-              </Reveal>
+              <Headline head={[FIRST_SESSION.card.price, FIRST_SESSION.card.duration, FIRST_SESSION.card.secondStudent].filter(Boolean).join(" · ")} headline={FIRST_SESSION.headline} subhead={FIRST_SESSION.subhead} body={FIRST_SESSION.body}>
+                <LinkArrow href={FIRST_SESSION.cta.href} className="mt-6">
+                  {FIRST_SESSION.cta.label}
+                </LinkArrow>
+              </Headline>
+              <InView className="mt-12">
+                <StepRail steps={FIRST_SESSION.steps} />
+              </InView>
             </div>
-            <Reveal delay={0.2} className="lg:col-span-5 lg:col-start-8">
+            <div className="lg:col-span-5 lg:col-start-8">
               <GlassPanel className="p-7 sm:p-8">
                 <div className="flex items-start justify-between gap-4">
                   <div>
@@ -124,7 +90,7 @@ export default function TrainingPage() {
                     <p className="mt-1 font-mono text-[0.8125rem] text-mist">{FIRST_SESSION.card.duration}</p>
                   </div>
                   <div className="text-right">
-                    <p className="t-3 tabular">{FIRST_SESSION.card.price}</p>
+                    <p className="t-3 t-price">{FIRST_SESSION.card.price}</p>
                     <p className="t-footnote text-mist">{FIRST_SESSION.card.priceNote}</p>
                   </div>
                 </div>
@@ -133,149 +99,116 @@ export default function TrainingPage() {
                     <Row key={line}>{line}</Row>
                   ))}
                 </Rows>
-                <div className="mt-6 flex flex-wrap items-center gap-3">
-                  <Badge tone="dark">{FIRST_SESSION.card.eligibility}</Badge>
-                  {FIRST_SESSION.card.secondStudent && (
-                    <span className="tabular font-mono text-[0.8125rem] text-mist">{FIRST_SESSION.card.secondStudent}</span>
-                  )}
-                </div>
+                <p className="mt-6 font-mono text-[0.8125rem] leading-[1.6] text-mist">{FIRST_SESSION.card.eligibility}.</p>
               </GlassPanel>
-            </Reveal>
+            </div>
           </div>
         </Container>
       </Section>
 
-      {/* ------------------------------------------------------------- Private */}
+      {/* --------------------------------------------------------- Private */}
       <Section theme="light" id="private">
         <Container>
-          <div className="grid gap-12 lg:grid-cols-12 lg:gap-10">
-            <div className="lg:col-span-6">
-              <Headline kicker={PRIVATE.eyebrow} headline={PRIVATE.headline} subhead={PRIVATE.subhead} body={PRIVATE.body} tone="light" />
-              <Reveal delay={0.1} className="mt-6 flex flex-wrap items-center gap-3">
-                <Badge tone="light">{PRIVATE.eligibility}</Badge>
-                {PRIVATE.price && <span className="tabular font-mono text-[0.8125rem] text-ink-muted">{PRIVATE.price}</span>}
-              </Reveal>
-              <Reveal delay={0.15} className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3">
-                <Button href={PRIVATE.cta.href}>{PRIVATE.cta.label}</Button>
-                <LinkArrow href={PRIVATE.requirements.href}>{PRIVATE.requirements.label}</LinkArrow>
-              </Reveal>
-            </div>
-            <Reveal delay={0.2} className="lg:col-span-6">
-              <InView as="figure" className="aspect-[16/9] w-full overflow-hidden rounded-card ring-1 ring-ink/10">
-                <PairDiagram left={PRIVATE.diagram.left} right={PRIVATE.diagram.right} />
-              </InView>
-            </Reveal>
-          </div>
-
-          <Reveal className="mt-20 sm:mt-24">
-            <h3 className="t-3">{PRIVATE.instructorsHeadline}</h3>
-          </Reveal>
-          <Stagger className="mt-8 grid gap-8 sm:grid-cols-3">
+          <Headline layout="beside" head={PRIVATE.price} headline={PRIVATE.headline} subhead={PRIVATE.subhead} body={PRIVATE.body}>
+            <p className="mt-4 font-mono text-[0.8125rem] leading-[1.6] text-ink-muted">
+              {PRIVATE.eligibility}.{PRIVATE.secondStudent && <> {PRIVATE.secondStudent}.</>}
+            </p>
+            <LinkArrow href={PRIVATE.cta.href} className="mt-6">
+              {PRIVATE.cta.label}
+            </LinkArrow>
+          </Headline>
+          <figure className="m-0 mt-14 sm:mt-20">
+            <ImageSlot slot={HERO.imageSlot} alt={HERO.imageAlt} className="aspect-[16/9] rounded-card ring-1 ring-ink/10" art={<GroupingTarget />} sizes="(min-width: 1180px) 1180px, 100vw" />
+          </figure>
+          {/* The instructors, one row each, with a 4:5 slot for the portrait sitting. */}
+          <h3 className="t-3 mt-14 sm:mt-20">{PRIVATE.instructorsHeadline}</h3>
+          <ul className="mt-6 border-t border-hairline" aria-label="Instructors">
             {PRIVATE.instructors.map((p) => (
-              <Item key={p.slot}>
-                <div className="flex items-center gap-4 sm:flex-col sm:items-start">
-                  <ImageSlot
-                    slot={p.slot}
-                    alt={p.alt}
-                    className="h-24 w-24 shrink-0 rounded-full bg-paper-2 ring-1 ring-hairline"
-                    sizes="96px"
-                    art={
-                      <svg viewBox="0 0 96 96" className="h-full w-full" aria-hidden="true">
-                        <circle cx="48" cy="38" r="15" fill="none" stroke="#d2d2d7" strokeWidth="1" />
-                        <path d="M20 84c4-16 14-24 28-24s24 8 28 24" fill="none" stroke="#d2d2d7" strokeWidth="1" />
-                      </svg>
-                    }
-                  />
-                  <div>
-                    <p className="t-4">{p.name}</p>
-                    <p className="t-caption mt-1 text-ink-muted">{p.credential}</p>
-                  </div>
+              <li key={p.slot} className="flex items-center gap-5 border-b border-hairline py-4">
+                <ImageSlot slot={p.slot} alt={p.alt} className="h-20 w-16 shrink-0 rounded-card-sm ring-1 ring-hairline" sizes="64px" art={<PortraitArt />} />
+                <div className="min-w-0">
+                  <p className="t-4">{p.name}</p>
+                  <p className="mt-1 font-mono text-[0.8125rem] text-ink-muted">{p.credential}</p>
                 </div>
-              </Item>
+              </li>
             ))}
-          </Stagger>
+          </ul>
         </Container>
       </Section>
 
-      {/* ------------------------------------------------------------- Courses */}
+      {/* --------------------------------------------------------- Courses */}
       <Section theme="black" id="courses" className="grain overflow-hidden">
-        <Glow className="-left-40 top-1/2 h-[520px] w-[520px] -translate-y-1/2" />
         <Container className="relative">
-          <Headline kicker={COURSES.eyebrow} headline={COURSES.headline} subhead={COURSES.subhead} body={COURSES.body} tone="dark" />
-          <div className="mt-12 grid gap-12 lg:grid-cols-12 lg:gap-10">
-            <Reveal delay={0.1} className="lg:col-span-6">
-              <InView as="figure" className="rounded-card bg-night-2 p-4 ring-1 ring-white/10 sm:p-6">
+          <div className="grid gap-12 lg:grid-cols-12 lg:gap-10">
+            <div className="lg:col-span-5">
+              <Headline
+                head={`${COURSES.seatsCaption} · ${COURSES.calendarCaption} · new dates post monthly`}
+                headline={COURSES.headline}
+                subhead={COURSES.subhead}
+                body={COURSES.body}
+              />
+              <div className="mt-8 space-y-2 font-mono text-[0.8125rem] leading-[1.6] text-mist">
+                {COURSES.priceLine && <p>{COURSES.priceLine}</p>}
+                <p>{COURSES.note}</p>
+                <p>{COURSES.eligibility}. Ask the desk for dates.</p>
+              </div>
+              <div className="mt-8">
+                <Button href={COURSES.cta.href}>{COURSES.cta.label}</Button>
+              </div>
+            </div>
+            <div className="lg:col-span-6 lg:col-start-7">
+              <InView as="figure" className="m-0 rounded-card bg-night-2 p-4 ring-1 ring-white/10 sm:p-6">
                 <MonthGrid ringed={COURSES.ringedDays} />
                 <figcaption className="mt-3 font-mono text-[0.75rem] text-mist">{COURSES.calendarCaption}</figcaption>
               </InView>
-            </Reveal>
-            <div className="lg:col-span-5 lg:col-start-8">
-              <Reveal delay={0.15}>
-                <p className="t-numeral tabular text-snow">{COURSES.numeral}</p>
-                <p className="t-eyebrow mt-3 text-accent">{COURSES.numeralCaption}</p>
-              </Reveal>
-              <Reveal delay={0.2} className="mt-10">
-                <InView>
-                  <SeatDots count={COURSES.seats} />
-                </InView>
+              <InView className="mt-8">
+                <SeatDots count={COURSES.seats} />
                 <p className="mt-3 font-mono text-[0.75rem] text-mist">{COURSES.seatsCaption}</p>
-              </Reveal>
-              <Reveal delay={0.25} className="mt-8 space-y-2">
-                {COURSES.priceLine && <p className="tabular font-mono text-[0.8125rem] text-mist">{COURSES.priceLine}</p>}
-                <p className="font-mono text-[0.8125rem] text-mist">{COURSES.note}</p>
-              </Reveal>
-              <Reveal delay={0.3} className="mt-6 flex flex-wrap items-center gap-3">
-                <Badge tone="dark">{COURSES.eligibility}</Badge>
-                <span className="inline-flex items-center rounded-pill px-2.5 py-1 font-mono text-[0.6875rem] text-mist ring-1 ring-inset ring-white/15">Inquire</span>
-              </Reveal>
-              <Reveal delay={0.35} className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3">
-                <Button href={COURSES.cta.href}>{COURSES.cta.label}</Button>
-                <LinkArrow href={COURSES.requirements.href}>{COURSES.requirements.label}</LinkArrow>
-              </Reveal>
+              </InView>
             </div>
           </div>
         </Container>
       </Section>
 
-      {/* ----------------------------------------------------------- Simulator */}
-      <Section theme="light" id="simulator">
+      {/* ------------------------------------------------ Silent: one line */}
+      <Section theme="black" padding="vast" aria-label="House line">
         <Container>
-          <div className="grid gap-12 lg:grid-cols-12 lg:gap-10">
-            <Reveal className="order-2 lg:order-1 lg:col-span-7">
-              <InView as="figure" className="aspect-[16/9] w-full overflow-hidden rounded-card ring-1 ring-ink/10">
+          <PullQuote>{LICENSE.note}</PullQuote>
+        </Container>
+      </Section>
+
+      {/* ------------------------------------------------------- Simulator */}
+      <Section theme="light" padding="tight" id="simulator">
+        <Container>
+          <div className="grid gap-12 lg:grid-cols-12 lg:items-center lg:gap-10">
+            <div className="order-2 lg:order-1 lg:col-span-7">
+              <InView as="figure" className="m-0 aspect-[16/9] w-full overflow-hidden rounded-card ring-1 ring-ink/10">
                 <DecisionTree root={SIMULATOR.tree.root} branches={SIMULATOR.tree.branches} leaves={SIMULATOR.tree.leaves} goldLeaf={SIMULATOR.tree.goldLeaf} />
               </InView>
-            </Reveal>
+            </div>
             <div className="order-1 lg:order-2 lg:col-span-5">
-              <Headline kicker={SIMULATOR.eyebrow} headline={SIMULATOR.headline} subhead={SIMULATOR.subhead} body={SIMULATOR.body} tone="light" />
-              <Reveal delay={0.1} className="mt-6 flex flex-wrap items-center gap-3">
-                <Badge tone="light">{SIMULATOR.eligibility}</Badge>
-                {SIMULATOR.price && <span className="tabular font-mono text-[0.8125rem] text-ink-muted">{SIMULATOR.price}</span>}
-              </Reveal>
-              <Reveal delay={0.15} className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3">
-                <Button href={SIMULATOR.cta.href}>{SIMULATOR.cta.label}</Button>
-                <LinkArrow href={SIMULATOR.link.href}>{SIMULATOR.link.label}</LinkArrow>
-              </Reveal>
+              <Headline head={SIMULATOR.price} headline={SIMULATOR.headline} subhead={SIMULATOR.subhead} body={SIMULATOR.body}>
+                <p className="mt-4 font-mono text-[0.8125rem] leading-[1.6] text-ink-muted">{SIMULATOR.eligibility}.</p>
+                <div className="mt-8">
+                  <Button href={SIMULATOR.cta.href}>{SIMULATOR.cta.label}</Button>
+                </div>
+              </Headline>
             </div>
           </div>
         </Container>
       </Section>
 
-      {/* ------------------------------------------------------------- License */}
-      <Section theme="black" id="license" className="grain overflow-hidden">
-        <Glow className="-top-40 right-0 h-[480px] w-[720px]" variant="white" />
+      {/* --------------------------------------------------------- License */}
+      <Section theme="dark" id="license" className="overflow-hidden">
         <Container className="relative">
-          <Headline kicker={LICENSE.eyebrow} headline={LICENSE.headline} subhead={LICENSE.subhead} body={LICENSE.body} tone="dark" />
-          <Reveal delay={0.1} className="mt-14 sm:mt-16">
-            <InView>
-              <ProcessLine nodes={LICENSE.nodes} className="mx-auto max-w-[860px]" />
-            </InView>
-            <p className="mt-10 text-center font-mono text-[0.8125rem] text-mist">{LICENSE.note}</p>
-          </Reveal>
-          <Reveal delay={0.15} className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
-            <Button href={LICENSE.cta.href}>{LICENSE.cta.label}</Button>
-            <LinkArrow href={LICENSE.requirements.href}>{LICENSE.requirements.label}</LinkArrow>
-          </Reveal>
+          <Headline layout="beside" head={`${LICENSE.nodes.length} steps · ${LICENSE.nodes.filter((n) => "here" in n && n.here).length} of them here`} headline={LICENSE.headline} subhead={LICENSE.subhead} body={LICENSE.body}>
+            <LinkArrow href={LICENSE.cta.href} className="mt-6">
+              {LICENSE.cta.label}
+            </LinkArrow>
+          </Headline>
+          <InView className="mt-14 sm:mt-20">
+            <ProcessLine nodes={LICENSE.nodes} className="mx-auto max-w-[860px]" />
+          </InView>
         </Container>
       </Section>
     </>

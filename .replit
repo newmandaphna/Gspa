@@ -8,7 +8,12 @@ channel = "stable-25_05"
 
 [deployment]
 deploymentTarget = "autoscale"
-build = ["sh", "-c", "npm ci && npm run build"]
+# The placeholder gate (src/tests/placeholders.test.ts) runs before the build. It skips itself unless
+# CONTENT_FINAL=1, so deploys pass while the owner's facts are still bracketed. Once the phone, the
+# bus route, the walk time, the parking line and the instructor names are real, flip the flag here:
+#   build = ["sh", "-c", "npm ci && CONTENT_FINAL=1 npx vitest run src/tests/placeholders.test.ts && npm run build"]
+# and a bracket or 000-0000 anywhere in site.ts or src/lib/content fails the deploy.
+build = ["sh", "-c", "npm ci && npx vitest run src/tests/placeholders.test.ts && npm run build"]
 run = ["npm", "run", "start"]
 
 [[ports]]

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { listBookings } from "@/lib/booking";
 import { listInquiries } from "@/lib/inquiries";
 import { listMemberRequests, memberStats } from "@/lib/members/service";
-import { addDaysIso, formatDateLong, formatMoney, todayIso, toHHMMInTz, labelForHHMM, zonedToUtc } from "@/lib/time";
+import { addDaysIso, dayOfWeekIso, formatDateLong, formatMoney, todayIso, toHHMMInTz, toIsoDateInTz, labelForHHMM, zonedToUtc } from "@/lib/time";
 import { BookingRow } from "@/components/admin/BookingRow";
 
 export const metadata: Metadata = { title: "Front desk · Today", robots: { index: false } };
@@ -80,11 +80,15 @@ export default async function AdminHome() {
             <ul className="mt-4 divide-y divide-ink/10 rounded-card-sm bg-white ring-1 ring-ink/8">
               {inquiries.map((i) => (
                 <li key={i.id} className="px-4 py-3">
-                  <p className="t-body font-medium">
-                    {i.name} <span className="t-caption text-ink-muted">· {i.kind}</span>
+                  <p className="t-body flex flex-wrap items-center gap-x-2 gap-y-1 font-medium">
+                    <span>
+                      {i.name} <span className="t-caption text-ink-muted">· {i.kind}</span>
+                    </span>
+                    {i.kind === "founders" && <CallBackBadge createdAt={i.createdAt} />}
                   </p>
                   <p className="t-caption text-ink-muted">
                     {i.email}
+                    {i.kind === "founders" && i.phone ? ` · ${i.phone}` : ""}
                     {i.guests ? ` · ${i.guests} guests` : ""}
                     {i.preferredDate ? ` · ${i.preferredDate}` : ""}
                   </p>
@@ -99,6 +103,41 @@ export default async function AdminHome() {
       </p>
     </div>
   );
+}
+
+/**
+ * A Founders "Request a conversation" is a promise to call within one business
+ * day. The badge names the day the call is due: the next weekday after the
+ * request came in, New York time. Gold reads as "act on this" on the Today screen.
+ */
+function CallBackBadge({ createdAt }: { createdAt: Date }) {
+  const due = callBackDue(createdAt);
+  const overdue = due < todayIso();
+  return (
+    <span
+      className={
+        overdue
+          ? "t-footnote inline-flex items-center gap-1 rounded-pill bg-danger/10 px-2 py-0.5 font-semibold text-danger"
+          : "t-footnote inline-flex items-center gap-1 rounded-pill bg-accent/25 px-2 py-0.5 font-semibold text-accent-deep"
+      }
+    >
+      <span aria-hidden="true" className={overdue ? "h-1.5 w-1.5 rounded-full bg-danger" : "h-1.5 w-1.5 rounded-full bg-accent-deep"} />
+      Call back {overdue ? "overdue" : `by ${shortDate(due)}`}
+    </span>
+  );
+}
+
+/** "Thu, Sep 25" for a calendar date. */
+function shortDate(dateISO: string): string {
+  const [y, mo, d] = dateISO.split("-").map(Number);
+  return new Intl.DateTimeFormat("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" }).format(new Date(Date.UTC(y, mo - 1, d)));
+}
+
+/** One business day after the request: the next Monday to Friday date after it arrived. */
+function callBackDue(createdAt: Date): string {
+  let d = addDaysIso(toIsoDateInTz(createdAt), 1);
+  while (dayOfWeekIso(d) === 0 || dayOfWeekIso(d) === 6) d = addDaysIso(d, 1);
+  return d;
 }
 
 function Tile({ label, value, sub, href }: { label: string; value: string; sub: string; href?: string }) {

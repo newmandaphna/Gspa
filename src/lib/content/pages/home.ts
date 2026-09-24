@@ -42,7 +42,7 @@ export const HERO = {
 
 export const QUIET = {
   eyebrow: "The room",
-  headline: "A quiet place to be loud.",
+  headline: "Loud room, quiet walls",
   subhead: "Baffled walls and filtered air, with lights you set from the lane.",
   body: "Baffling swallows the echo before it reaches the next lane. Dim the lights from where you stand. You leave calmer than you arrived.",
   captions: ["Baffled", "Ventilated", "Dimmable"],
@@ -51,9 +51,9 @@ export const QUIET = {
 
 export const LANES = {
   eyebrow: "Lanes",
-  headline: "Pick your lane, or two.",
-  subhead: `${FACILITY.laneYards} yards on all ${FACILITY.laneCount} lanes, each with its own carrier and air.`,
-  body: "Program the carrier from where you stand, and reserve two side by side when you bring friends.",
+  headline: `${FACILITY.laneCount} lanes at ${FACILITY.laneYards} yards`,
+  subhead: "Each with its own air supply and its own target carrier.",
+  body: "Set the distance from the bench, and reserve two lanes side by side when you bring friends. The price is per lane.",
   chips: [`${FACILITY.laneYards} yd`, "Own air supply", "Programmable carrier", "Acoustic baffling"],
   cta: { label: "Reserve a lane", href: "/reserve?category=lane" },
   requirements: { label: "See requirements", href: "/visit#requirements" },
@@ -64,7 +64,7 @@ export const LANES = {
 
 export const SUITES = {
   eyebrow: "Private suites",
-  headline: "A range of your own.",
+  headline: `${cap(spell(FACILITY.lanesPerSuite))} lanes behind a closed door`,
   subhead: `${cap(spell(FACILITY.suites))} private suites with ${spell(FACILITY.lanesPerSuite)} lanes each and their own lounge.`,
   body: `Frosted glass, a sofa, a screen, a host outside the door. Room for ${spell(privateSuite?.maxGuestsPerUnit ?? 6)} people who would rather have the place to themselves.`,
   cta: { label: "Reserve a suite", href: "/reserve?category=suite" },
@@ -76,7 +76,7 @@ export const SUITES = {
 
 export const SIMULATOR = {
   eyebrow: "Simulator",
-  headline: "Start here.",
+  headline: "Nobody needs a license for this room.",
   subhead: `${cap(spell(FACILITY.simulatorBays))} simulator bays with no live ammunition.`,
   body: `Scenarios branch on what you do; an instructor debriefs you after. Up to ${spell(simulatorBay?.maxGuestsPerUnit ?? 4)} people share a bay for an hour.`,
   cta: { label: "Reserve the simulator", href: "/reserve?experience=simulator-bay" },
@@ -121,7 +121,7 @@ export const HOSPITALITY = {
 
 export const MEMBERSHIP = {
   eyebrow: "Membership",
-  headline: "Membership is the product.",
+  headline: "Members get the calendar before anyone else does.",
   subhead: `${cap(spell(MEMBERSHIP_TIERS.length))} tiers, all vetted the same way, all with guests.`,
   body: "Members reserve further ahead and keep a locker. Founders hold same-day priority; guests come in at the member rate.",
   caption: "days ahead",
@@ -142,7 +142,7 @@ export const MEMBERSHIP = {
 export const VISIT = {
   eyebrow: "Visit",
   headline: `${FACILITY.transit.driveFromJfkMin} minutes from JFK.`,
-  subhead: `${SITE.address.line1}, ${SITE.address.neighborhood}, on the north edge of the airport.`,
+  subhead: `${SITE.address.line1}, at the north fence of JFK, on the boulevard the cargo trucks use.`,
   body: `Come off the ${FACILITY.transit.expressway.split(" (")[0]} at ${FACILITY.transit.exit}, or take a car from any terminal. From Manhattan, plan on ${FACILITY.transit.driveFromManhattanMin} minutes. Hours and parking are on the Visit page.`,
   cta: { label: "Plan your visit", href: "/visit" },
   hoursLink: { label: "See hours", href: "/visit#hours" },

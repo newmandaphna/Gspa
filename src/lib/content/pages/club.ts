@@ -6,6 +6,8 @@
  */
 import { FACILITY, LOCKERS_TOTAL } from "@/lib/config/site";
 import { itemBySlug, type CatalogItem } from "@/lib/content/catalog";
+import { HOUSE_RULES_LINK } from "@/lib/content/nav";
+import { HOUSE_RULES, LIVE_FIRE_MIN_AGE, STATE_SUPERVISED_AGE } from "@/lib/content/requirements";
 
 export type Cta = { label: string; href: string };
 
@@ -77,8 +79,8 @@ export const CLUB_PHOTO_ALT = "The range floor at The Gun Spa, seen from the lou
 export const CLUB_AIR: SectionCopy = {
   eyebrow: `Air changes: ${FACILITY.airChangesPerHour} per hour`,
   headline: "The air goes one way: downrange.",
-  subhead: "Downrange airflow and filtration on every lane.",
-  body: "Fresh air comes in behind you, and the lead leaves with it through the filters at the far end.",
+  subhead: "Every lane has its own supply and its own filters.",
+  body: "Fresh air comes in behind you, and the lead leaves with it through the filters at the far end. The next lane never breathes yours.",
   secondary: { label: "Read the FAQ", href: "/visit#faq" },
 };
 
@@ -88,9 +90,9 @@ export const TARGET_STOPS: readonly number[] = [3, 7, 15, FACILITY.laneYards];
 
 export const CLUB_TARGETS: SectionCopy = {
   eyebrow: "Carriers",
-  headline: "Targets that listen.",
-  subhead: `Programmable carriers from ${TARGET_STOPS[0]} to ${FACILITY.laneYards} yards.`,
-  body: "Distance, turn, timing: all set from the lane. A drill you like saves to your profile for next time.",
+  headline: `Carriers from ${TARGET_STOPS[0]} to ${FACILITY.laneYards} yards`,
+  subhead: "Distance, turn and timing, all set from the lane.",
+  body: "A drill you like saves to your profile for next time. Nobody walks downrange to hang paper.",
 };
 
 /* ---------------------------------------------------------------- suites */
@@ -131,8 +133,8 @@ export const SIMULATOR_CHIPS: string[] = ["Steel", "Timed drills", "Decision sce
 export const CLUB_LOUNGE: SectionCopy = {
   eyebrow: "Lounge",
   headline: "Exhale.",
-  subhead: "A lounge that feels like a members' club, because it is.",
-  body: "Espresso or tea and sparkling water, then a warm towel when you come off the line. The lanes are right there behind ballistic glass. No alcohol, ever.",
+  subhead: "The line is behind ballistic glass. The espresso is on this side.",
+  body: "Espresso or tea and sparkling water, then a warm towel when you come off the line. No alcohol, ever.",
 };
 
 export type LoungeIconKind = "cup" | "towel" | "wifi" | "glass";
@@ -152,8 +154,8 @@ export const LOUNGE_PHOTO_ALT = "The lounge at The Gun Spa, espresso on the tabl
 export const CLUB_LOCKERS: SectionCopy = {
   eyebrow: "Lockers",
   headline: "Keep your gear here.",
-  subhead: "A locker for your gear, a bench for your firearm.",
-  body: `${LOCKERS_TOTAL} gear lockers for members, each opened by fingerprint or PIN. Detailing and the gunsmith bench are members' services too.`,
+  subhead: `${LOCKERS_TOTAL} lockers, fingerprint or PIN, gear only.`,
+  body: "Handguns stay with their licensee; everything else can live here. Detailing and the gunsmith bench are members' services too.",
   cta: { label: "See membership", href: "/membership" },
 };
 
@@ -165,15 +167,45 @@ export const LOCKER_NOTE = {
 export const SERVICES_EYEBROW = "Members' services";
 export const SERVICES_CAPTION = "Brush · Mat · Bore light";
 
-/* ---------------------------------------------------------------- safety */
+/* ------------------------------------------------------------- decisions */
 
-export const CLUB_SAFETY: SectionCopy = {
-  eyebrow: "Safety",
-  headline: "Four rules. No exceptions.",
-  subhead: "A range officer on every string, every day.",
-  body: "Short rules are the ones people remember.",
-  cta: { label: "Read the range rules", href: "/legal#range-rules" },
+/**
+ * Things we decided: five stances the club took on top of the four rules
+ * every range posts. One sentence of decision, one of reason, first person
+ * plural. The numbers come from FACILITY, TARGET_STOPS and requirements.ts.
+ */
+export const CLUB_DECISIONS: SectionCopy = {
+  eyebrow: "Things we decided",
+  headline: "Things we decided.",
+  subhead: `${cap(numberWord(5))} calls we made before the doors opened, and the reason for each.`,
+  body: `All ${numberWord(HOUSE_RULES.length)} house rules, two of them repeated above, are on their own page. Every one is a decision first and a reason second.`,
+  cta: { label: "Read the house rules", href: HOUSE_RULES_LINK.href },
 };
+
+export type Decision = { decision: string; reason: string };
+
+export const DECISIONS: Decision[] = [
+  {
+    decision: `Live fire is ${LIVE_FIRE_MIN_AGE} here.`,
+    reason: `The state allows supervised shooting from ${STATE_SUPERVISED_AGE}. We set our own floor and we look at it again every year.`,
+  },
+  {
+    decision: "No alcohol in the lounge, and none in you.",
+    reason: "Nothing impairing before or during a session, so the lounge pours espresso.",
+  },
+  {
+    decision: "No house handguns.",
+    reason: "The law says so, and we would not rent them anyway.",
+  },
+  {
+    decision: `Every lane runs ${FACILITY.laneYards} yards.`,
+    reason: `That covers every pistol distance, and the carriers stop at ${TARGET_STOPS.slice(0, -1).join(", ")} and ${FACILITY.laneYards}.`,
+  },
+  {
+    decision: "Every lane has its own air.",
+    reason: "It cost more, and the lead leaves with it instead of drifting to the next bench.",
+  },
+];
 
 /* ---------------------------------------------------------- availability */
 

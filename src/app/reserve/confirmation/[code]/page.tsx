@@ -7,11 +7,12 @@ import { Container } from "@/components/ui/Container";
 import { Row, Rows } from "@/components/ui/List";
 import { Section } from "@/components/ui/Section";
 import { cancelWindowHours } from "@/lib/availability";
-import { getBookingByCode, markPaidBySession } from "@/lib/booking";
-import { BOOKING, SITE } from "@/lib/config/site";
+import { confirmPaidSession, getBookingByCode } from "@/lib/booking";
+import { BOOKING, deskPhone, SITE } from "@/lib/config/site";
 import { requirementsFor } from "@/lib/content/requirements";
+import { googleCalendarUrlFor, requestedLane } from "@/lib/email";
 import { checkAmountCollected, getStripe, paymentIntentIdOf, stripeEnabled } from "@/lib/stripe";
-import { formatInstant, formatMoney } from "@/lib/time";
+import { formatInstant, formatMoney, labelForHHMM, toHHMMInTz } from "@/lib/time";
 import { cn } from "@/lib/cn";
 
 export const dynamic = "force-dynamic";
@@ -44,12 +45,13 @@ export default async function ConfirmationPage({
   let found = await getBookingByCode(code);
   if (!found) notFound();
 
-  // Reconcile a Stripe return even if the webhook hasn't fired yet.
+  // Reconcile a Stripe return even if the webhook hasn't fired yet. Whichever of the two
+  // marks the row paid sends the confirmation email, so the guest gets exactly one.
   if (found.booking.status === "pending" && session_id && stripeEnabled() && found.booking.stripeSessionId === session_id) {
     try {
       const session = await getStripe().checkout.sessions.retrieve(session_id);
       if (session.payment_status === "paid") {
-        const paid = await markPaidBySession(session_id, paymentIntentIdOf(session));
+        const paid = await confirmPaidSession(session_id, paymentIntentIdOf(session));
         if (paid) checkAmountCollected(paid, session);
         found = (await getBookingByCode(code)) ?? found;
       }
@@ -68,6 +70,10 @@ export default async function ConfirmationPage({
   const cancelHours = cancelWindowHours(experience);
   const canCancel = booking.status !== "cancelled" && cancellableNow(booking.startsAt, cancelHours);
   const headline = booking.status === "cancelled" ? "Reservation cancelled." : booking.status === "pending" ? "Almost there." : `See you soon, ${booking.firstName}.`;
+  // A lane tapped on a floor plan prints here as "Lane 07, 8:30 PM"; the shared parser drops anything a guest typed that is not a real lane.
+  const lane = requestedLane(booking.notes, experience);
+  const phone = deskPhone();
+  const startLabel = labelForHHMM(toHHMMInTz(booking.startsAt));
 
   return (
     <Section theme="light" className="pt-[calc(var(--nav-h)+3rem)] sm:pt-[calc(var(--nav-h)+4.5rem)]">
@@ -90,6 +96,7 @@ export default async function ConfirmationPage({
               <Item label="When" value={formatInstant(booking.startsAt)} />
               <Item label="Duration" value={`${experience.durationMin} minutes`} />
               <Item label="Guests" value={`${booking.guests} · ${unitNoun(experience.category, booking.units)}`} />
+              {lane && <Item label="Lane" value={`Lane ${lane}, ${startLabel}. Requested; the desk confirms at check-in.`} />}
               <Item label="Name" value={`${booking.firstName} ${booking.lastName}`} />
               <Item
                 label="Total"
@@ -102,6 +109,11 @@ export default async function ConfirmationPage({
               {booking.memberNumber && <Item label="Member" value={booking.memberNumber} />}
             </dl>
             <div className="mt-8 flex flex-wrap gap-3">
+              {booking.status === "confirmed" && (
+                <Button href={`/reserve/confirmation/${booking.code}/calendar`} prefetch={false} download={`gun-spa-${booking.code}.ics`} size="sm">
+                  Add to calendar
+                </Button>
+              )}
               <Button href="/visit" variant="secondary" size="sm">
                 Directions & parking
               </Button>
@@ -109,6 +121,15 @@ export default async function ConfirmationPage({
                 Make another reservation
               </Button>
             </div>
+            {booking.status === "confirmed" && (
+              <p className="t-caption mt-3 text-ink-muted">
+                The file works with Apple Calendar and Outlook. On Android,{" "}
+                <a href={googleCalendarUrlFor(booking, experience)} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4 hover:text-ink">
+                  add it to Google Calendar
+                </a>
+                .
+              </p>
+            )}
           </div>
 
           <div className="space-y-6">
@@ -130,7 +151,7 @@ export default async function ConfirmationPage({
             <div className="rounded-card bg-paper-2 p-6">
               <p className="t-4">Need to change plans?</p>
               <p className="t-caption mt-2 text-ink-muted">
-                Free cancellation up to {cancelHours} hours before your session. After that, call {SITE.phone}.
+                Free cancellation up to {cancelHours} hours before your session. After that, {phone ? `call ${phone}` : `email ${SITE.email}`} and the desk will sort it out.
               </p>
               {canCancel ? <CancelForm code={booking.code} /> : booking.status !== "cancelled" ? <p className="t-caption mt-3 font-semibold">Online cancellation has closed for this reservation.</p> : null}
             </div>

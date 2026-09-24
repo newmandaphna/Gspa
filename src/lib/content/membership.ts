@@ -10,6 +10,10 @@ export type Tier = {
   altPrice?: string;
   billing: "annual" | "lifetime" | "annual-or-lifetime";
   tagline: string;
+  /** Two sentences for the buyer. Every claim here also appears in `perks`. */
+  forWhom: string;
+  /** The three perks that set this tier apart; the compare table holds the full grid. */
+  differs: string[];
   perks: string[];
   guestsPerVisit: number;
   bookingWindowDays: number;
@@ -31,6 +35,8 @@ export const MEMBERSHIP_TIERS: Tier[] = [
     altPrice: "or $325 a month",
     billing: "annual",
     tagline: "The calendar, a week early.",
+    forWhom: "For the regular. A half-size locker, a week's head start on the calendar, and the $45 lane.",
+    differs: [`Reserve ${TIER_WINDOW_DAYS.club} days ahead`, "Lane sessions at $45", "Gear locker, half size"],
     perks: [
       `Reserve ${TIER_WINDOW_DAYS.club} days ahead`,
       "Lane sessions at the member rate of $45",
@@ -51,6 +57,8 @@ export const MEMBERSHIP_TIERS: Tier[] = [
     priceNote: "per year",
     billing: "annual",
     tagline: "Two dozen hours and a suite a month.",
+    forWhom: "For the member who brings people. A suite every month, two guests every visit, and somebody else cleans the gun.",
+    differs: ["One Private Suite session each month", "Two guests per visit", "Firearm detailing included"],
     perks: [
       `Reserve ${TIER_WINDOW_DAYS.signature} days ahead`,
       "24 lane hours a year included, then $45",
@@ -73,6 +81,8 @@ export const MEMBERSHIP_TIERS: Tier[] = [
     altPrice: "or [$60,000] once, for life",
     billing: "annual-or-lifetime",
     tagline: "Fifty names, first call on everything.",
+    forWhom: `For the fifty who were here first, and a wall that says so. Unlimited lane time, a ${TIER_WINDOW_DAYS.founders}-day calendar, and same-day priority on two lanes until 6 PM.`,
+    differs: ["Unlimited lane sessions", "Same-day priority on two lanes until 6 PM", "Name on the Founders wall"],
     perks: [
       `Reserve ${TIER_WINDOW_DAYS.founders} days ahead, with same-day priority on two lanes until 6 PM`,
       "Unlimited lane sessions",
@@ -91,8 +101,17 @@ export const MEMBERSHIP_TIERS: Tier[] = [
 ];
 
 export const FOUNDERS_CAP = 50;
-/** Editable until the admin tracks it. */
-export const FOUNDERS_REMAINING = "[N]";
+/**
+ * The remaining count is no longer typed here: /membership computes it live as
+ * FOUNDERS_CAP minus the members on the founders tier who are active or pending
+ * (foundersCount in src/lib/members/service.ts).
+ */
+
+/**
+ * The first name engraved on the wall, once there is one and the owner says it
+ * may be shown ("Ana R."). Null until then; the page prints nothing.
+ */
+export const FOUNDERS_FIRST_ON_WALL: string | null = null;
 
 export function tierByKey(key: string): Tier | undefined {
   return MEMBERSHIP_TIERS.find((t) => t.key === key);
