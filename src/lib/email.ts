@@ -10,7 +10,7 @@ export function confirmationText(booking: Booking, experience: Experience): { su
   const when = formatInstant(booking.startsAt);
   const paid = booking.paymentStatus === "paid" ? "Paid" : booking.paymentStatus === "pay_on_arrival" ? "Due on arrival" : "Pending";
   const url = `${SITE.url.replace(/\/$/, "")}/reserve/confirmation/${booking.code}`;
-  const subject = `Your reservation at ${SITE.name} — ${booking.code}`;
+  const subject = `Your reservation at ${SITE.name}: ${booking.code}`;
   const lines = [
     `${SITE.name}`,
     ``,

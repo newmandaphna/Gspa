@@ -49,26 +49,29 @@ export const SCREENING_VENDOR = "[Vendor]";
 export const PRIVACY_EMAIL = SITE.email;
 
 const course = itemBySlug("nys-ccw-course");
+const COURSE_NAME = course?.name ?? "concealed carry course";
 const COURSE_CANCEL_DAYS = Math.round((course?.cancelHours ?? 168) / 24);
 
 const FEE = formatMoney(SCREENING_FEE_CENTS);
 const founders = tierByKey("founders");
+const FOUNDERS_NAME = founders?.name ?? "Founders";
 /** Tiers that pay the screening fee at application (refunded if declined). */
 const FEE_TIERS = MEMBERSHIP_TIERS.filter((t) => !t.screeningFeeWaived)
   .map((t) => t.name)
   .join(" and ");
 const TIER_WINDOWS = MEMBERSHIP_TIERS.map((t) => `${t.name} ${TIER_WINDOW_DAYS[t.key]}`).join(", ");
+const TIER_GUESTS = MEMBERSHIP_TIERS.map((t) => `${t.name} ${t.guestsPerVisit}`).join(", ");
 
 export const LEGAL_META = {
   title: "Legal",
-  description: "Privacy, terms of reservation, the screening process, the membership agreement, the biometric notice, the range rules and the acknowledgement, in plain English on one page.",
+  description: "Privacy, reservation terms, screening, the membership agreement, the biometric notice, the range rules, the acknowledgement. All of it in plain English, on one page.",
 };
 
 export const LEGAL_HERO = {
   eyebrow: "Legal",
   headline: "The fine print, in plain English.",
   subhead: "Everything you agree to at the club, on one page.",
-  body: "Read what you need and skip the rest. Lines in square brackets are still with counsel or the owner and change before launch.",
+  body: "Read the part you need and skip the rest. Anything in square brackets is still with counsel or the owner and will change before launch.",
 };
 
 export const NAV_LABEL = "On this page";
@@ -82,11 +85,11 @@ export const RETENTION_HEADERS = { data: "Data", why: "Why", howLong: "How long"
 
 export const RETENTION_ROWS: RetentionRow[] = [
   { data: "Reservation and guest details", why: "To run the reservation and reach you about it.", howLong: "3 years after the visit" },
-  { data: "Acknowledgements, with name, timestamp, IP address and browser", why: "To prove acceptance of the range rules.", howLong: "7 years" },
-  { data: "ID checks at the desk", why: "Recorded as a yes or no flag with the document type. Never an image.", howLong: "3 years" },
+  { data: "Signed acknowledgements (name, timestamp, IP address, browser)", why: "To prove acceptance of the range rules.", howLong: "7 years" },
+  { data: "ID checks at the desk", why: "A yes or no flag plus the document type. Never an image.", howLong: "3 years" },
   { data: "License and permit numbers", why: "To verify eligibility for the lane you reserve. Stored encrypted.", howLong: "3 years after your last visit, or on request" },
-  { data: "Membership applications and references", why: "To decide membership. References are asked one question.", howLong: "Reference replies 1 year, then deleted" },
-  { data: "Screening results", why: `Consumer reports are held by ${SCREENING_VENDOR}. The club keeps the decision and any adverse-action record.`, howLong: "Decision 5 years; the report itself 1 year" },
+  { data: "Membership applications and references", why: "To decide membership. Each reference is asked one question.", howLong: "Reference replies 1 year, then deleted" },
+  { data: "Screening results", why: `${SCREENING_VENDOR} holds the consumer report. The club keeps the decision and any adverse-action record.`, howLong: "Decision 5 years; the report itself 1 year" },
   { data: "Event leads", why: "To quote and plan the event.", howLong: "2 years" },
   { data: "Lane credit ledger", why: "To apply credit at the desk.", howLong: "12 months after the credit expires" },
   { data: "Member-match cookie", why: "A signed, httpOnly cookie holding only a member id, set after you open the emailed link.", howLong: "30 days" },
@@ -97,42 +100,42 @@ export const PRIVACY: LegalSection = {
   id: "privacy",
   label: "Privacy",
   headline: "Privacy.",
-  subhead: "What we collect, why, and for how long.",
+  subhead: "What is kept about you, and for how long.",
   updated: LEGAL_UPDATED,
   clauses: [
     {
-      heading: "What we collect",
+      heading: "What the club collects",
       paragraphs: [
-        "When you reserve, the club records your name, email, phone, party size and the session you chose. At the desk, staff confirm your photo ID and record only that it was checked and what kind of document it was. No copy or image of the ID is kept.",
-        "Members also give a license or permit number, references, and written authorization for a background screen. Screening results come back from a third party and are used only to decide the application and, once a year, to confirm the membership.",
+        "When you reserve, the club records four things about you (name, email address, phone number, party size) and the session you chose. At the desk, staff look at your photo ID and note only that it was checked and what kind of document it was. No copy or image of the ID is kept.",
+        `Members also give a license or permit number, the names of two references and written authorization for a background screen. The screening result comes back from ${SCREENING_VENDOR} and serves two purposes: deciding the application, and confirming the membership once a year.`,
         "If you sign in to the members portal, a signed cookie holding only your member id keeps you matched to your account for 30 days.",
       ],
     },
     {
-      heading: "Why we collect it",
+      heading: "Why the club collects it",
       paragraphs: [
-        "To run your reservation, to confirm that everyone on the line is eligible for the activity they reserved, to decide and maintain memberships, and to keep the record of who accepted the range rules and when. The club does not sell personal information and does not use it for advertising.",
+        "Reservation details run your reservation and confirm that everyone on the line is eligible for the activity they reserved. Application details decide and maintain memberships. Acknowledgement records show who accepted the range rules, and when. The club does not sell personal information and does not use it for advertising.",
       ],
     },
     {
-      heading: "How long we keep it",
-      paragraphs: ["The table below is the whole retention schedule. Anything not listed is deleted when the reason for holding it ends."],
+      heading: "How long it is kept",
+      paragraphs: ["The table below is the whole retention schedule. Anything missing from it is deleted once the reason for holding it ends."],
       slot: "retention-table",
     },
     {
       heading: "Payments",
       paragraphs: [
-        "Card payments are processed by Stripe. Your card number never reaches the club's systems. The club sees the last four digits, the card brand, and the result of the charge, and keeps the receipt for the reservation for accounting purposes.",
+        "Stripe processes card payments. Your card number never reaches club systems. The club sees three things (the last four digits, the card brand, the result of the charge) and keeps the receipt for the reservation for accounting.",
       ],
     },
     {
       heading: "Safeguards under the New York SHIELD Act",
-      paragraphs: ["The club keeps reasonable administrative, technical and physical safeguards for private information, including:"],
+      paragraphs: ["The club keeps reasonable administrative, technical and physical safeguards for private information. Among them:"],
       bullets: [
         "Encryption of license numbers and screening records at rest, and of all traffic in transit.",
         "Access limited to desk and admin roles, with a log of who looked at what.",
         "A written incident response plan, reviewed each year.",
-        "Vendor contracts with security terms, including Stripe and the screening vendor.",
+        "Security terms in the contracts with Stripe and with the screening vendor.",
         "Notice to affected New York residents in the manner and timeframe the Act requires.",
       ],
     },
@@ -158,40 +161,40 @@ export const TERMS: LegalSection = {
     {
       heading: "Reservations",
       paragraphs: [
-        `Public reservations open ${BOOKING.maxAdvanceDays} days ahead and start on the half hour, with at least ${BOOKING.leadTimeMin / 60} hours' notice. Members reserve further out by tier: ${TIER_WINDOWS} days. A reservation is confirmed when you receive the confirmation email with its code.`,
-        "A reservation is for the named guest and party. Everyone in the party must meet the requirements for the activity, which are listed on the Visit page and in the range rules below. The desk may decline entry to anyone who does not, and the reservation is treated as a no-show.",
+        `Public reservations open ${BOOKING.maxAdvanceDays} days ahead and start on the half hour, with at least ${BOOKING.leadTimeMin / 60} hours of notice. Members reserve further out, by tier: ${TIER_WINDOWS} days. Your reservation is confirmed when the confirmation email arrives with its code.`,
+        "A reservation belongs to the named guest and party. Everyone in the party must meet the requirements for the activity, listed on the Visit page and again under the range rules below. The desk may decline entry to anyone who does not meet them, and the reservation is then treated as a no-show.",
       ],
     },
     {
       heading: "Cancellations and lane credit",
       paragraphs: [
-        `Lanes, training and the simulator cancel free up to ${BOOKING.freeCancelHours} hours before the session. Suites and events cancel free up to ${BOOKING.suiteFreeCancelHours} hours before. Seats in the ${course?.name ?? "concealed carry course"} cancel free up to ${COURSE_CANCEL_DAYS} days before the first day.`,
-        "Inside the window, half the fee is held as lane credit for 12 months from the date of the cancellation. Lane credit applies to any reservation at the desk, does not convert to cash, and is not transferable. The cancel link is in your confirmation email.",
+        `A lane, a training session or the simulator cancels free up to ${BOOKING.freeCancelHours} hours before the session. Suites and events cancel free up to ${BOOKING.suiteFreeCancelHours} hours before. A seat in the ${COURSE_NAME} cancels free up to ${COURSE_CANCEL_DAYS} days before the first day.`,
+        "Inside the window, half the fee is held as lane credit for 12 months from the date you cancel. Lane credit applies to any reservation at the desk. It does not convert to cash and it is not transferable. The cancel link is in your confirmation email.",
       ],
     },
     {
       heading: "Arrival and no-shows",
       paragraphs: [
-        "Arrive 15 minutes early for check-in and the safety briefing. Your session ends at its scheduled time regardless of when you start. More than 20 minutes late counts as a no-show, and a no-show forfeits the session and its fee.",
+        "Arrive 15 minutes early for check-in and the safety briefing. Your session ends at its scheduled time whatever time you start. More than 20 minutes late counts as a no-show. A no-show forfeits the session and its fee.",
       ],
     },
     {
       heading: "Changes made by the club",
       paragraphs: [
-        "If the club cancels a session for any reason, including weather, equipment or staffing, you receive a full refund to the original payment method or, if you prefer, a new time. The club is not responsible for travel or other costs.",
+        "If the club cancels a session for any reason, weather, equipment or staffing included, you receive a full refund to the original payment method or, if you prefer, a new time. Travel and other costs stay with you.",
       ],
     },
     {
       heading: "Conduct",
       paragraphs: [
-        "Range officer instructions are final. A safety violation ends the session without refund and may end a membership. The club may remove anyone who is impaired, who films other guests without permission, or whose behavior puts anyone at risk, and the reservation is treated as a no-show.",
+        "An instruction from a range officer is final. A safety violation ends the session without refund and may end a membership. The club may remove anyone who is impaired, anyone who films other guests without permission, and anyone whose behavior puts another person at risk. The reservation is then treated as a no-show.",
         "The club is a private facility and may refuse service consistent with law.",
       ],
     },
     {
       heading: "Prices and payment",
       paragraphs: [
-        "Prices are shown at reservation and include the items listed for that experience. Ammunition, targets beyond those included, and catering are charged at the desk. Where online payment is offered it is taken at reservation; otherwise payment is due at the desk on arrival.",
+        "The price shown at reservation covers the items listed for that experience. Ammunition is charged at the desk, as are targets beyond those included and catering. Where online payment is offered it is taken at reservation. Otherwise payment is due at the desk when you arrive.",
       ],
     },
   ],
@@ -213,25 +216,25 @@ export const SCREENING: LegalSection = {
     {
       heading: "Disclosure",
       paragraphs: [
-        `The Gun Spa may obtain a consumer report about you from ${SCREENING_VENDOR}, a consumer reporting agency, to decide your application for membership and, once a year while you remain a member, to confirm the membership. The report may include identity verification, criminal history records, and public records. This disclosure is made in a document that consists solely of the disclosure, as the Fair Credit Reporting Act requires.`,
+        `The Gun Spa may obtain a consumer report about you from ${SCREENING_VENDOR}, a consumer reporting agency, to decide your application for membership and, once a year while you remain a member, to confirm the membership. The report may include any of the following: identity verification, criminal history records, public records. This disclosure is made in a document that consists solely of the disclosure, as the Fair Credit Reporting Act requires.`,
       ],
     },
     {
       heading: "Authorization",
       paragraphs: [
-        `By signing the authorization on its own page during the application, you authorize the club to obtain the report described above from ${SCREENING_VENDOR}, and you authorize the annual re-screen for as long as your membership continues. You may withdraw the authorization at any time by writing to ${PRIVACY_EMAIL}, which ends the application or the membership.`,
+        `The authorization sits on its own page of the application. Signing it lets the club obtain the report described above from ${SCREENING_VENDOR}, and it covers the annual re-screen for as long as your membership continues. You may withdraw it at any time by writing to ${PRIVACY_EMAIL}. Withdrawing it ends the application or the membership.`,
       ],
     },
     {
       heading: "Before a decision is made",
       paragraphs: [
-        "If anything in the report may affect the decision, the club sends you a copy of the report and the Consumer Financial Protection Bureau's summary of your rights before any decision is final. You then have at least five business days to respond, correct the record with the vendor, or add context.",
+        "If anything in the report could affect the decision, the club sends you a copy of the report, together with the summary of your rights published by the Consumer Financial Protection Bureau, before any decision is final. You then have at least five business days to respond, to correct the record with the vendor, or to add context.",
       ],
     },
     {
       heading: "If the application is declined",
       paragraphs: [
-        `If the decision is based in whole or in part on the report, you receive a written notice that names ${SCREENING_VENDOR} and gives its address and phone number, states that the vendor did not make the decision and cannot explain it, and explains your right to dispute the accuracy or completeness of the report with the vendor and to obtain a free copy of it within 60 days.`,
+        `If the decision rests in whole or in part on the report, you receive a written notice. It names ${SCREENING_VENDOR} and gives its address and phone number. It states that the vendor did not make the decision and cannot explain it. And it sets out your right to dispute the accuracy or completeness of the report with the vendor, and to obtain a free copy of it within 60 days.`,
         "The club reviews every application against the criteria published here.",
       ],
     },
@@ -249,7 +252,7 @@ export const SCREENING: LegalSection = {
     {
       heading: "The fee",
       paragraphs: [
-        `${FEE_TIERS} applicants pay a ${FEE} screening fee at application. It is refunded in full if the application is declined. ${founders?.name ?? "Founders"} applicants do not pay the fee.`,
+        `${FEE_TIERS} applicants pay a ${FEE} screening fee at application. It is refunded in full if the application is declined. ${FOUNDERS_NAME} applicants pay no fee.`,
       ],
     },
   ],
@@ -269,51 +272,51 @@ export const MEMBERSHIP_AGREEMENT: LegalSection = {
     {
       heading: "Term and renewal",
       paragraphs: [
-        "Membership runs for one year from activation and renews automatically for a further year at the then-current rate. The club emails you 30 days before renewal, and you may cancel the renewal any time before it takes effect by replying to that email or writing to the desk. Monthly plans, where offered, are twelve payments against the annual term, not a month-to-month membership.",
-        `${founders?.name ?? "Founders"} members may instead pay once for a lifetime membership at the price shown on the Membership page. A lifetime membership does not renew and is not refunded, except as set out under termination below.`,
+        "Membership runs for one year from activation and renews automatically for a further year at the then-current rate. The club emails you 30 days before renewal. You may cancel the renewal any time before it takes effect, by replying to that email or by writing to the desk. Monthly plans, where offered, spread the annual fee over twelve payments; the commitment is still the full year.",
+        `${FOUNDERS_NAME} members may instead pay once for a lifetime membership at the price shown on the Membership page. A lifetime membership never renews, and it is refunded only as set out under termination below.`,
       ],
     },
     {
       heading: "Transfer",
       paragraphs: [
-        "Membership is personal to the named member and cannot be sold, lent, or transferred to anyone else, including a family member. Guest passes issued to a tier may be given to a guest, and are the only transferable benefit.",
+        "Membership is personal to the named member. It cannot be sold, lent or transferred to anyone else, family included. Guest passes issued to a tier may be handed to a guest, and they are the only transferable benefit.",
       ],
     },
     {
       heading: "Included sessions and rates",
       paragraphs: [
-        "Included lane hours, suite sessions and instruction reset at each renewal and do not carry over or convert to cash. Member rates apply to the member and to guests within the tier's guest allowance. Reservation windows by tier are set out in the Terms above.",
+        "Included lane hours reset at each renewal, as do included suite sessions and instruction. None of it carries over or converts to cash. Member rates apply to the member and to guests within the guest allowance for the tier. Reservation windows by tier are set out in the Terms above.",
       ],
     },
     {
       heading: "Guests",
       paragraphs: [
-        `Each tier includes a number of guests per visit: ${MEMBERSHIP_TIERS.map((t) => `${t.name} ${t.guestsPerVisit}`).join(", ")}. You are responsible for your guests: they shoot under you and a range officer, must meet the requirements for the activity, sign the acknowledgement, and follow the range rules. A guest's safety violation counts as yours. A guest may visit as a guest no more than six times a year before applying.`,
+        `Guests per visit by tier: ${TIER_GUESTS}. You are responsible for your guests. They shoot under you and a range officer. Each guest must meet the requirements for the activity, sign the acknowledgement before reaching the line and follow the range rules. A safety violation by a guest counts as yours. A guest may visit six times a year. After that, the next step is an application of their own.`,
       ],
     },
     {
       heading: "Suspension",
       paragraphs: [
-        "The club may suspend a membership immediately for a safety violation, for impairment on the premises, for a change in licensing status, or for conduct that puts staff or other members at risk. The club writes to you within five business days with the reason and, where the suspension is not permanent, what is needed to restore it. No refund is due for the period of a suspension.",
+        "The club may suspend a membership on the spot for a safety violation, for impairment on the premises, for a change in licensing status, or for conduct that puts staff or other members at risk. Within five business days the club writes to you with the reason and, where the suspension is temporary, what it takes to restore the membership. No refund is due for the period of a suspension.",
       ],
     },
     {
       heading: "Termination and refunds",
       paragraphs: [
         "You may end your membership at any time by writing to the desk. Fees already paid for the current term are not refunded.",
-        "If the club ends your membership for a reason other than a safety violation, a licensing change or a breach of this agreement, including closure of the club, you receive a pro-rated refund of the unused part of the current term, or of the lifetime fee over ten years. Membership that the club ends for cause is not refunded.",
+        "If the club ends your membership for a reason other than a safety violation, a licensing change or a breach of this agreement (closure of the club, for example), you receive a pro-rated refund of the unused part of the current term. For a lifetime membership the refund is pro-rated over ten years. A membership the club ends for cause is not refunded.",
       ],
     },
     {
       heading: "Lockers and property",
       paragraphs: [
-        "Lockers are for gear only and remain the club's property. The club may open a locker with notice for safety, maintenance, or when a membership ends, and holds the contents for 30 days before disposing of them. Firearm storage rules are in the requirements.",
+        "Lockers are for gear only and remain the property of the club. The club may open a locker, with notice, for safety, for maintenance, or when a membership ends. Contents are held for 30 days before disposal. Firearm storage rules are in the requirements.",
       ],
     },
     {
       heading: "Changes",
       paragraphs: [
-        "The club may change this agreement with 30 days' written notice. If a change materially reduces your benefits, you may cancel within those 30 days and receive a pro-rated refund of the current term.",
+        "The club may change this agreement with 30 days of written notice. If a change materially reduces your benefits, you may cancel within those 30 days and receive a pro-rated refund of the current term.",
       ],
     },
   ],
@@ -339,25 +342,25 @@ export const BIOMETRICS: LegalSection = {
     {
       heading: "What it is used for",
       paragraphs: [
-        "The template opens your locker and nothing else. It is not used to identify you at the desk, on the range floor, or on camera, and it is not matched against any outside database.",
+        "The template opens your locker. Nothing else. It does not identify you at the desk, on the range floor or on camera, and it is never matched against an outside database.",
       ],
     },
     {
-      heading: "What we never do with it",
+      heading: "What the club never does with it",
       paragraphs: [
-        "The club never sells, leases, trades, shares or otherwise profits from biometric identifier information, and never discloses it to anyone outside the locker system's storage vendor except as the law requires.",
+        "The club never sells, leases, trades, shares or otherwise profits from biometric identifier information. It never discloses it to anyone beyond the storage vendor for the locker system, except where the law requires.",
       ],
     },
     {
       heading: "The alternative",
       paragraphs: [
-        "Every locker also opens with a PIN. You may choose a PIN instead of a fingerprint at any time, and switching to a PIN deletes the template within 30 days.",
+        "Every locker also opens with a PIN. Choose a PIN instead of a fingerprint at any time. Switching deletes the template within 30 days.",
       ],
     },
     {
       heading: "Retention and deletion",
       paragraphs: [
-        "Templates are stored encrypted and are deleted within 30 days after the membership ends, after you switch to a PIN, or on your written request, whichever comes first. The club keeps a record that the template was deleted, not the template itself.",
+        "Templates are stored encrypted. Each one is deleted within 30 days of whichever comes first: the membership ending, a switch to a PIN, or your written request. After that the club holds only a record of the deletion.",
       ],
     },
   ],
@@ -400,12 +403,12 @@ export const ACKNOWLEDGEMENT = {
   signedNote: "Signed at the desk or on your phone before arrival.",
   counselNote: "[Counsel to review under NY GOL § 5-326.]",
   paragraphs: [
-    "I am here to use a live-fire range, a simulator bay, or both, at The Gun Spa. I understand that shooting involves risks that no amount of care removes entirely, including injury from the discharge of a firearm, ricochet, ejected brass, noise, and exposure to lead and other combustion products. I accept those risks knowingly and voluntarily.",
-    "I have read the four range rules and the requirements list, and I agree to follow them and every instruction from a range officer. I understand that a range officer's instruction is final, that a safety violation ends my session without refund, and that it may end a membership.",
-    "I confirm that I meet the requirements for the activity I reserved, that any firearm I bring is lawfully possessed and transported, and that any ammunition I bring meets the club's specification. I will tell the desk if any of this changes.",
-    "I am not impaired by alcohol, cannabis, medication or anything else, and I will leave the firing line if I become unwell or unsure.",
-    "I am responsible for the conduct of any guest I bring, and I will make sure each guest has signed this acknowledgement before they reach the line.",
-    "This acknowledgement stays in force for 12 months from the date I sign it. I have read it in full, I have had the chance to ask questions, and I sign it freely.",
+    "I am here to use a live-fire range, a simulator bay, or both, at The Gun Spa. I understand that shooting carries risks that no amount of care removes entirely: injury from the discharge of a firearm, from ricochet, from ejected brass, from noise, and from exposure to lead and other combustion products. I accept those risks knowingly and voluntarily.",
+    "I have read the four range rules and the requirements list. I will follow them, and every instruction from a range officer. Whatever a range officer tells me is final. A safety violation ends my session without refund and may end a membership.",
+    "I meet the requirements for the activity I reserved. Any firearm I bring is lawfully possessed and lawfully transported. Any ammunition I bring meets the specification the club publishes. If any of this changes, I will tell the desk.",
+    "I am not impaired by alcohol, cannabis, medication or anything else. If I become unwell or unsure, I will leave the firing line.",
+    "I am responsible for the conduct of any guest I bring. Each guest of mine signs this acknowledgement before reaching the line.",
+    "This acknowledgement stays in force for 12 months from the date I sign it. I have read it in full, I was free to ask questions before signing, and I sign it freely.",
   ],
 };
 

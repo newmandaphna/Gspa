@@ -28,7 +28,7 @@ function openHour(dow: number): string {
 
 export const VISIT_META = {
   title: "Visit & FAQ",
-  description: `How to reach ${SITE.name} in ${SITE.address.neighborhood} by LIRR, subway or AirTrain. Hours, what to bring, every requirement in one list, plus short answers to the usual questions.`,
+  description: `How to reach ${SITE.name} at ${SITE.address.line1} in ${SITE.address.neighborhood}, ${FACILITY.transit.driveFromJfkMin} minutes from JFK. Hours, parking, what to bring, every requirement in one list, plus short answers to the usual questions.`,
 };
 
 /* ------------------------------------------------------------------ hero */
@@ -38,7 +38,7 @@ export const ADDRESS_LINE = `${SITE.address.line1}, ${SITE.address.city}, ${SITE
 export const VISIT_HERO: SectionCopy = {
   eyebrow: "Visit",
   headline: "Jamaica, Queens.",
-  subhead: "Where the LIRR meets the subway and the AirTrain.",
+  subhead: `On Rockaway Blvd, ${FACILITY.transit.driveFromJfkMin} minutes north of the JFK terminals.`,
   body: `${ADDRESS_LINE}. Come in through the doors under the sign.`,
   cta: { label: "Open in Maps", href: SITE.address.mapsUrl, external: true },
 };
@@ -49,25 +49,25 @@ export const EXTERIOR_PHOTO_ALT = `The street entrance of ${SITE.name} in ${SITE
 
 export const VISIT_TRANSIT: SectionCopy = {
   eyebrow: "Getting here",
-  headline: "Take the train.",
-  subhead: `${FACILITY.transit.lirrFromPennMin} minutes from Penn Station and ${FACILITY.transit.airtrainFromJfkMin} from your JFK terminal.`,
-  body: "Get off at Jamaica on the LIRR or at Sutphin Blvd-Archer Av on the E, J or Z. AirTrain JFK ends at the same station.",
+  headline: "Come by car, or the bus.",
+  subhead: `${FACILITY.transit.driveFromJfkMin} minutes from any JFK terminal, ${FACILITY.transit.driveFromManhattanMin} from Manhattan.`,
+  body: `Leave the ${FACILITY.transit.expressway} at the ${FACILITY.transit.exit} exit. The ${FACILITY.transit.busLine} bus runs the length of Rockaway Blvd, and ${FACILITY.transit.nearestLirr} on the LIRR is a ${FACILITY.transit.lirrDriveMin}-minute cab ride. ${FACILITY.transit.parking}.`,
 };
 
 export type TransitLine = { id: "lirr" | "subway" | "airtrain"; label: string; stops: string[] };
 
 /** The three ways in, drawn as converging lines. Labels are set in mono. */
 export const TRANSIT_LINES: TransitLine[] = [
-  { id: "lirr", label: "Jamaica LIRR", stops: ["Penn Station", "Woodside", "Jamaica"] },
-  { id: "subway", label: "Sutphin Blvd-Archer Av (E J Z)", stops: ["Manhattan", "Kew Gardens", "Sutphin-Archer"] },
-  { id: "airtrain", label: "AirTrain JFK", stops: ["Terminals", "Federal Circle", "Jamaica"] },
+  { id: "lirr", label: "From Manhattan, Van Wyck Expwy", stops: ["Midtown", "Kew Gardens", "Rockaway Blvd exit"] },
+  { id: "subway", label: `${FACILITY.transit.busLine} bus, Rockaway Blvd`, stops: ["Ozone Park", "150th St", "158th St"] },
+  { id: "airtrain", label: "JFK terminals", stops: ["Terminals", "JFK Expwy", "Rockaway Blvd"] },
 ];
 
-/** Mono chips. The walk minutes stay bracketed until the owner confirms them in FACILITY. */
+/** Mono chips. Bracketed minutes stay bracketed until the owner confirms them in FACILITY. */
 export const TRANSIT_CHIPS: string[] = [
-  `LIRR · ${FACILITY.transit.walkFromLirrMin} min walk`,
-  `E J Z · ${FACILITY.transit.walkFromSubwayMin} min walk`,
-  `AirTrain · ${FACILITY.transit.walkFromLirrMin} min walk`,
+  `JFK · ${FACILITY.transit.driveFromJfkMin} min by car`,
+  `Manhattan · ${FACILITY.transit.driveFromManhattanMin} min by car`,
+  `${FACILITY.transit.busLine} bus · ${FACILITY.transit.busWalkMin} min walk`,
 ];
 
 export const MAP_EMBED_LABEL = "[MAP_EMBED] until the address is confirmed";

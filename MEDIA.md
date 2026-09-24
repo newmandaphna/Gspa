@@ -78,7 +78,7 @@ two pages; one file serves both.
 | EVENTS_PHOTO_01 | `/events` | The range floor from above at night: twelve lanes, the two private suites lit, the lounge beyond the glass. Sits behind the hero copy and floor plan, so dark and low-detail. | Full-bleed 16:9 background (fill) |
 | DATE_PHOTO_01 | `/events` | A lounge table set for two with espresso and dessert, the simulator wall glowing beyond the glass. Currently the Venn target-rings art with the espresso glyph. | 3:2 |
 | CLIENT_LOGOS_01 | `/events` | A strip of client or partner logos in one muted tone on black. The caption above it is the placeholder "[Client logos]" until real names are supplied. | Strip: 3:1 on phones, 8:1 on desktop |
-| MAP_EMBED | `/visit` | A map tile or embed of the blocks around the street address, showing Jamaica LIRR, Sutphin Blvd-Archer Av and the AirTrain terminal. Placeholder stays labeled until the address is confirmed. | 16:9 on phones, 21:9 on desktop |
+| MAP_EMBED | `/visit` | A map tile or embed centered on 158-12 Rockaway Blvd, Jamaica, NY 11434, showing the Van Wyck Expressway exit, Rockaway Blvd and the north edge of JFK. | 16:9 on phones, 21:9 on desktop |
 
 ## The logo
 

@@ -309,9 +309,9 @@ export function ExteriorArt() {
 type Station = { x: number; y: number };
 const PIN: Station = { x: 60, y: 50 };
 const ROUTES: { label: string; from: Station; stops: Station[]; labelPos: string }[] = [
-  { label: "Jamaica LIRR", from: { x: 4, y: 24 }, stops: [{ x: 20, y: 31 }, { x: 40, y: 40 }], labelPos: "left-[4%] top-[24%] -translate-y-[calc(100%+10px)]" },
-  { label: "Sutphin Blvd–Archer Av", from: { x: 4, y: 82 }, stops: [{ x: 22, y: 72 }, { x: 42, y: 60 }], labelPos: "left-[4%] top-[82%] translate-y-[10px]" },
-  { label: "AirTrain JFK", from: { x: 96, y: 90 }, stops: [{ x: 84, y: 77 }, { x: 72, y: 63 }], labelPos: "right-[4%] top-[90%] translate-y-[10px]" },
+  { label: "Van Wyck Expwy", from: { x: 4, y: 24 }, stops: [{ x: 20, y: 31 }, { x: 40, y: 40 }], labelPos: "left-[4%] top-[24%] -translate-y-[calc(100%+10px)]" },
+  { label: "Q7 bus, Rockaway Blvd", from: { x: 4, y: 82 }, stops: [{ x: 22, y: 72 }, { x: 42, y: 60 }], labelPos: "left-[4%] top-[82%] translate-y-[10px]" },
+  { label: "JFK terminals", from: { x: 96, y: 90 }, stops: [{ x: 84, y: 77 }, { x: 72, y: 63 }], labelPos: "right-[4%] top-[90%] translate-y-[10px]" },
 ];
 
 export function TransitSketch({ stations, pin, className }: { stations: ReadonlyArray<string>; pin: string; className?: string }) {

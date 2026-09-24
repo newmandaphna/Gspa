@@ -18,7 +18,7 @@ export function BookingRow({ row, compact = false }: { row: Row; compact?: boole
       <div className="min-w-0">
         <p className="t-body font-medium">
           <span className="tabular-nums">{start}</span>
-          <span className="text-ink-faint"> – {end}</span> · {experience.name}
+          <span className="text-ink-faint"> to {end}</span> · {experience.name}
         </p>
         <p className="t-caption text-ink-muted">
           {booking.firstName} {booking.lastName} · {booking.guests} guest{booking.guests === 1 ? "" : "s"} · {booking.units} unit{booking.units === 1 ? "" : "s"} · {formatMoney(booking.amountCents)} ·{" "}

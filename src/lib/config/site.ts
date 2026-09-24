@@ -16,12 +16,13 @@ export const SITE = {
   phone: "(718) 000-0000", // TODO(owner): real phone
   email: "desk@thegunspa.com", // TODO(owner): real email
   address: {
-    line1: "[Street address]", // TODO(owner): street address
+    line1: "158-12 Rockaway Blvd",
     city: "Jamaica",
     state: "NY",
-    zip: "11432", // TODO(owner): confirm ZIP
+    zip: "11434",
     neighborhood: "Jamaica, Queens",
-    mapsUrl: "https://maps.apple.com/?q=Jamaica+Station+Queens+NY",
+    mapsUrl: "https://maps.apple.com/?q=158-12+Rockaway+Blvd,+Jamaica,+NY+11434",
+    googleMapsUrl: "https://www.google.com/maps/search/?api=1&query=158-12+Rockaway+Blvd,+Jamaica,+NY+11434",
   },
   social: {
     instagram: "https://instagram.com/thegunspa",
@@ -41,13 +42,22 @@ export const FACILITY = {
   simulatorBays: 2,
   instructors: 3,
   classroomSeats: 12,
-  sqft: "[11,000]",
+  sqft: "[11,600]", // building record; owner to confirm the club's footprint
   airChangesPerHour: "[N]",
+  /**
+   * 158-12 Rockaway Blvd sits on the north edge of JFK, off the Van Wyck.
+   * Bracketed values are the owner's to confirm.
+   */
   transit: {
-    lirrFromPennMin: 20,
-    airtrainFromJfkMin: 10,
-    walkFromLirrMin: "[N]",
-    walkFromSubwayMin: "[N]",
+    driveFromJfkMin: 5,
+    driveFromManhattanMin: "[25]",
+    expressway: "Van Wyck Expressway (I-678)",
+    exit: "Rockaway Blvd",
+    busLine: "[Q7]",
+    busWalkMin: "[N]",
+    nearestLirr: "Locust Manor",
+    lirrDriveMin: "[5]",
+    parking: "[On-site parking to be confirmed]",
   },
 } as const;
 

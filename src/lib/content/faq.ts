@@ -104,7 +104,7 @@ export const FAQ: Faq[] = [
   {
     id: "parking",
     q: "Is there parking?",
-    a: "[Owner to confirm on-site spaces.] Public lots sit within two blocks. Most guests come by LIRR, the E, J or Z, or the AirTrain from JFK.",
+    a: "[Owner to confirm on-site spaces.] The club sits on Rockaway Blvd just north of JFK, off the Van Wyck, so most guests drive or take a car from the airport. Rideshares drop at the front door, and the [Q7] bus stops on the boulevard.",
   },
   {
     id: "events",

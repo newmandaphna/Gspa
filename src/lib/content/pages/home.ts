@@ -33,7 +33,7 @@ export const HOME_META = {
 export const HERO = {
   headline: SITE.tagline,
   subhead: "A private shooting club in Jamaica, Queens.",
-  body: `${FACILITY.laneCount} acoustic lanes, ${spell(FACILITY.suites)} private suites off the line, ${spell(FACILITY.simulatorBays)} simulator bays. ${FACILITY.transit.airtrainFromJfkMin} minutes from JFK on the AirTrain.`,
+  body: `${FACILITY.laneCount} acoustic lanes, ${spell(FACILITY.suites)} private suites off the line, ${spell(FACILITY.simulatorBays)} simulator bays. ${FACILITY.transit.driveFromJfkMin} minutes from JFK.`,
   cta: { label: "Reserve a lane", href: "/reserve?category=lane" },
   link: { label: "Explore membership", href: "/membership" },
   imageSlot: "HERO_PHOTO_01",
@@ -141,12 +141,12 @@ export const MEMBERSHIP = {
 
 export const VISIT = {
   eyebrow: "Visit",
-  headline: `${FACILITY.transit.airtrainFromJfkMin} minutes from JFK.`,
-  subhead: `${SITE.address.neighborhood}. E, J or Z train, or the LIRR.`,
-  body: `Take the AirTrain from your terminal, or the LIRR from Penn in ${FACILITY.transit.lirrFromPennMin} minutes. The address and the hours are on the Visit page.`,
+  headline: `${FACILITY.transit.driveFromJfkMin} minutes from JFK.`,
+  subhead: `${SITE.address.line1}, ${SITE.address.neighborhood}, on the north edge of the airport.`,
+  body: `Come off the ${FACILITY.transit.expressway.split(" (")[0]} at ${FACILITY.transit.exit}, or take a car from any terminal. From Manhattan, plan on ${FACILITY.transit.driveFromManhattanMin} minutes. Hours and parking are on the Visit page.`,
   cta: { label: "Plan your visit", href: "/visit" },
   hoursLink: { label: "See hours", href: "/visit#hours" },
-  stations: ["Jamaica LIRR", "Sutphin Blvd-Archer Av", "AirTrain JFK"],
+  stations: ["JFK terminals", "Van Wyck Expwy", `${FACILITY.transit.busLine} bus, Rockaway Blvd`],
   pin: SITE.shortName,
   imageSlot: "EXTERIOR_PHOTO_01",
   imageAlt: "The exterior of The Gun Spa at dusk, the wordmark lit above the door",
