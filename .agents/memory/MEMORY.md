@@ -1,0 +1,1 @@
+- [Next.js preview hydration](next-preview-hydration.md) — Replit's injected devtools and browser extensions can mutate HTML before hydration; distinguish those mismatches from app defects.
