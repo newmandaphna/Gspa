@@ -43,8 +43,9 @@ export function CompareTable({
   requirements: Cta;
   className?: string;
 }) {
+  // `relative` keeps the absolutely positioned sr-only labels inside this scroll box;
+  // otherwise they escape to the section and widen the page on phones.
   return (
-    {/* `relative` keeps the absolutely positioned sr-only labels inside this scroll box; otherwise they escape to the section and widen the page on phones. */}
     <div className={cn("no-scrollbar relative -mx-5 overflow-x-auto px-5 sm:mx-0 sm:px-0 md:overflow-visible", className)}>
       <table className="w-full min-w-[640px] border-collapse text-left">
         <caption className="sr-only">{caption}</caption>
