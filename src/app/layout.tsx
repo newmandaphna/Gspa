@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   },
   twitter: { card: "summary_large_image", title: SITE.name, description: SITE.description },
   robots: { index: true, follow: true },
-  icons: { icon: "/icon.svg" },
+  // Icons come from src/app/icon.svg, icon.png and apple-icon.png (Next.js wires the link tags).
 };
 
 export const viewport: Viewport = {
