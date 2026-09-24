@@ -3,7 +3,7 @@ import { and, asc, eq, gt, inArray, lt, sql } from "drizzle-orm";
 import { getDb, type Db } from "@/lib/db";
 import { bookings, experiences, type Booking, type Experience } from "@/lib/db/schema";
 import { BOOKING, RESOURCES, tierSatisfies, type ResourceKey } from "@/lib/config/site";
-import { applyLoad, buildSlotWindows, canFit, hoursFor, maxBookableDate, unitsFor, type Load, type Slot } from "@/lib/availability";
+import { applyLoad, buildSlotWindows, canFit, computeAmount, hoursFor, maxBookableDate, type Load, type Slot } from "@/lib/availability";
 import { addDaysIso, compareIso, isHHMM, isIsoDate, todayIso, zonedToUtc } from "@/lib/time";
 import { members } from "@/lib/db/schema";
 import type { MemberContext } from "@/lib/members/service";
@@ -45,12 +45,12 @@ export function canAccess(experience: Pick<Experience, "memberOnly" | "minTier">
   return { ok: true };
 }
 
-/** A typed member number counts only if it belongs to an active member. */
-async function validatedMemberNumber(db: Db, memberNumber: string | null | undefined): Promise<string | null> {
+/** A typed member number counts only if it belongs to an active member. Returns their number and tier. */
+async function validatedMemberNumber(db: Db, memberNumber: string | null | undefined): Promise<{ memberNumber: string; tier: string } | null> {
   const n = memberNumber?.trim().toUpperCase();
   if (!n) return null;
-  const [m] = await db.select({ memberNumber: members.memberNumber, status: members.status }).from(members).where(eq(members.memberNumber, n)).limit(1);
-  return m && m.status === "active" ? m.memberNumber : null;
+  const [m] = await db.select({ memberNumber: members.memberNumber, status: members.status, tier: members.tier }).from(members).where(eq(members.memberNumber, n)).limit(1);
+  return m && m.status === "active" ? { memberNumber: m.memberNumber, tier: m.tier } : null;
 }
 export type BookingResult =
   | { ok: true; booking: Booking; experience: Experience }
@@ -120,7 +120,7 @@ export async function getAvailability(
   const experience = await getExperienceBySlug(slug, db);
   if (!experience || !experience.active || !experience.bookable) return null;
   if (!canAccess(experience, opts.member).ok) return null;
-  const isMember = Boolean(opts.member) || Boolean(await validatedMemberNumber(db, opts.memberNumber));
+  const tier = opts.member?.tier ?? (await validatedMemberNumber(db, opts.memberNumber))?.tier ?? null;
   const base = {
     experience: {
       slug: experience.slug,
@@ -137,7 +137,7 @@ export async function getAvailability(
   const hours = hoursFor(dateISO);
   const today = todayIso(undefined, now);
   if (compareIso(dateISO, today) < 0) return { ...base, open: false, hours, slots: [], reason: "past" };
-  if (compareIso(dateISO, maxBookableDate(today, isMember)) > 0) return { ...base, open: false, hours, slots: [], reason: "too_far" };
+  if (compareIso(dateISO, maxBookableDate(today, tier)) > 0) return { ...base, open: false, hours, slots: [], reason: "too_far" };
   if (!hours) return { ...base, open: false, hours: null, slots: [], reason: "closed" };
 
   await sweepExpiredHolds(db, now);
@@ -165,16 +165,17 @@ export async function createBooking(input: CreateBookingInput): Promise<BookingR
 
   const guests = Math.floor(input.guests);
   if (guests < BOOKING.minGuests || guests > BOOKING.maxGuests) return { ok: false, code: "INVALID", error: `Guests must be between ${BOOKING.minGuests} and ${BOOKING.maxGuests}.` };
-  const units = unitsFor(guests, experience.maxGuestsPerUnit);
-  if (units > experience.maxUnitsPerBooking) {
-    return { ok: false, code: "TOO_MANY", error: `Online reservations cover up to ${experience.maxUnitsPerBooking * experience.maxGuestsPerUnit} guests for this experience. For larger groups, contact us about a private event.` };
+  const maxGuestsAllowed = experience.fixedUnits ? experience.maxGuestsPerUnit : experience.maxUnitsPerBooking * experience.maxGuestsPerUnit;
+  if (guests > maxGuestsAllowed) {
+    return { ok: false, code: "TOO_MANY", error: `Online reservations cover up to ${maxGuestsAllowed} guests for this experience. For larger groups, contact us about a private event.` };
   }
+  const { units, amountCents } = computeAmount(experience, guests, Boolean(input.member));
 
   const today = todayIso(undefined, now);
-  const memberNumber = input.member?.memberNumber ?? (await validatedMemberNumber(db, input.memberNumber));
-  const isMember = Boolean(memberNumber);
+  const validated = input.member ? { memberNumber: input.member.memberNumber, tier: input.member.tier } : await validatedMemberNumber(db, input.memberNumber);
+  const memberNumber = validated?.memberNumber ?? null;
   if (compareIso(input.date, today) < 0) return { ok: false, code: "INVALID", error: "That date has passed." };
-  if (compareIso(input.date, maxBookableDate(today, isMember)) > 0) return { ok: false, code: "INVALID", error: "That date is beyond the online booking window." };
+  if (compareIso(input.date, maxBookableDate(today, validated?.tier ?? null)) > 0) return { ok: false, code: "INVALID", error: "That date is beyond your online booking window." };
 
   const hours = hoursFor(input.date);
   const windows = buildSlotWindows({ dateISO: input.date, durationMin: experience.durationMin, hours, now });
@@ -182,7 +183,6 @@ export async function createBooking(input: CreateBookingInput): Promise<BookingR
   if (!slot) return { ok: false, code: "UNAVAILABLE", error: "That start time is no longer available. Please choose another." };
 
   const capacity = capacityFor(experience.resource);
-  const amountCents = priceFor(experience, input.member) * units;
   const status = input.paymentMode === "stripe" ? "pending" : "confirmed";
   const paymentStatus = input.paymentMode === "stripe" ? "unpaid" : "pay_on_arrival";
 

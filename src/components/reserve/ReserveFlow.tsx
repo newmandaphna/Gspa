@@ -1,16 +1,16 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { Calendar } from "@/components/reserve/Calendar";
 import { Button } from "@/components/ui/Button";
-import { CATEGORY_LABELS, type CatalogItem, type Category } from "@/lib/content/catalog";
-import { ACK_SUMMARY, CANCELLATION_POLICY, REQUIREMENTS } from "@/lib/content/requirements";
-import { BOOKING } from "@/lib/config/site";
-import { maxBookableDate, unitsFor } from "@/lib/availability";
-import { formatDateLong, formatMoney, todayIso } from "@/lib/time";
+import { CATEGORY_LABELS, ELIGIBILITY_LABELS, type CatalogItem, type Category } from "@/lib/content/catalog";
+import { ACK_SUMMARY, CANCELLATION_POLICY, requirementsFor } from "@/lib/content/requirements";
+import { BOOKING, TIER_WINDOW_DAYS, windowDaysFor } from "@/lib/config/site";
+import { computeAmount, maxBookableDate } from "@/lib/availability";
+import { formatDateLong, formatMoney, isHHMM, isIsoDate, todayIso } from "@/lib/time";
 import { cn } from "@/lib/cn";
 
 type SlotDto = { time: string; label: string; available: number; startsAt: string };
@@ -58,6 +58,8 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
 
   const initialSlug = params.get("experience");
   const initialCategory = params.get("category") as Category | null;
+  const initialDate = params.get("date");
+  const initialTime = params.get("time");
   const cancelledCode = params.get("cancelled");
 
   const [category, setCategory] = useState<Category>(() => {
@@ -70,8 +72,8 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
   });
   const [experience, setExperience] = useState<CatalogItem | null>(() => bookable.find((e) => e.slug === initialSlug) ?? null);
   const [step, setStep] = useState<0 | 1 | 2>(() => (initialSlug && bookable.some((e) => e.slug === initialSlug) ? 1 : 0));
-  const [date, setDate] = useState<string | null>(null);
-  const [time, setTime] = useState<string | null>(null);
+  const [date, setDate] = useState<string | null>(() => (initialDate && isIsoDate(initialDate) ? initialDate : null));
+  const [time, setTime] = useState<string | null>(() => (initialTime && isHHMM(initialTime) ? initialTime : null));
   const [guests, setGuests] = useState(2);
   const [memberNumber, setMemberNumber] = useState("");
   const [availability, setAvailability] = useState<AvailabilityDto | null>(null);
@@ -90,15 +92,18 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
 
   const today = useMemo(() => todayIso(), []);
   const typedMember = memberNumber.trim();
-  const isMember = Boolean(member) || typedMember.length > 0;
-  const maxDate = useMemo(() => maxBookableDate(today, isMember), [today, isMember]);
+  // A typed member number opens the calendar optimistically; the server enforces the real tier window.
+  const windowTier = member?.tier ?? (typedMember ? "founders" : null);
+  const maxDate = useMemo(() => maxBookableDate(today, windowTier), [today, windowTier]);
 
   const unitPriceFor = useCallback((item: CatalogItem) => (member && item.memberPriceCents != null ? item.memberPriceCents : item.priceCents), [member]);
+  const maxGuestsFor = (item: CatalogItem) => Math.min(BOOKING.maxGuests, item.fixedUnits ? item.maxGuestsPerUnit : item.maxGuestsPerUnit * item.maxUnitsPerBooking);
 
-  const units = experience ? unitsFor(guests, experience.maxGuestsPerUnit) : 1;
-  const maxGuestsForExperience = experience ? Math.min(BOOKING.maxGuests, experience.maxGuestsPerUnit * experience.maxUnitsPerBooking) : BOOKING.maxGuests;
-  const unitPrice = experience ? unitPriceFor(experience) : 0;
-  const total = unitPrice * units;
+  const pricing = experience ? computeAmount(experience, guests, Boolean(member)) : { units: 1, unitPriceCents: 0, amountCents: 0 };
+  const units = pricing.units;
+  const maxGuestsForExperience = experience ? maxGuestsFor(experience) : BOOKING.maxGuests;
+  const unitPrice = pricing.unitPriceCents;
+  const total = pricing.amountCents;
 
   const loadSlots = useCallback(async (slug: string, iso: string, typed: string) => {
     setLoadingSlots(true);
@@ -123,6 +128,16 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
     if (experience) void loadSlots(experience.slug, d, typedMember);
   };
 
+  // Deep links (?experience=&date=&time=) arrive with a date already chosen: load its slots once on mount.
+  const deepLinked = useRef(false);
+  useEffect(() => {
+    if (deepLinked.current) return;
+    deepLinked.current = true;
+    const slug = experience?.slug;
+    const d = date;
+    if (slug && d) queueMicrotask(() => void loadSlots(slug, d, ""));
+  }, [experience, date, loadSlots]);
+
   /** Re-query availability after the member number changes (window may widen). */
   const commitMemberNumber = () => {
     if (experience && date) void loadSlots(experience.slug, date, typedMember);
@@ -138,7 +153,7 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
     setExperience(e);
     setTime(null);
     setAvailability(null);
-    const cap = Math.min(BOOKING.maxGuests, e.maxGuestsPerUnit * e.maxUnitsPerBooking);
+    const cap = maxGuestsFor(e);
     if (guests > cap) setGuests(cap);
     if (date) void loadSlots(e.slug, date, typedMember);
     goTo(1);
@@ -208,7 +223,7 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
           <Link href="/members/login?next=/reserve" className="text-link-ink underline underline-offset-2">
             Sign in
           </Link>{" "}
-          for member rates, the {BOOKING.memberMaxAdvanceDays}-day window, and members-only services.
+          for member rates, a longer booking window, and members-only services.
         </p>
       )}
 
@@ -276,6 +291,22 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
                     </button>
                   ))}
                 </div>
+                {!member && (category === "lane" || category === "suite") && (
+                  <p className="t-caption mt-4 text-ink-muted">
+                    No NYC pistol license? Start with{" "}
+                    <button type="button" className="text-link-ink underline underline-offset-2" onClick={() => setCategory("experience")}>
+                      the simulator
+                    </button>{" "}
+                    or{" "}
+                    <button type="button" className="text-link-ink underline underline-offset-2" onClick={() => setCategory("training")}>
+                      First Session
+                    </button>
+                    .{" "}
+                    <Link href="/visit#requirements" className="underline underline-offset-2">
+                      See requirements
+                    </Link>
+                  </p>
+                )}
                 <ul className="mt-6 grid gap-4 sm:grid-cols-2">
                   {bookable
                     .filter((e) => e.category === category)
@@ -298,6 +329,7 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
                             </span>
                             <span className="t-3 mt-1">{e.name}</span>
                             <span className="t-body mt-2 text-ink-muted">{e.tagline}</span>
+                            <span className="t-footnote mt-3 inline-flex w-fit rounded-pill bg-paper-2 px-2 py-0.5 text-ink-muted">{ELIGIBILITY_LABELS[e.eligibility]}</span>
                             <span className="mt-auto flex items-end justify-between gap-3 pt-6">
                               <span className="t-4">
                                 {price === 0 ? "Included" : formatMoney(price)}
@@ -307,7 +339,9 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
                                   <span className="t-footnote block font-normal text-ink-muted">Members {e.memberPriceCents === 0 ? "included" : formatMoney(e.memberPriceCents)}</span>
                                 )}
                               </span>
-                              <span className="t-caption text-right text-ink-muted">{e.maxGuestsPerUnit > 1 ? `up to ${e.maxGuestsPerUnit} guests` : "per guest"}</span>
+                              <span className="t-caption text-right text-ink-muted">
+                                {e.fixedUnits ? `up to ${e.maxGuestsPerUnit} guests · flat` : e.maxGuestsPerUnit > 1 ? `up to ${e.maxGuestsPerUnit} guests` : "per guest"}
+                              </span>
                             </span>
                           </button>
                         </li>
@@ -322,7 +356,9 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
                 <h2 className="t-2">When?</h2>
                 <p className="t-body mt-2 text-ink-muted">
                   {experience.name} · {durationLabel(experience.durationMin)}.{" "}
-                  {member ? `Members reserve up to ${BOOKING.memberMaxAdvanceDays} days ahead.` : `Public reservations open ${BOOKING.maxAdvanceDays} days out; members ${BOOKING.memberMaxAdvanceDays}.`}
+                  {member
+                    ? `${member.tierName} members reserve up to ${windowDaysFor(member.tier)} days ahead.`
+                    : `Public reservations open ${BOOKING.maxAdvanceDays} days out; members see ${TIER_WINDOW_DAYS.club}, ${TIER_WINDOW_DAYS.signature} or ${TIER_WINDOW_DAYS.founders}.`}
                 </p>
 
                 <div className="mt-8 grid gap-10 md:grid-cols-2">
@@ -473,13 +509,18 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
                 <div className="mt-8 rounded-card-sm bg-paper-2 p-5">
                   <p className="t-caption font-semibold text-ink">Before you arrive</p>
                   <ul className="mt-3 space-y-2">
-                    {REQUIREMENTS.slice(0, 4).map((r) => (
-                      <li key={r} className="t-caption flex gap-2 text-ink-muted">
-                        <span aria-hidden="true" className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-accent-deep" />
-                        {r}
-                      </li>
-                    ))}
+                    {requirementsFor(experience.eligibility, Boolean(member))
+                      .slice(0, 5)
+                      .map((r) => (
+                        <li key={r.text} className="t-caption flex gap-2 text-ink-muted">
+                          <span aria-hidden="true" className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-accent-deep" />
+                          {r.text}
+                        </li>
+                      ))}
                   </ul>
+                  <Link href="/visit#requirements" className="link-arrow mt-2 text-[0.875rem]">
+                    All requirements
+                  </Link>
                   <label className="mt-4 flex cursor-pointer items-start gap-3">
                     <input type="checkbox" required checked={form.ack} onChange={(e) => setForm({ ...form, ack: e.target.checked })} className="mt-1 h-5 w-5 shrink-0 accent-ink" />
                     <span className="t-caption text-ink">{ACK_SUMMARY}</span>
@@ -524,7 +565,10 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
                   <Row label="Total" value={total === 0 ? "Included" : formatMoney(total)} strong />
                   <p className="t-footnote mt-1 text-ink-faint">
                     {total === 0 ? "Included with your membership. " : stripeEnabled ? "Charged securely at checkout. " : "Pay at the front desk on arrival. "}
-                    {unitPrice > 0 && `${formatMoney(unitPrice)} per ${unitNoun(experience, 1).replace(/^1 /, "")}${member && experience.memberPriceCents != null && experience.memberPriceCents < experience.priceCents ? " at the member rate" : ""}. Tax included.`}
+                    {unitPrice > 0 &&
+                      (experience.fixedUnits
+                        ? `${formatMoney(unitPrice)} flat${member && experience.memberPriceCents != null && experience.memberPriceCents < experience.priceCents ? " at the member rate" : ""}. Tax included.`
+                        : `${formatMoney(unitPrice)} per ${unitNoun(experience, 1).replace(/^1 /, "")}${experience.extraGuestCents ? `, ${formatMoney(experience.extraGuestCents)} per additional guest` : ""}${member && experience.memberPriceCents != null && experience.memberPriceCents < experience.priceCents ? " at the member rate" : ""}. Tax included.`)}
                   </p>
                 </div>
               </>

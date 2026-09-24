@@ -80,7 +80,7 @@ describe("booking lifecycle (in-memory Postgres)", () => {
   it("rejects invalid dates, times, past dates and dates beyond the window", async () => {
     expect((await createBooking({ ...base, time: "25:00" })).ok).toBe(false);
     expect((await createBooking({ ...base, date: "2020-01-01", time: "12:00" })).ok).toBe(false);
-    const far = addDaysIso(todayIso(undefined, NOW), 45);
+    const far = addDaysIso(todayIso(undefined, NOW), 10); // beyond the 7-day public window
     const tooFar = await createBooking({ ...base, date: far, time: "12:00" });
     expect(tooFar.ok).toBe(false);
     // A typed member number only counts when it belongs to a real, active member (see members.test.ts).
@@ -89,7 +89,7 @@ describe("booking lifecycle (in-memory Postgres)", () => {
     // Not on a slot boundary / inside lead time
     expect((await createBooking({ ...base, time: "12:07" })).ok).toBe(false);
     const today = todayIso(undefined, NOW);
-    expect((await createBooking({ ...base, date: today, time: "10:30" })).ok).toBe(false);
+    expect((await createBooking({ ...base, date: today, time: "11:00" })).ok).toBe(false);
   });
 
   it("supports the Stripe pending → paid path and hold expiry", async () => {

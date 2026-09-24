@@ -5,7 +5,7 @@ import { expect, test, type Page } from "@playwright/test";
  * Screenshots land in e2e/screenshots (git-ignored) for visual review.
  */
 
-const PAGES = ["/", "/range", "/training", "/membership", "/events", "/visit", "/reserve", "/members/login", "/legal/range-rules"];
+const PAGES = ["/", "/club", "/training", "/membership", "/events", "/visit", "/reserve", "/members/login", "/members/activate", "/reserve/manage", "/legal", "/admin/login"];
 
 async function collectErrors(page: Page): Promise<string[]> {
   const errors: string[] = [];

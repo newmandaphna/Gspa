@@ -1,24 +1,27 @@
 /**
  * Central business configuration. Everything an owner is likely to change
  * lives here or in src/lib/content/*. Nothing here is legal advice.
+ * Square brackets mark facts the owner has not confirmed yet.
  */
 
 export const SITE = {
   name: "The Gun Spa",
   shortName: "Gun Spa",
   domain: "thegunspa.com",
-  tagline: "Precision, refined.",
+  tagline: "Ready? Aim. Relax!",
+  taglineSecondary: "Precision, at ease.",
   description:
-    "A private shooting club and luxury indoor range in Jamaica, Queens. Sixteen lanes, private suites, world-class instruction, and a lounge worth the trip.",
+    "A private shooting club and luxury indoor range in Jamaica, Queens. Twelve acoustic lanes, two private suites, two simulator bays, instruction, and a lounge worth the trip.",
   timezone: "America/New_York",
   phone: "(718) 000-0000", // TODO(owner): real phone
-  email: "hello@thegunspa.com", // TODO(owner): real email
+  email: "desk@thegunspa.com", // TODO(owner): real email
   address: {
-    line1: "Address to be announced", // TODO(owner): street address
+    line1: "[Street address]", // TODO(owner): street address
     city: "Jamaica",
     state: "NY",
-    zip: "11432",
+    zip: "11432", // TODO(owner): confirm ZIP
     neighborhood: "Jamaica, Queens",
+    mapsUrl: "https://maps.apple.com/?q=Jamaica+Station+Queens+NY",
   },
   social: {
     instagram: "https://instagram.com/thegunspa",
@@ -26,41 +29,61 @@ export const SITE = {
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:5000",
 } as const;
 
+/**
+ * Physical facts, in one place, so a single edit (say, 16 lanes instead of 12)
+ * changes the hero, floor plan, spec chips and copy together.
+ */
+export const FACILITY = {
+  laneCount: 12,
+  laneYards: 25,
+  suites: 2,
+  lanesPerSuite: 2,
+  simulatorBays: 2,
+  instructors: 3,
+  classroomSeats: 12,
+  sqft: "[11,000]",
+  airChangesPerHour: "[N]",
+  transit: {
+    lirrFromPennMin: 20,
+    airtrainFromJfkMin: 10,
+    walkFromLirrMin: "[N]",
+    walkFromSubwayMin: "[N]",
+  },
+} as const;
+
 export type Hours = { open: string; close: string } | null;
 
 /** Opening hours by day of week (0 = Sunday). null = closed. 24h "HH:MM". */
 export const HOURS: Record<number, Hours> = {
-  0: { open: "09:00", close: "21:00" },
-  1: { open: "11:00", close: "22:00" },
-  2: { open: "11:00", close: "22:00" },
-  3: { open: "11:00", close: "22:00" },
-  4: { open: "11:00", close: "23:00" },
-  5: { open: "11:00", close: "23:00" },
-  6: { open: "09:00", close: "23:00" },
+  0: { open: "09:00", close: "20:00" },
+  1: { open: "10:00", close: "22:00" },
+  2: { open: "10:00", close: "22:00" },
+  3: { open: "10:00", close: "22:00" },
+  4: { open: "10:00", close: "22:00" },
+  5: { open: "10:00", close: "22:00" },
+  6: { open: "09:00", close: "22:00" },
 };
 
-export const HOURS_DISPLAY: { days: string; hours: string }[] = [
-  { days: "Monday – Wednesday", hours: "11 AM – 10 PM" },
-  { days: "Thursday – Friday", hours: "11 AM – 11 PM" },
-  { days: "Saturday", hours: "9 AM – 11 PM" },
-  { days: "Sunday", hours: "9 AM – 9 PM" },
+export const HOURS_DISPLAY: { days: string; hours: string; dow: number[] }[] = [
+  { days: "Monday – Friday", hours: "10 AM – 10 PM", dow: [1, 2, 3, 4, 5] },
+  { days: "Saturday", hours: "9 AM – 10 PM", dow: [6] },
+  { days: "Sunday", hours: "9 AM – 8 PM", dow: [0] },
 ];
 
 /**
  * Bookable resources and how many can be in use at once.
  * Experiences reference a resource key; capacity is shared across every
- * experience that uses the same resource (a 1-hour and a 2-hour lane session
- * both consume "lane" units).
+ * experience that uses the same resource (a lane session and a heritage
+ * rifle session both consume "lane" units).
  */
 export const RESOURCES = {
-  lane: { label: "Signature Lane", capacity: 12 },
-  premiumLane: { label: "Reserve Lane", capacity: 4 },
+  lane: { label: "Lane", capacity: 12 },
   suite: { label: "Private Suite", capacity: 2 },
   simulator: { label: "Simulator Bay", capacity: 2 },
   instructor: { label: "Instructor", capacity: 3 },
-  classroom: { label: "Classroom Seat", capacity: 10 },
+  classroom: { label: "Classroom Seat", capacity: 12 },
   gunsmith: { label: "Gunsmith Bench", capacity: 1 },
-  detailing: { label: "Detailing Bay", capacity: 2 },
+  detailing: { label: "Detailing Bay", capacity: 1 },
 } as const;
 
 export type ResourceKey = keyof typeof RESOURCES;
@@ -71,6 +94,13 @@ export type ResourceKey = keyof typeof RESOURCES;
  */
 export const TIERS = ["club", "signature", "founders"] as const;
 export type TierKey = (typeof TIERS)[number];
+
+/** How far ahead each tier may reserve. The public window is BOOKING.maxAdvanceDays. */
+export const TIER_WINDOW_DAYS: Record<TierKey, number> = {
+  club: 14,
+  signature: 21,
+  founders: 30,
+};
 
 export function tierRank(tier: string): number {
   const i = TIERS.indexOf(tier as TierKey);
@@ -83,22 +113,29 @@ export function tierSatisfies(memberTier: string, minTier: string | null | undef
   return tierRank(memberTier) >= tierRank(minTier);
 }
 
+/** Booking window in days for a tier key (falls back to the public window). */
+export function windowDaysFor(tier: string | null | undefined): number {
+  return (tier && TIER_WINDOW_DAYS[tier as TierKey]) || BOOKING.maxAdvanceDays;
+}
+
 /** Total lockers available for rent (assignment is handled by staff). */
 export const LOCKERS_TOTAL = 60;
 
 export const BOOKING = {
   /** Slot boundaries every N minutes. */
   slotStepMin: 30,
-  /** Earliest a public reservation may start, relative to now. */
-  leadTimeMin: 60,
-  /** How far ahead the public can book. */
-  maxAdvanceDays: 30,
-  /** Members (with a valid member number) may book further out. */
-  memberMaxAdvanceDays: 60,
+  /** Earliest any reservation may start, relative to now. */
+  leadTimeMin: 120,
+  /** How far ahead the public can book. Members use TIER_WINDOW_DAYS. */
+  maxAdvanceDays: 7,
+  /** The calendar never opens further than this for anyone. */
+  calendarCapDays: 30,
   /** Unpaid Stripe checkouts hold the slot this long. */
   pendingHoldMin: 30,
-  /** Guests may cancel free of charge up to this many hours before start. */
+  /** Guests may cancel free of charge up to this many hours before start (lanes, training, simulator). */
   freeCancelHours: 24,
+  /** Suites and events use a longer window. */
+  suiteFreeCancelHours: 72,
   minGuests: 1,
   maxGuests: 12,
 } as const;

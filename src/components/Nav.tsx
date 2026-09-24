@@ -30,7 +30,7 @@ export function Nav() {
       <nav aria-label="Primary" className="glass-dark h-[var(--nav-h)] border-b border-white/[0.08] text-snow">
         <div className="mx-auto flex h-full max-w-[1180px] items-center justify-between px-5 sm:px-8">
           <Link href="/" onClick={close} className="flex items-center gap-2 rounded-md" aria-label={`${SITE.name} home`}>
-            <Wordmark className="h-[18px] w-auto" />
+            <Wordmark tone="current" className="text-[15px]" />
           </Link>
 
           <ul className="hidden items-center gap-8 md:flex">

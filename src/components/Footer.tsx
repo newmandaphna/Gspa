@@ -10,7 +10,7 @@ export function Footer() {
       <div className="mx-auto max-w-[1180px] px-5 py-12 sm:px-8">
         <div className="grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-5">
           <div className="col-span-2 md:col-span-1">
-            <Wordmark className="h-4 text-ink" />
+            <Wordmark tagline className="text-[22px]" />
             <p className="t-footnote mt-4 max-w-[220px] leading-relaxed">
               A private shooting club and luxury indoor range in {SITE.address.neighborhood}.
             </p>

@@ -1,4 +1,4 @@
-import { BOOKING, HOURS, type Hours } from "@/lib/config/site";
+import { BOOKING, HOURS, windowDaysFor, type Hours } from "@/lib/config/site";
 import { dayOfWeekIso, fromMinutes, labelForHHMM, toMinutes, zonedToUtc, RANGE_TZ } from "@/lib/time";
 
 export type SlotWindow = { time: string; startsAt: Date; endsAt: Date };
@@ -13,6 +13,30 @@ export function hoursFor(dateISO: string, hours: Record<number, Hours> = HOURS):
 export function unitsFor(guests: number, maxGuestsPerUnit: number): number {
   if (guests < 1) return 1;
   return Math.max(1, Math.ceil(guests / Math.max(1, maxGuestsPerUnit)));
+}
+
+export type Priceable = {
+  priceCents: number;
+  memberPriceCents?: number | null;
+  maxGuestsPerUnit: number;
+  /** Always consumes exactly this many units at a flat price (e.g. the Founders' Suite takes both suites). */
+  fixedUnits?: number | null;
+  /** Charged for each guest beyond one per unit (e.g. a second student at 50%). */
+  extraGuestCents?: number | null;
+};
+
+/**
+ * Units consumed and total price for a party. Shared by the server (booking)
+ * and the client (summary card) so the two never disagree.
+ */
+export function computeAmount(item: Priceable, guests: number, isMember: boolean): { units: number; unitPriceCents: number; amountCents: number } {
+  const unitPriceCents = isMember && item.memberPriceCents != null ? item.memberPriceCents : item.priceCents;
+  if (item.fixedUnits && item.fixedUnits > 0) {
+    return { units: item.fixedUnits, unitPriceCents, amountCents: unitPriceCents };
+  }
+  const units = unitsFor(guests, item.maxGuestsPerUnit);
+  const extra = item.extraGuestCents ? Math.max(0, guests - units) * item.extraGuestCents : 0;
+  return { units, unitPriceCents, amountCents: unitPriceCents * units + extra };
 }
 
 /**
@@ -91,9 +115,9 @@ export function canFit(start: Date, end: Date, units: number, load: Load[], capa
   return true;
 }
 
-/** Latest bookable date for a public guest or a member. */
-export function maxBookableDate(todayISO: string, isMember: boolean): string {
-  const days = isMember ? BOOKING.memberMaxAdvanceDays : BOOKING.maxAdvanceDays;
+/** Latest bookable date for the public (tier null) or a member of `tier`. */
+export function maxBookableDate(todayISO: string, tier: string | null | undefined): string {
+  const days = Math.min(BOOKING.calendarCapDays, windowDaysFor(tier));
   const [y, mo, d] = todayISO.split("-").map(Number);
   return new Date(Date.UTC(y, mo - 1, d + days)).toISOString().slice(0, 10);
 }

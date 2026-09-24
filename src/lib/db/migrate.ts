@@ -24,6 +24,9 @@ export async function ensureSchema(db: Db): Promise<void> {
       member_only BOOLEAN NOT NULL DEFAULT FALSE,
       member_price_cents INTEGER,
       min_tier TEXT,
+      fixed_units INTEGER,
+      extra_guest_cents INTEGER,
+      eligibility TEXT NOT NULL DEFAULT 'anyone',
       sort_order INTEGER NOT NULL DEFAULT 0,
       active BOOLEAN NOT NULL DEFAULT TRUE
     )
@@ -98,6 +101,9 @@ export async function ensureSchema(db: Db): Promise<void> {
   await db.execute(sql`ALTER TABLE experiences ADD COLUMN IF NOT EXISTS member_only BOOLEAN NOT NULL DEFAULT FALSE`);
   await db.execute(sql`ALTER TABLE experiences ADD COLUMN IF NOT EXISTS member_price_cents INTEGER`);
   await db.execute(sql`ALTER TABLE experiences ADD COLUMN IF NOT EXISTS min_tier TEXT`);
+  await db.execute(sql`ALTER TABLE experiences ADD COLUMN IF NOT EXISTS fixed_units INTEGER`);
+  await db.execute(sql`ALTER TABLE experiences ADD COLUMN IF NOT EXISTS extra_guest_cents INTEGER`);
+  await db.execute(sql`ALTER TABLE experiences ADD COLUMN IF NOT EXISTS eligibility TEXT NOT NULL DEFAULT 'anyone'`);
   await db.execute(sql`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS member_id INTEGER`);
   await db.execute(sql`
     CREATE TABLE IF NOT EXISTS inquiries (

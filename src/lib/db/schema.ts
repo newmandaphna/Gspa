@@ -24,6 +24,12 @@ export const experiences = pgTable("experiences", {
   memberPriceCents: integer("member_price_cents"),
   /** Minimum tier key required (null = any member / public). */
   minTier: text("min_tier"),
+  /** Always consumes this many units at a flat price (Founders' Suite = both suites). */
+  fixedUnits: integer("fixed_units"),
+  /** Price per guest beyond one per unit (second student at 50%). */
+  extraGuestCents: integer("extra_guest_cents"),
+  /** Who can take part: handgun | longgun | simulator | anyone. Rendered as a badge; rules live in requirements.ts. */
+  eligibility: text("eligibility").notNull().default("anyone"),
   sortOrder: integer("sort_order").notNull().default(0),
   active: boolean("active").notNull().default(true),
 });

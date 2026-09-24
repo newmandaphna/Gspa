@@ -116,13 +116,14 @@ describe("member lifecycle (in-memory Postgres)", () => {
   });
 
   it("validates a typed member number for the extended booking window", async () => {
-    const created = await createMember({ firstName: "Ada", lastName: "Byron", email: "ada@example.com", tier: "club", billing: "lifetime" });
+    const created = await createMember({ firstName: "Ada", lastName: "Byron", email: "ada@example.com", tier: "founders", billing: "lifetime" });
     expect(created.ok).toBe(true);
     if (!created.ok) return;
     const num = created.value.member.memberNumber;
     expect(await getMemberByNumber(num.toLowerCase())).not.toBeNull();
     const lane = CATALOG.find((c) => !c.memberOnly && c.bookable)!;
-    const far = addDaysIso(todayIso(undefined, NOW), 45);
+    // 25 days out: beyond the 7-day public window, inside the 30-day Founders window.
+    const far = addDaysIso(todayIso(undefined, NOW), 25);
     const fake = await createBooking({
       experienceSlug: lane.slug, date: far, time: "12:00", guests: 1, firstName: "X", lastName: "Y", email: "x@y.co", phone: "7185550100", ackRequirements: true, paymentMode: "on_arrival", now: NOW, memberNumber: "GS-M-9999999",
     });

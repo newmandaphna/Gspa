@@ -7,7 +7,7 @@ import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
 import { getBookingByCode, markPaidBySession } from "@/lib/booking";
 import { BOOKING, SITE } from "@/lib/config/site";
-import { REQUIREMENTS } from "@/lib/content/requirements";
+import { requirementsFor } from "@/lib/content/requirements";
 import { getStripe, stripeEnabled } from "@/lib/stripe";
 import { formatInstant, formatMoney } from "@/lib/time";
 import { cn } from "@/lib/cn";
@@ -100,12 +100,14 @@ export default async function ConfirmationPage({
             <div className="rounded-card bg-paper-2 p-6">
               <p className="t-4">Bring</p>
               <ul className="mt-3 space-y-2">
-                {REQUIREMENTS.slice(0, 3).map((r) => (
-                  <li key={r} className="t-caption flex gap-2 text-ink-muted">
-                    <span aria-hidden="true" className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-accent-deep" />
-                    {r}
-                  </li>
-                ))}
+                {requirementsFor(experience.eligibility as "handgun" | "longgun" | "simulator" | "anyone", Boolean(booking.memberId))
+                  .slice(0, 3)
+                  .map((r) => (
+                    <li key={r.text} className="t-caption flex gap-2 text-ink-muted">
+                      <span aria-hidden="true" className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-accent-deep" />
+                      {r.text}
+                    </li>
+                  ))}
               </ul>
               <Link href="/visit#requirements" className="link-arrow mt-3 text-[0.9375rem]">
                 All requirements
