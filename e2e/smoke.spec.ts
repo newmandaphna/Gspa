@@ -37,10 +37,11 @@ for (const path of PAGES) {
     // Accept font/network noise, fail on real runtime errors.
     const real = errors.filter((e) => !/fonts\.g|net::ERR|favicon|hydrat/i.test(e));
     expect(real, `${path} errors`).toEqual([]);
+    const name = path === "/" ? "home" : path.replace(/^\//, "").replace(/\//g, "_");
     await page.setViewportSize({ width: 1440, height: 900 });
-    await page.screenshot({ path: `e2e/screenshots${path === "/" ? "/home" : path.replace(/\//g, "_")}-desktop.png`, fullPage: true });
+    await page.screenshot({ path: `e2e/screenshots/${name}-desktop.png`, fullPage: true });
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.screenshot({ path: `e2e/screenshots${path === "/" ? "/home" : path.replace(/\//g, "_")}-mobile.png`, fullPage: true });
+    await page.screenshot({ path: `e2e/screenshots/${name}-mobile.png`, fullPage: true });
   });
 }
 
