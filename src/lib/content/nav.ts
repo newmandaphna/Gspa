@@ -1,4 +1,12 @@
 export type NavItem = { label: string; href: string };
+export const TRAINING_CLASSES_LINK: NavItem = { label: "Training Classes", href: "/training/classes" };
+
+/** Match the most specific destination so nested routes do not select two links. */
+export function isNavActive(pathname: string, href: string): boolean {
+  return (pathname === href || pathname.startsWith(href + "/")) &&
+    !NAV.some((item) => item.href.startsWith(href + "/") &&
+      (pathname === item.href || pathname.startsWith(item.href + "/")));
+}
 
 /** The house rules page. The footer, the club page and the legal page all point here. */
 export const HOUSE_RULES_LINK: NavItem = { label: "House rules", href: "/house-rules" };
@@ -7,6 +15,7 @@ export const HOUSE_RULES_LINK: NavItem = { label: "House rules", href: "/house-r
 export const NAV: NavItem[] = [
   { label: "The Club", href: "/club" },
   { label: "Training", href: "/training" },
+  TRAINING_CLASSES_LINK,
   { label: "Membership", href: "/membership" },
   { label: "Events", href: "/events" },
   { label: "Visit", href: "/visit" },
@@ -20,6 +29,7 @@ export const FOOTER_COLUMNS: { title: string; links: NavItem[] }[] = [
       { label: "Private Suites", href: "/club#suites" },
       { label: "Simulator", href: "/club#simulator" },
       { label: "Training", href: "/training" },
+      TRAINING_CLASSES_LINK,
       { label: "Membership", href: "/membership" },
       { label: "Events", href: "/events" },
     ],

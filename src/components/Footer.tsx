@@ -3,15 +3,16 @@ import { LiveStatus } from "@/components/LiveStatus";
 import { Wordmark } from "@/components/Wordmark";
 import { Owner } from "@/components/ui/Owner";
 import { SITE } from "@/lib/config/site";
-import { FOOTER_COLUMNS, HOUSE_RULES_LINK, type NavItem } from "@/lib/content/nav";
+import { FOOTER_COLUMNS, HOUSE_RULES_LINK, TRAINING_CLASSES_LINK, type NavItem } from "@/lib/content/nav";
 import { computeOpenStatus } from "@/lib/hours";
 
-/** The six text links. Members and Legal come from nav.ts so one edit renames them everywhere. */
+/** Shared footer destinations. */
 function pick(title: string, label: string): NavItem | undefined {
   return FOOTER_COLUMNS.find((c) => c.title === title)?.links.find((l) => l.label === label);
 }
 
 const ROW: NavItem[] = [
+  TRAINING_CLASSES_LINK,
   { label: "Reserve", href: "/reserve" },
   { label: "Manage a reservation", href: "/reserve/manage" },
   pick("Members", "Sign in") ?? { label: "Sign in", href: "/members/login" },
@@ -27,7 +28,7 @@ const PHONE_HREF = `tel:${SITE.phone.replace(/[^\d+]/g, "")}`;
 
 /**
  * One dark band. Wordmark, the live status in serif, the address as a Maps
- * link, the phone as tel:, Instagram, one row of six links, then the legal
+ * link, the phone as tel:, Instagram, a wrapping row of links, then the legal
  * links and the year in mono. The range license number goes in the footnote
  * once the owner supplies it (RANGE_LICENSE below).
  */

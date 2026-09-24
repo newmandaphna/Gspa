@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "motion/react";
-import { NAV } from "@/lib/content/nav";
+import { NAV, isNavActive } from "@/lib/content/nav";
 import { SITE } from "@/lib/config/site";
 import { cn } from "@/lib/cn";
 import type { OpenStatus } from "@/lib/hours";
@@ -21,7 +21,7 @@ type NavTheme = "dark" | "light" | "clear";
  * of each page; a route missing here paints a dark bar over a white hero
  * until the bundle hydrates.
  */
-const LIGHT_FIRST = ["/reserve", "/admin", "/events", "/legal", "/members/login", "/members/activate", "/members/account", "/members/requests/new"];
+const LIGHT_FIRST = ["/training/classes", "/reserve", "/admin", "/events", "/legal", "/members/login", "/members/activate", "/members/account", "/members/requests/new"];
 function firstBand(pathname: string): "dark" | "light" {
   return LIGHT_FIRST.some((p) => pathname === p || pathname.startsWith(p + "/")) ? "light" : "dark";
 }
@@ -194,15 +194,16 @@ export function Nav({ memberName, initialStatus }: Props) {
             <Wordmark tone="current" className="text-[15px]" />
           </Link>
 
-          <ul className="hidden items-center gap-8 md:flex">
+           <ul className="hidden items-center gap-3 lg:gap-5 md:flex">
             {NAV.map((item) => {
-              const active = pathname === item.href || pathname.startsWith(item.href + "/");
+               const active = isNavActive(pathname, item.href);
               return (
                 <li key={item.href}>
                   <Link
                     href={item.href}
+                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "text-[0.8125rem] tracking-[-0.01em] transition-opacity duration-200 hover:opacity-100",
+                      "whitespace-nowrap text-[0.8125rem] tracking-[-0.01em] transition-opacity duration-200 hover:opacity-100",
                       active ? "opacity-100" : "opacity-80",
                     )}
                   >
@@ -220,7 +221,7 @@ export function Nav({ memberName, initialStatus }: Props) {
             {/* Live status: server-rendered, refreshed each minute. Gold dot when open, mist when closed. */}
             <Link
               href="/visit#hours"
-              className={cn("hidden items-center gap-2 font-mono text-[0.6875rem] tracking-[0.02em] transition-opacity hover:opacity-100 md:inline-flex", light ? "text-ink-muted" : "text-mist")}
+              className={cn("hidden items-center gap-2 font-mono text-[0.6875rem] tracking-[0.02em] transition-opacity hover:opacity-100 xl:inline-flex", light ? "text-ink-muted" : "text-mist")}
               aria-label={`${status.short}. See hours`}
             >
               <span aria-hidden="true" className={cn("h-1.5 w-1.5 rounded-full transition-colors duration-500", status.open ? "bg-accent" : "bg-mist")} />
@@ -285,7 +286,7 @@ export function Nav({ memberName, initialStatus }: Props) {
                   variants={{ hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } }}
                   className="border-b border-white/10"
                 >
-                  <Link href={item.href} onClick={close} className="block py-4 text-[1.75rem] font-semibold tracking-[-0.02em] text-snow">
+                  <Link href={item.href} onClick={close} aria-current={isNavActive(pathname, item.href) ? "page" : undefined} className="block py-4 text-[1.75rem] font-semibold tracking-[-0.02em] text-snow aria-[current=page]:underline underline-offset-8">
                     {item.label}
                   </Link>
                 </motion.li>
