@@ -23,6 +23,17 @@ for (const path of PAGES) {
     expect(res?.status(), `${path} status`).toBeLessThan(400);
     await page.waitForLoadState("networkidle");
     await expect(page.locator("main")).toBeVisible();
+    // Walk the page so scroll-reveal sections render in the full-page capture.
+    await page.evaluate(async () => {
+      document.documentElement.style.scrollBehavior = "auto";
+      const h = document.documentElement.scrollHeight;
+      for (let y = 0; y < h; y += 400) {
+        window.scrollTo({ top: y, behavior: "instant" });
+        await new Promise((r) => setTimeout(r, 100));
+      }
+      window.scrollTo({ top: 0, behavior: "instant" });
+    });
+    await page.waitForTimeout(1200);
     // Accept font/network noise, fail on real runtime errors.
     const real = errors.filter((e) => !/fonts\.g|net::ERR|favicon|hydrat/i.test(e));
     expect(real, `${path} errors`).toEqual([]);
