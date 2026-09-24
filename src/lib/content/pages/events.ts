@@ -66,16 +66,16 @@ export function priceLabel(c: CatalogItem): string {
 
 export const EVENTS_META = {
   title: "Events",
-  description: `A Private Suite for ${numberWord(PRIVATE_SUITE.maxGuestsPerUnit)}, the Founders' Suite for ${numberWord(FOUNDERS_SUITE.maxGuestsPerUnit)}, or the floor for ${CORPORATE.maxGuestsPerUnit}. Suites reserve online. Buyouts are quoted within one business day.`,
+  description: `Events at ${SITE.name} in Jamaica, Queens: a Private Suite for ${numberWord(PRIVATE_SUITE.maxGuestsPerUnit)}, the Founders' Suite for ${numberWord(FOUNDERS_SUITE.maxGuestsPerUnit)}, or the whole floor for ${CORPORATE.maxGuestsPerUnit}. Suites reserve online. Buyouts are quoted within one business day.`,
 };
 
 /* ------------------------------------------------------------------ hero */
 
 export const EVENTS_HERO: SectionCopy = {
   eyebrow: "Events",
-  headline: "Three ways to gather.",
-  subhead: `A suite for ${numberWord(PRIVATE_SUITE.maxGuestsPerUnit)}. The Founders' Suite for ${numberWord(FOUNDERS_SUITE.maxGuestsPerUnit)}. The floor for ${numberWord(CORPORATE.maxGuestsPerUnit)}.`,
-  body: "Simulator bays for everyone, lanes for those who qualify. We check eligibility so you handle the guest list.",
+  headline: "Room for the whole group.",
+  subhead: `A Private Suite for ${numberWord(PRIVATE_SUITE.maxGuestsPerUnit)}, the Founders' Suite for ${numberWord(FOUNDERS_SUITE.maxGuestsPerUnit)}, or the whole floor for ${numberWord(CORPORATE.maxGuestsPerUnit)}.`,
+  body: "Simulator bays for every guest, lanes for the ones who qualify. The desk checks eligibility. You handle the invitations.",
   cta: { label: "Plan an event", href: "#inquire" },
   secondary: REQUIREMENTS_LINK,
 };
@@ -100,9 +100,9 @@ export const FLOOR_PLAN_LABELS = {
 
 export const EVENTS_FORMATS: SectionCopy = {
   eyebrow: "Formats",
-  headline: `${cap(numberWord(PRIVATE_SUITE.maxGuestsPerUnit))}, ${numberWord(FOUNDERS_SUITE.maxGuestsPerUnit)}, or ${numberWord(CORPORATE.maxGuestsPerUnit)}.`,
-  subhead: "Two formats reserve online. The third starts with a conversation.",
-  body: `The Private Suite for ${numberWord(PRIVATE_SUITE.maxGuestsPerUnit)} and the Founders' Suite for ${numberWord(FOUNDERS_SUITE.maxGuestsPerUnit)} reserve on the Reserve page. Buyouts are quoted.`,
+  headline: "How many are coming?",
+  subhead: "Suites reserve online. Buyouts start with the form below.",
+  body: `The Private Suite for ${numberWord(PRIVATE_SUITE.maxGuestsPerUnit)} and the Founders' Suite for ${numberWord(FOUNDERS_SUITE.maxGuestsPerUnit)} reserve on the Reserve page. The whole floor, ${numberWord(CORPORATE.maxGuestsPerUnit)} guests, is quoted per group.`,
   cta: { label: "Reserve a suite", href: "/reserve?category=suite" },
 };
 
@@ -151,22 +151,22 @@ export const EVENTS_DATE_NIGHT: SectionCopy = {
   eyebrow: "Coming",
   headline: `${DATE_NIGHT.name}.`,
   subhead: DATE_NIGHT.tagline,
-  body: "Forty minutes in the simulator, forty on a house rifle with an instructor, forty in the lounge. Price is for two. [Opening date to be confirmed.]",
+  body: "Forty minutes in the simulator, forty on a house rifle with an instructor beside you, and the last forty at a lounge table with dessert and espresso. Priced for two. [Opening date to be confirmed.]",
   cta: { label: "Join the list", href: "#inquire" },
   secondary: REQUIREMENTS_LINK,
 };
 
 export const DATE_NIGHT_CHIPS: string[] = [`${priceLabel(DATE_NIGHT)} for two`, durationLabel(DATE_NIGHT.durationMin)];
 
-export const DATE_PHOTO_ALT = "A lounge table set for two, espresso and dessert, the simulator wall glowing beyond the glass.";
+export const DATE_PHOTO_ALT = "A lounge table set for two with espresso and dessert, the simulator wall glowing beyond the glass.";
 
 /* --------------------------------------------------------------- parties */
 
 export const EVENTS_PARTIES: SectionCopy = {
   eyebrow: "Parties",
-  headline: "Bachelor. Bachelorette. Birthday.",
-  subhead: `${cap(numberWord(PRIVATE_SUITE.maxGuestsPerUnit))} in a Private Suite, ${numberWord(FOUNDERS_SUITE.maxGuestsPerUnit)} in the Founders' Suite. One range officer per ${numberWord(SHOOTERS_PER_OFFICER)} shooters.`,
-  body: "Simulator for everyone, lanes for those who qualify. No alcohol. A member host or a club host is required.",
+  headline: "Throw the party here.",
+  subhead: `${cap(numberWord(PRIVATE_SUITE.maxGuestsPerUnit))} in a Private Suite or ${numberWord(FOUNDERS_SUITE.maxGuestsPerUnit)} in the Founders' Suite, with one range officer for every ${numberWord(SHOOTERS_PER_OFFICER)} shooters.`,
+  body: "The simulator takes everyone; the lanes take guests who qualify. A member host or a club host is required. No alcohol.",
   cta: { label: "Check suite dates", href: "/reserve?category=suite" },
   secondary: REQUIREMENTS_LINK,
 };
@@ -182,8 +182,8 @@ export const AVATARS = {
 export const EVENTS_CORPORATE: SectionCopy = {
   eyebrow: "Corporate",
   headline: "Offsites with a point.",
-  subhead: `${cap(numberWord(CORPORATE_MIN_GUESTS))} to ${numberWord(CORPORATE.maxGuestsPerUnit)} guests. Simulator brackets, guided lanes, a catered lounge.`,
-  body: "Team-based simulator brackets, guided lanes for eligible guests, and a lounge buyout. Quoted per group.",
+  subhead: `${cap(numberWord(CORPORATE_MIN_GUESTS))} to ${numberWord(CORPORATE.maxGuestsPerUnit)} guests. An eight-team bracket in the simulator, and a host who writes the run of show.`,
+  body: "Teams shoot the bracket in the simulator, guests who qualify get guided lanes, and the lounge is bought out. Quoted per group.",
   cta: { label: "Request a quote", href: "#inquire" },
 };
 
@@ -201,7 +201,7 @@ export const EVENTS_INQUIRE: SectionCopy = {
   eyebrow: "Inquire",
   headline: "Tell us about the group.",
   subhead: "We reply within one business day.",
-  body: "Date, headcount, occasion, food and AV needs. Buyouts are quoted, not reserved online.",
+  body: "Date, headcount, occasion. Food or AV if you want them. Buyouts are quoted by a planner.",
 };
 
 export const OCCASIONS = ["Offsite", "Party", "Client evening", "Date night list", "Other"] as const;
@@ -238,7 +238,7 @@ export const EVENT_FORM = {
 };
 
 export const INQUIRE_FOOTNOTE = {
-  lead: "Rather talk to a person.",
+  lead: "Rather talk to a person? Try",
   phone: SITE.phone,
   email: SITE.email,
 };

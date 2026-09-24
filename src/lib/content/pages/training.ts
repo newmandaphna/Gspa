@@ -28,14 +28,14 @@ function minutesLabel(min: number): string {
 
 export const TRAINING_META = {
   title: "Training",
-  description: `Certified instruction at ${SITE.name}: the simulator, First Session, private instruction and the New York State 18-hour course, taught on site in Jamaica, Queens.`,
+  description: `Certified instruction at ${SITE.name} in Jamaica, Queens: the simulator, First Session, private instruction, plus the New York State 18-hour course, all taught on site.`,
 } as const;
 
 export const HERO = {
   eyebrow: "Training",
   headline: "Learn it right the first time.",
-  subhead: "Certified instructors. Small groups. Real feedback.",
-  body: "Whether it is your first shot or your thousandth, someone is watching your fundamentals.",
+  subhead: "Certified instructors and feedback on every shot.",
+  body: "First shot or ten thousandth, an instructor stands at your shoulder and says so when a fundamental slips.",
   cta: { label: "Reserve a session", href: "/reserve?category=training" },
   link: { label: "See requirements", href: "/visit#requirements" },
   imageSlot: "TRAINING_PHOTO_01",
@@ -65,9 +65,9 @@ function rungFrom(item: CatalogItem | undefined, label: string, fallbackSlug: st
 
 export const LADDER = {
   eyebrow: "The ladder",
-  headline: "Five steps. One ladder.",
-  subhead: "Start on the simulator. End with a state certificate.",
-  body: "Simulator, First Session, Private Instruction, the NYS 18-hour course, Defensive Scenarios. Each step assumes only the one before it.",
+  headline: "The ladder has five rungs.",
+  subhead: "It starts on the simulator and ends with a state certificate.",
+  body: "Simulator, First Session, Private Instruction, the NYS 18-hour course, Defensive Scenarios. Each step assumes only the one before it, and the first assumes nothing.",
   rungs: [
     rungFrom(simulatorBay, "Simulator", "simulator-bay"),
     rungFrom(firstSession, "First Session", "first-session"),
@@ -85,8 +85,8 @@ export const LADDER = {
 export const FIRST_SESSION = {
   eyebrow: "First Session",
   headline: "First Session.",
-  subhead: "Ninety minutes. One instructor. Zero assumptions.",
-  body: "Safety, stance, grip and sight picture in the classroom, then 50 rounds on a house rifle with your instructor beside you. No experience required.",
+  subhead: "Ninety minutes with an instructor who assumes nothing.",
+  body: "Safety and stance in the classroom, grip and sight picture next, then 50 rounds through a house .22 with your instructor at your elbow. No experience needed.",
   steps: ["Safety", "Stance", "Grip", "Sights", "Live fire"],
   cta: { label: "Reserve First Session", href: "/reserve?experience=first-session" },
   requirements: { label: "See requirements", href: "/visit#requirements" },
@@ -109,15 +109,15 @@ export type Instructor = { slot: string; name: string; credential: string; alt: 
 export const PRIVATE = {
   eyebrow: "Private instruction",
   headline: "One on one.",
-  subhead: "Private instruction, on your lane, on your schedule.",
-  body: "Drills built for your goals and saved to your profile. A second student joins at half price. Reserve consecutive hours for a longer session.",
+  subhead: "An instructor to yourself, at the hour you choose.",
+  body: "Drills built around whatever you came to fix, written up and saved to your profile. A second student joins at half price. For a longer session, reserve consecutive hours.",
   cta: { label: "Reserve private instruction", href: "/reserve?experience=private-instruction" },
   requirements: { label: "See requirements", href: "/visit#requirements" },
   price: privateInstruction ? `${formatMoney(privateInstruction.priceCents)} · ${privateInstruction.durationMin} minutes · lane fee included` : "",
   secondStudent: privateInstruction?.extraGuestCents ? `Second student ${formatMoney(privateInstruction.extraGuestCents)}` : "",
   eligibility: ELIGIBILITY_LABELS[privateInstruction?.eligibility ?? "longgun"],
   diagram: { left: "Instructor", right: "You" },
-  instructorsHeadline: `${cap(spell(FACILITY.instructors))} instructors. One standard.`,
+  instructorsHeadline: `${cap(spell(FACILITY.instructors))} instructors, every one certified.`,
   instructors: [
     { slot: "INSTRUCTOR_PHOTO_01", name: "[Name]", credential: "[Name], NRA Certified Instructor", alt: "Portrait of the first instructor" },
     { slot: "INSTRUCTOR_PHOTO_02", name: "[Name]", credential: "[Name], DCJS-approved instructor", alt: "Portrait of the second instructor" },
@@ -132,9 +132,9 @@ const cancelDays = ccwCourse?.cancelHours ? Math.round(ccwCourse.cancelHours / 2
 
 export const COURSES = {
   eyebrow: "State course",
-  headline: "New York State courses.",
-  subhead: "The 18-hour concealed carry course, taught on site.",
-  body: `Sixteen hours of classroom, two of live fire, one certificate. ${cap(spell(FACILITY.classroomSeats))} seats per date. Dates post monthly.`,
+  headline: "The 18-hour course.",
+  subhead: "The concealed carry course, taught here over one weekend.",
+  body: `Sixteen hours in the classroom and two on the line, with lunch both days. ${cap(spell(FACILITY.classroomSeats))} seats per date. New dates post monthly.`,
   numeral: "16 + 2",
   numeralCaption: "classroom + live fire",
   seats: FACILITY.classroomSeats,
@@ -144,7 +144,7 @@ export const COURSES = {
   ringedDays: [13, 14],
   cta: { label: "Ask about dates", href: "/visit#contact" },
   priceLine: ccwCourse ? `${formatMoney(ccwCourse.priceCents)} per seat [owner to confirm]` : "",
-  note: `Free cancellation to ${spell(cancelDays)} days before.`,
+  note: `Cancel free up to ${spell(cancelDays)} days before.`,
   eligibility: ELIGIBILITY_LABELS[ccwCourse?.eligibility ?? "anyone"],
   requirements: { label: "See requirements", href: "/visit#requirements" },
 } as const;
@@ -154,9 +154,9 @@ export const COURSES = {
    --------------------------------------------------------------------- */
 export const SIMULATOR = {
   eyebrow: "Simulator",
-  headline: "Decisions under pressure.",
-  subhead: "Simulator curriculum for civilians, security professionals, and teams.",
-  body: "Branching scenarios with an instructor debrief. No live fire.",
+  headline: "Judgment.",
+  subhead: "For civilians and security professionals, four to a bay.",
+  body: "Each scenario branches on what you do, and an instructor debriefs it after. No live ammunition.",
   cta: { label: "Reserve the simulator", href: "/reserve?experience=simulator-bay" },
   link: { label: "See the simulator", href: "/club#simulator" },
   price: simulatorBay ? `${formatMoney(simulatorBay.priceCents)} · ${simulatorBay.durationMin} minutes · up to ${spell(simulatorBay.maxGuestsPerUnit)}` : "",
@@ -171,20 +171,20 @@ export const SIMULATOR = {
 } as const;
 
 /* ------------------------------------------------------------------------
-   The license, decoded. Only the course happens here.
+   The license, step by step. Only the course happens here.
    --------------------------------------------------------------------- */
 export const LICENSE = {
   eyebrow: "The process",
-  headline: "The license, decoded.",
-  subhead: "NYC licensing is a process. We will walk it with you.",
-  body: "We do not issue licenses and cannot speed the NYPD. We can explain the steps, host the required course, and keep your training records in one place.",
+  headline: "How the license works.",
+  subhead: "Four steps, one of them here. We walk the rest with you.",
+  body: "Everything from the application to the decision belongs to the NYPD License Division. The required course happens here, your training record stays in one file, and the desk can talk you through any step.",
   nodes: [
     { label: "Apply", note: "NYPD License Division" },
     { label: "Course", note: "Here", here: true },
     { label: "Interview", note: "NYPD" },
     { label: "Decision", note: "NYPD" },
   ],
-  note: "Timelines set by the NYPD, not by us.",
+  note: "The clock belongs to the NYPD.",
   cta: { label: "Read the FAQ", href: "/visit#faq" },
   requirements: { label: "See requirements", href: "/visit#requirements" },
 } as const;
