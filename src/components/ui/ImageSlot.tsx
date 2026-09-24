@@ -12,6 +12,8 @@ type Props = {
   art?: React.ReactNode;
   priority?: boolean;
   sizes?: string;
+  /** Fill the nearest positioned ancestor (full-bleed backgrounds). */
+  fill?: boolean;
 };
 
 /**
@@ -19,9 +21,9 @@ type Props = {
  * `src` is provided, otherwise the supplied CSS/SVG art. Every slot is
  * discoverable via [data-image-slot].
  */
-export function ImageSlot({ slot, src, alt, className, art, priority, sizes = "100vw" }: Props) {
+export function ImageSlot({ slot, src, alt, className, art, priority, sizes = "100vw", fill = false }: Props) {
   return (
-    <div data-image-slot={slot} className={cn("relative overflow-hidden", className)}>
+    <div data-image-slot={slot} className={cn(fill ? "absolute inset-0" : "relative", "overflow-hidden", className)}>
       {src ? (
         <Image src={src} alt={alt} fill priority={priority} sizes={sizes} className="object-cover" />
       ) : (
