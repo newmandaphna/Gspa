@@ -70,16 +70,16 @@ export const REQUIREMENTS_LINK: Cta = { label: "See requirements", href: "/visit
 
 export const MEMBERSHIP_META = {
   title: "Membership",
-  description: `Three tiers, one standard of vetting. Members reserve ${TIER_WINDOW_DAYS.club}, ${TIER_WINDOW_DAYS.signature} or ${TIER_WINDOW_DAYS.founders} days ahead, bring guests, and keep a locker. Founders is limited to ${FOUNDERS_CAP} memberships.`,
+  description: `Three tiers. Members reserve ${TIER_WINDOW_DAYS.club}, ${TIER_WINDOW_DAYS.signature} or ${TIER_WINDOW_DAYS.founders} days ahead, shoot at the member rate and sign guests in on their own name. Founders stops at ${FOUNDERS_CAP} memberships.`,
 };
 
 /* ---------------------------------------------------------------- hero */
 
 export const MEMBERSHIP_HERO: SectionCopy = {
   eyebrow: "Membership",
-  headline: "Membership is the product.",
-  subhead: "Three tiers, one standard of vetting.",
-  body: "A club, not a counter. Members reserve further ahead, bring guests, and keep a locker.",
+  headline: "This is a members' club.",
+  subhead: "Three tiers, vetted to the same standard.",
+  body: "Members see the calendar before the public does, sign guests in on their own name and keep a locker here.",
   cta: { label: "Apply", href: "#apply" },
   secondary: { label: "Compare tiers", href: "#tiers" },
 };
@@ -92,15 +92,15 @@ export const HERO_SIGN_IN = { prefix: "Already a member?", label: "Sign in", hre
 export const SCREENING_FEE_SENTENCE = (() => {
   const paying = MEMBERSHIP_TIERS.filter((t) => !t.screeningFeeWaived).map((t) => t.name);
   const waived = MEMBERSHIP_TIERS.filter((t) => t.screeningFeeWaived).map((t) => t.name);
-  const first = `${joinNames(paying)} pay a ${formatMoney(SCREENING_FEE_CENTS)} screening fee at application, refunded if declined.`;
-  return waived.length ? `${first} ${joinNames(waived)}: waived.` : first;
+  const first = `${joinNames(paying)} pay a ${formatMoney(SCREENING_FEE_CENTS)} screening fee with the application. If we decline you, we refund it.`;
+  return waived.length ? `${first} ${joinNames(waived)} skip it.` : first;
 })();
 
 export const MEMBERSHIP_TIERS_COPY: SectionCopy = {
   eyebrow: "Tiers",
   headline: `${TIER_NAMES.join(". ")}.`,
-  subhead: "Choose the window you want.",
-  body: `Prices are annual. Club may be billed monthly. ${SCREENING_FEE_SENTENCE}`,
+  subhead: "Pick how far ahead you reserve.",
+  body: `Prices are per year. Club can be billed monthly if you prefer. ${SCREENING_FEE_SENTENCE}`,
 };
 
 export const TIER_CARD = {
@@ -120,7 +120,7 @@ export const COMPARE_ROWS: BenefitRow[] = [
   },
 ];
 
-export const COMPARE_CAPTION = "Everything each tier includes. Public reservations open seven days ahead.";
+export const COMPARE_CAPTION = `Everything each tier includes. For reference, the public reserves ${numberWord(BOOKING.maxAdvanceDays)} days ahead.`;
 
 /* ------------------------------------------------------------- windows */
 
@@ -133,9 +133,9 @@ export const WINDOW_STRIPS: WindowStrip[] = [
 
 export const MEMBERSHIP_WINDOWS: SectionCopy = {
   eyebrow: "Reservation windows",
-  headline: "See the calendar first.",
+  headline: "Reserve before the public.",
   subhead: `${cap(joinNames(MEMBERSHIP_TIERS.map((t) => numberWord(t.bookingWindowDays))).replace(" and ", ", or "))} days ahead.`,
-  body: `The public sees ${numberWord(BOOKING.maxAdvanceDays)} days. Founders also hold same-day priority on two lanes until 6 PM.`,
+  body: `The public sees ${numberWord(BOOKING.maxAdvanceDays)} days. Founders also hold two lanes on same-day priority until 6 PM, the closest thing here to walking in.`,
 };
 
 /* -------------------------------------------------------------- guests */
@@ -148,21 +148,21 @@ export const GUEST_MAX = Math.max(...GUEST_OPTIONS.map((g) => g.guests));
 export const MEMBERSHIP_GUESTS: SectionCopy = {
   eyebrow: "Guests",
   headline: "Bring people.",
-  subhead: "Guests shoot on your membership, under your name.",
-  body: "Guests sign the acknowledgement on their phone before they arrive and must meet the requirements for what they join. You are responsible for them on the line.",
+  subhead: "Guests shoot on your membership and under your name.",
+  body: `Each guest signs the acknowledgement on their phone before the visit and meets the same requirements as anyone else in that session. Bring up to ${numberWord(GUEST_MAX)}, depending on your tier. On the line, what they do is on you.`,
   cta: REQUIREMENTS_LINK,
 };
 
-export const GUEST_NOTE = "Guests visit up to six times a year before applying.";
+export const GUEST_NOTE = "A guest gets six visits a year. The seventh is an application.";
 export const GUEST_PICKER_LABELS = { you: "You", guest: "Guest", legend: "Guests per visit" };
 
 /* ------------------------------------------------------------- vetting */
 
 export const MEMBERSHIP_VETTING: SectionCopy = {
   eyebrow: "Vetting",
-  headline: "Vetting is the point.",
-  subhead: `${cap(numberWord(APPLICATION_STEPS.length))} steps. About ten business days.`,
-  body: "Application, ID and license check, a background screen, a 20-minute orientation in person, then activation. The screen runs only with your written authorization.",
+  headline: "Who shoots next to you?",
+  subhead: `${cap(numberWord(APPLICATION_STEPS.length))} steps over about ten business days.`,
+  body: "Apply online. We check ID and license status, then a third party runs a background screen with your written authorization. You come in for a 20-minute orientation. Then you are active. Nobody skips a step.",
 };
 
 export const VETTING_STEPS = APPLICATION_STEPS;
@@ -171,7 +171,7 @@ export const VETTING_LINK: Cta = { label: "How screening works", href: "/legal#s
 
 export const PORTAL_UNLOCKS = {
   eyebrow: "Members portal",
-  headline: "What activation unlocks.",
+  headline: "Once you are active.",
   minTierNote: (name: string) => `${name} and up`,
   services: MEMBER_SERVICES,
 };
@@ -181,9 +181,9 @@ export const PORTAL_UNLOCKS = {
 export const MEMBERSHIP_FOUNDERS: SectionCopy = {
   eyebrow: FOUNDERS_TIER.limited ?? `Limited to ${FOUNDERS_CAP} memberships`,
   headline: `${cap(numberWord(FOUNDERS_CAP))} Founders.`,
-  subhead: "Name on the wall. First call on everything.",
-  body: `A ${TIER_WINDOW_DAYS.founders}-day window, same-day priority on two lanes, ${numberWord(FOUNDERS_TIER.guestsPerVisit)} guests, unlimited lane time, a suite session every month. When it closes, it closes.`,
-  cta: { label: "Request a conversation", href: "#apply" },
+  subhead: "Your name on the wall and first call on everything.",
+  body: `A ${TIER_WINDOW_DAYS.founders}-day window, same-day priority on two lanes, ${numberWord(FOUNDERS_TIER.guestsPerVisit)} guests, unlimited lane time, a suite session every month, a host on every visit. Once all ${numberWord(FOUNDERS_CAP)} names are up, the list is closed for good.`,
+  cta: { label: "Ask about Founders", href: "#apply" },
 };
 
 export const FOUNDERS_COUNTER = `${FOUNDERS_REMAINING} remaining`;
@@ -195,8 +195,8 @@ export const FOUNDERS_WALL_ALT = "The Founders wall at The Gun Spa: fifty engrav
 export const MEMBERSHIP_APPLY: SectionCopy = {
   eyebrow: "Application",
   headline: "Apply.",
-  subhead: "Ten minutes now. Ten business days from us.",
-  body: "Name, contact, tier, license status, two references. The screening fee is collected at orientation until online payment goes live.",
+  subhead: "Ten minutes from you, ten business days from us.",
+  body: "Name, contact, tier, license status, two references. Until online payment goes live, we collect the screening fee at orientation.",
 };
 
 export const LICENSE_OPTIONS = ["None", "Premises", "Carry"] as const;
@@ -213,7 +213,7 @@ export const APPLY_FORM = {
     license: "NYC pistol license",
     reference1: "Reference one",
     reference2: "Reference two",
-    referenceHint: "Name and how to reach them. Each reference is asked one question by email.",
+    referenceHint: "Name and how to reach them. Each reference gets one question by email.",
     heard: "How you heard about us",
     consentPrefix: "I understand membership includes a third-party background screen that I authorize separately, and I have read the",
     consentScreening: "screening notice",

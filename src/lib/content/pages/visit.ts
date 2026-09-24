@@ -5,7 +5,7 @@
  * from src/lib/content/faq.ts. Square brackets are the owner's placeholders
  * and stay until confirmed at the source.
  */
-import { FACILITY, SITE } from "@/lib/config/site";
+import { FACILITY, HOURS, SITE } from "@/lib/config/site";
 
 export type Cta = { label: string; href: string; external?: boolean };
 
@@ -18,9 +18,17 @@ export type SectionCopy = {
   secondary?: Cta;
 };
 
+/** "09:00" for a day of week becomes "9" for running copy. */
+function openHour(dow: number): string {
+  const h = HOURS[dow];
+  if (!h) return "";
+  const n = Number(h.open.slice(0, 2)) % 12;
+  return String(n || 12);
+}
+
 export const VISIT_META = {
   title: "Visit & FAQ",
-  description: `Address, transit, hours, what to bring, the requirements list, and short answers. ${SITE.name} is in ${SITE.address.neighborhood}, where the E, J, Z, the LIRR and the JFK AirTrain meet.`,
+  description: `How to reach ${SITE.name} in ${SITE.address.neighborhood} by LIRR, subway or AirTrain. Hours, what to bring, every requirement in one list, plus short answers to the usual questions.`,
 };
 
 /* ------------------------------------------------------------------ hero */
@@ -30,8 +38,8 @@ export const ADDRESS_LINE = `${SITE.address.line1}, ${SITE.address.city}, ${SITE
 export const VISIT_HERO: SectionCopy = {
   eyebrow: "Visit",
   headline: "Jamaica, Queens.",
-  subhead: "Where the E, J, Z, the LIRR, and JFK meet.",
-  body: `${ADDRESS_LINE}. Enter through the doors under the sign.`,
+  subhead: "Where the LIRR meets the subway and the AirTrain.",
+  body: `${ADDRESS_LINE}. Come in through the doors under the sign.`,
   cta: { label: "Open in Maps", href: SITE.address.mapsUrl, external: true },
 };
 
@@ -41,9 +49,9 @@ export const EXTERIOR_PHOTO_ALT = `The street entrance of ${SITE.name} in ${SITE
 
 export const VISIT_TRANSIT: SectionCopy = {
   eyebrow: "Getting here",
-  headline: "Getting here.",
-  subhead: `${FACILITY.transit.lirrFromPennMin} minutes from Penn Station. ${FACILITY.transit.airtrainFromJfkMin} from the JFK terminal.`,
-  body: "Jamaica LIRR and Sutphin Blvd–Archer Av (E, J, Z) are the stops. AirTrain JFK ends at the same station.",
+  headline: "Take the train.",
+  subhead: `${FACILITY.transit.lirrFromPennMin} minutes from Penn Station and ${FACILITY.transit.airtrainFromJfkMin} from your JFK terminal.`,
+  body: "Get off at Jamaica on the LIRR or at Sutphin Blvd-Archer Av on the E, J or Z. AirTrain JFK ends at the same station.",
 };
 
 export type TransitLine = { id: "lirr" | "subway" | "airtrain"; label: string; stops: string[] };
@@ -51,7 +59,7 @@ export type TransitLine = { id: "lirr" | "subway" | "airtrain"; label: string; s
 /** The three ways in, drawn as converging lines. Labels are set in mono. */
 export const TRANSIT_LINES: TransitLine[] = [
   { id: "lirr", label: "Jamaica LIRR", stops: ["Penn Station", "Woodside", "Jamaica"] },
-  { id: "subway", label: "Sutphin Blvd–Archer Av (E J Z)", stops: ["Manhattan", "Kew Gardens", "Sutphin–Archer"] },
+  { id: "subway", label: "Sutphin Blvd-Archer Av (E J Z)", stops: ["Manhattan", "Kew Gardens", "Sutphin-Archer"] },
   { id: "airtrain", label: "AirTrain JFK", stops: ["Terminals", "Federal Circle", "Jamaica"] },
 ];
 
@@ -69,13 +77,13 @@ export const MAP_EMBED_ALT = `Map of the streets around ${SITE.name}, ${SITE.add
 
 export const VISIT_HOURS: SectionCopy = {
   eyebrow: "Hours",
-  headline: "Hours.",
-  subhead: "Open seven days.",
-  body: "The table below is the one the calendar uses. The last start is close minus the length of your session.",
+  headline: "Seven days.",
+  subhead: `Weekends open at ${openHour(6)}, weekdays at ${openHour(1)}.`,
+  body: "This table is the one the calendar reads. The last start of the day is closing time minus the length of your session.",
 };
 
 /** Mono line beneath the table. Matches the FAQ answer on lateness. */
-export const HOURS_NOTE = "Arrive 15 minutes early for check-in and the briefing. More than 20 minutes late counts as a no-show.";
+export const HOURS_NOTE = "Come 15 minutes early for check-in and the safety briefing. More than 20 minutes late counts as a no-show.";
 
 export const OPEN_STATUS_LABELS = {
   openNow: "Open now",
@@ -89,9 +97,9 @@ export const OPEN_STATUS_LABELS = {
 
 export const VISIT_BRING: SectionCopy = {
   eyebrow: "What to bring",
-  headline: "What to bring.",
-  subhead: "Photo ID. Closed-toe shoes. A calm head.",
-  body: "Every requirement is listed below and checked at the desk. Read it once and check-in takes a minute.",
+  headline: "Pack light.",
+  subhead: "Photo ID, closed-toe shoes, a calm head.",
+  body: "The full list is below and the desk checks every line of it. Read it once before you come and check-in takes a minute.",
   cta: { label: "See requirements", href: "#requirements" },
 };
 
@@ -107,9 +115,9 @@ export const BRING_ITEMS: BringItem[] = [
 
 export const VISIT_REQUIREMENTS: SectionCopy = {
   eyebrow: "Requirements",
-  headline: "What you will need.",
+  headline: "Read this once.",
   subhead: "Every rule, in one list.",
-  body: "The reservation flow shows you the lines that apply to your session. Nothing else on the site restates them. Lines in brackets are with counsel.",
+  body: "When you reserve, the flow shows only the lines that apply to that session. Nothing else on the site restates them. Brackets mean counsel is still on it, and the date below is the last review.",
 };
 
 export const LAST_REVIEWED_LABEL = "Last reviewed";
@@ -118,17 +126,17 @@ export const LAST_REVIEWED_LABEL = "Last reviewed";
 
 export const VISIT_FAQ: SectionCopy = {
   eyebrow: "FAQ",
-  headline: "Questions.",
-  subhead: "Short answers. Ask the desk for long ones.",
+  headline: "Anything else?",
+  subhead: "Short answers here. The desk has the long ones.",
 };
 
 /* --------------------------------------------------------------- contact */
 
 export const VISIT_CONTACT: SectionCopy = {
   eyebrow: "Contact",
-  headline: "Contact.",
-  subhead: "Concierge, 10 to 10.",
-  body: "Call or write. Groups and buyouts start here.",
+  headline: "Call the desk.",
+  subhead: "A concierge answers, 10 to 10.",
+  body: "Call or write. Groups and buyouts start with the desk.",
   secondary: { label: "Press and partnerships", href: `mailto:${SITE.email}?subject=Press%20and%20partnerships`, external: true },
 };
 
