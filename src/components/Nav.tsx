@@ -16,7 +16,22 @@ import { Wordmark } from "@/components/Wordmark";
 export function Nav() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [memberName, setMemberName] = useState<string | null>(null);
   const close = () => setOpen(false);
+
+  // Session probe: swaps the "Members" link to the member's name when signed in.
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/me", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: { member?: { firstName: string } | null } | null) => {
+        if (!cancelled) setMemberName(d?.member?.firstName ?? null);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [pathname]);
 
   useEffect(() => {
     document.documentElement.style.overflow = open ? "hidden" : "";
@@ -52,7 +67,10 @@ export function Nav() {
             })}
           </ul>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
+            <Link href={memberName ? "/members" : "/members/login"} className="hidden text-[0.8125rem] tracking-[-0.01em] opacity-80 transition-opacity hover:opacity-100 md:inline">
+              {memberName ? memberName : "Members"}
+            </Link>
             <Link
               href="/reserve"
               className="hidden h-7 items-center rounded-pill bg-snow px-3.5 text-[0.75rem] font-medium text-ink transition-colors hover:bg-white sm:inline-flex"
@@ -101,7 +119,7 @@ export function Nav() {
               variants={{ hidden: {}, show: { transition: { staggerChildren: 0.05, delayChildren: 0.05 } } }}
               className="flex flex-col px-8 pt-8"
             >
-              {[...NAV, { label: "Reserve", href: "/reserve" }].map((item) => (
+              {[...NAV, { label: memberName ? `Members · ${memberName}` : "Members", href: memberName ? "/members" : "/members/login" }, { label: "Reserve", href: "/reserve" }].map((item) => (
                 <motion.li
                   key={item.href}
                   variants={{ hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } }}

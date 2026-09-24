@@ -48,4 +48,4 @@ Set `ADMIN_PASSWORD` in `.env.local` to use the front desk at `/admin`.
 
 ## Content and brand
 
-All copy lives in `src/lib/content/*`. Colors are CSS tokens in `src/app/globals.css` (`--color-accent` re-skins the site). Photo placeholders are listed in `MEDIA.md`.
+All copy lives in `src/lib/content/*`. Colors are CSS tokens in `src/app/globals.css`; the accent is the gold from the logo, and `--color-accent-deep` is the darker gold used for small text on white. The logo lockup ("GUN | SPA", tagline "Ready? Aim. Relax!") is rebuilt as SVG in `src/components/Wordmark.tsx`. Photo placeholders and how to replace the wordmark with the original artwork are listed in `MEDIA.md`.
