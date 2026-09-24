@@ -43,7 +43,7 @@ export function Wordmark({ className, tone = "brand", tagline = false }: { class
       {tagline && (
         <>
           <span className="mt-[0.35em] block h-[0.14em] w-full" style={{ background: GOLD }} aria-hidden="true" />
-          <span className="mt-[0.3em] font-[family-name:var(--font-display)] text-[0.34em] font-semibold uppercase leading-none tracking-[0.12em]">
+          <span className="mt-[0.32em] font-[family-name:var(--font-display)] text-[0.42em] font-semibold uppercase leading-none tracking-[0.14em]">
             <span style={{ color: gun }}>Ready? Aim. </span>
             <span style={{ color: GOLD }}>Relax!</span>
           </span>
