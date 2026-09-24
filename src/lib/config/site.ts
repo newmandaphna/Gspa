@@ -57,16 +57,35 @@ export const SITE = {
  * every page down.
  */
 export function resolveSiteUrl(env: Record<string, string | undefined>): string {
-  const production = env.NODE_ENV === "production";
-  const fallback = production ? CANONICAL_URL : "http://localhost:5000";
-  const raw = env.NEXT_PUBLIC_SITE_URL?.trim() || (production ? CANONICAL_URL : env.REPLIT_DEV_DOMAIN?.trim()) || fallback;
+  // Anything that is not an explicit dev or test process counts as production, so a builder
+  // that leaves NODE_ENV unset or odd still gets the canonical domain.
+  const development = env.NODE_ENV === "development" || env.NODE_ENV === "test";
+  const fallback = development ? "http://localhost:5000" : CANONICAL_URL;
+  const override = publicOrigin(env.NEXT_PUBLIC_SITE_URL);
+  if (override) return override;
+  if (env.NEXT_PUBLIC_SITE_URL?.trim() && !development) {
+    console.error(`[site] NEXT_PUBLIC_SITE_URL is not a public URL: ${JSON.stringify(env.NEXT_PUBLIC_SITE_URL)}; using ${fallback}`);
+  }
+  return (development && publicOrigin(env.REPLIT_DEV_DOMAIN)) || fallback;
+}
+
+/**
+ * The origin of a usable public address, or null. The host must be localhost,
+ * an IPv4 address, or a real domain whose top-level label is letters only, so
+ * a build-host token such as "0hdm0b8.y_" can never end up in the sitemap.
+ */
+function publicOrigin(value: string | undefined): string | null {
+  const raw = value?.trim();
+  if (!raw) return null;
   const withScheme = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
   try {
     const u = new URL(withScheme);
-    return u.origin;
+    const host = u.hostname;
+    const label = "[a-z0-9](?:[a-z0-9-]*[a-z0-9])?";
+    const usable = host === "localhost" || /^\d{1,3}(?:\.\d{1,3}){3}$/.test(host) || new RegExp(`^(?:${label}\\.)+[a-z]{2,}$`, "i").test(host);
+    return usable ? u.origin : null;
   } catch {
-    if (production) console.error(`[site] NEXT_PUBLIC_SITE_URL is not a valid URL: ${JSON.stringify(raw)}; using ${fallback}`);
-    return fallback;
+    return null;
   }
 }
 
