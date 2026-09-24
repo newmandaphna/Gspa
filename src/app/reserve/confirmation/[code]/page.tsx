@@ -15,6 +15,11 @@ import { cn } from "@/lib/cn";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Your reservation", robots: { index: false, follow: false } };
 
+function unitNoun(category: string, n: number): string {
+  const base = category === "training" ? "seat" : category === "suite" ? "suite" : category === "experience" ? "bay" : category === "service" ? "appointment" : "lane";
+  return `${n} ${base}${n === 1 ? "" : "s"}`;
+}
+
 function cancellableNow(startsAt: Date): boolean {
   return startsAt.getTime() - Date.now() > BOOKING.freeCancelHours * 3_600_000;
 }
@@ -81,9 +86,16 @@ export default async function ConfirmationPage({
               <Item label="Experience" value={experience.name} />
               <Item label="When" value={formatInstant(booking.startsAt)} />
               <Item label="Duration" value={`${experience.durationMin} minutes`} />
-              <Item label="Guests" value={`${booking.guests} · ${booking.units} ${experience.maxGuestsPerUnit > 1 ? "lane" : "seat"}${booking.units === 1 ? "" : "s"}`} />
+              <Item label="Guests" value={`${booking.guests} · ${unitNoun(experience.category, booking.units)}`} />
               <Item label="Name" value={`${booking.firstName} ${booking.lastName}`} />
-              <Item label="Total" value={`${formatMoney(booking.amountCents)} · ${booking.paymentStatus === "paid" ? "paid" : booking.paymentStatus === "pay_on_arrival" ? "due on arrival" : booking.paymentStatus}`} />
+              <Item
+                label="Total"
+                value={
+                  booking.amountCents === 0
+                    ? "Included with membership"
+                    : `${formatMoney(booking.amountCents)} · ${booking.paymentStatus === "paid" ? "paid" : booking.paymentStatus === "pay_on_arrival" ? "due on arrival" : booking.paymentStatus}`
+                }
+              />
               {booking.memberNumber && <Item label="Member" value={booking.memberNumber} />}
             </dl>
             <div className="mt-8 flex flex-wrap gap-3">

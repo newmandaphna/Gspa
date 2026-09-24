@@ -444,6 +444,9 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
                           {availability.slots.map((s) => {
                             const ok = s.available >= units;
                             const selected = time === s.time;
+                            // "N left" only when this slot is scarcer than the day's best, so single-capacity
+                            // resources (gunsmith bench, detailing bay) don't badge every slot.
+                            const scarce = ok && s.available <= 2 && s.available < Math.max(...availability.slots.map((x) => x.available));
                             return (
                               <button
                                 key={s.time}
@@ -458,7 +461,7 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
                                 )}
                               >
                                 {s.label}
-                                {ok && s.available <= 2 && !selected && (
+                                {scarce && !selected && (
                                   <span className="absolute -top-1.5 right-2 rounded-pill bg-accent px-1.5 text-[0.625rem] font-semibold text-night">{s.available} left</span>
                                 )}
                               </button>
