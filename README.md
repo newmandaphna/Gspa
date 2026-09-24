@@ -28,7 +28,7 @@ Set `ADMIN_PASSWORD` in `.env.local` to use the front desk at `/admin`.
 
 1. Import this repository into Replit. The `.replit` file configures the dev server and an Autoscale deployment.
 2. Open **Database** and create a PostgreSQL database. This sets `DATABASE_URL`.
-3. Add secrets: `ADMIN_PASSWORD`, `SESSION_SECRET` (a long random value, e.g. `openssl rand -base64 32`; member sign-in refuses to run in production without it), `NEXT_PUBLIC_SITE_URL` (your canonical `https://` URL; it drives Stripe redirects, emails, the sitemap and Open Graph tags), and optionally the Stripe and Resend keys.
+3. Add secrets: `ADMIN_PASSWORD`, `SESSION_SECRET` (a long random value, e.g. `openssl rand -base64 32`; member sign-in refuses to run in production without it), and optionally the Stripe and Resend keys. The public origin for Stripe redirects, emails, the sitemap and Open Graph tags is `canonicalUrl` in `src/lib/config/site.ts` (`https://gunspa.com`); `NEXT_PUBLIC_SITE_URL` overrides it for a staging address. Replit's deployment builder does not pass secrets to `next build`, so keep the canonical domain in the config rather than in a secret.
 4. Deploy. Tables are created automatically on first request. A deployment without `DATABASE_URL` refuses to start rather than silently using the embedded, per-instance database.
 
 ## How reservations work

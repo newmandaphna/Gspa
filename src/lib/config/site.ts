@@ -4,17 +4,21 @@
  * Square brackets mark facts the owner has not confirmed yet.
  */
 
+/** The production origin. Every absolute link, the sitemap, share tags, emails and Stripe redirects use it. */
+const CANONICAL_URL = "https://gunspa.com";
+
 export const SITE = {
   name: "The Gun Spa",
   shortName: "Gun Spa",
-  domain: "thegunspa.com",
+  domain: "gunspa.com",
+  canonicalUrl: CANONICAL_URL,
   tagline: "Ready? Aim. Relax!",
   taglineSecondary: "Precision, at ease.",
   description:
     "A private shooting club and luxury indoor range in Jamaica, Queens. Twelve acoustic lanes, two private suites, two simulator bays. Three instructors and a lounge worth the trip.",
   timezone: "America/New_York",
   phone: "(718) 000-0000", // TODO(owner): real phone
-  email: "desk@thegunspa.com", // TODO(owner): real email
+  email: "desk@gunspa.com", // TODO(owner): real email
   address: {
     line1: "158-12 Rockaway Blvd",
     city: "Jamaica",
@@ -34,27 +38,34 @@ export const SITE = {
    */
   url: resolveSiteUrl({
     NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
-    REPLIT_DOMAINS: process.env.REPLIT_DOMAINS,
     REPLIT_DEV_DOMAIN: process.env.REPLIT_DEV_DOMAIN,
     NODE_ENV: process.env.NODE_ENV,
   }),
 } as const;
 
 /**
- * The public origin: NEXT_PUBLIC_SITE_URL, else the Replit deployment domain
- * (REPLIT_DOMAINS, first entry), else the Replit workspace domain, else
- * localhost. A value typed without a scheme gets https://. Never throws: an
- * unparsable value falls back so a typo in a secret cannot take every page down.
+ * The public origin. NEXT_PUBLIC_SITE_URL wins when set. Otherwise a
+ * production build uses the canonical domain above, and development uses the
+ * Replit workspace domain or localhost.
+ *
+ * The production default is deliberate: Replit's deployment builder does not
+ * pass workspace secrets to `next build`, and the sitemap, robots file and
+ * Open Graph tags are rendered at build time, so anything read from the
+ * environment there (including REPLIT_DOMAINS) bakes a build-host name into
+ * the published site. A value typed without a scheme gets https://. Never
+ * throws: an unparsable value falls back so a typo in a secret cannot take
+ * every page down.
  */
 export function resolveSiteUrl(env: Record<string, string | undefined>): string {
-  const fallback = "http://localhost:5000";
-  const raw = env.NEXT_PUBLIC_SITE_URL?.trim() || env.REPLIT_DOMAINS?.split(",")[0]?.trim() || env.REPLIT_DEV_DOMAIN?.trim() || fallback;
+  const production = env.NODE_ENV === "production";
+  const fallback = production ? CANONICAL_URL : "http://localhost:5000";
+  const raw = env.NEXT_PUBLIC_SITE_URL?.trim() || (production ? CANONICAL_URL : env.REPLIT_DEV_DOMAIN?.trim()) || fallback;
   const withScheme = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
   try {
     const u = new URL(withScheme);
     return u.origin;
   } catch {
-    if (env.NODE_ENV === "production") console.error(`[site] NEXT_PUBLIC_SITE_URL is not a valid URL: ${JSON.stringify(raw)}; using ${fallback}`);
+    if (production) console.error(`[site] NEXT_PUBLIC_SITE_URL is not a valid URL: ${JSON.stringify(raw)}; using ${fallback}`);
     return fallback;
   }
 }
