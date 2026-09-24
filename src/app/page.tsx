@@ -16,6 +16,7 @@ import { ExteriorArt, FloorPlan, LoungeArt, SimArt, SimulatorScreen, StepRail, S
 import { HeroArt, LaneWalk } from "@/components/pages/home/HeroMotion";
 import { InView } from "@/components/pages/home/InView";
 import { Tonight } from "@/components/pages/home/Tonight";
+import { UpcomingClasses } from "@/components/pages/home/UpcomingClasses";
 import { cn } from "@/lib/cn";
 import { FACILITY, SITE, TIER_WINDOW_DAYS } from "@/lib/config/site";
 import { computeOpenStatus } from "@/lib/hours";
@@ -82,6 +83,8 @@ export default function HomePage() {
           </div>
         </Container>
       </Section>
+
+      <UpcomingClasses />
 
       {/* ---------------------------------------------------------------- Quiet */}
       <Section theme="light" id="quiet" aria-labelledby="quiet-title">

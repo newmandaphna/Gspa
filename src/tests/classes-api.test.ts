@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("@/lib/auth", () => ({ isAdmin: vi.fn(async () => false) }));
-vi.mock("@/lib/classes", () => ({ listClassSessions: vi.fn(async () => [{ id: 1, title: "Safety", staffNotes: "private note", startsAt: new Date("2030-01-01T12:00:00Z") }]) }));
+vi.mock("@/lib/classes", () => ({ listClassSessions: vi.fn(async () => [{ id: 1, title: "Safety", status: "open", staffNotes: "private note", roster: ["private"], paidSeats: 2, startsAt: new Date("2099-01-01T12:00:00Z"), endsAt: new Date("2099-01-01T14:00:00Z") }]) }));
 import { isAdmin } from "@/lib/auth";
 import { listClassSessions } from "@/lib/classes";
 import { boundedBody, guard, readJson } from "@/app/api/classes/_shared";
@@ -35,7 +35,9 @@ describe("class API boundary", () => {
     const response = await GET(new Request("https://example.com/api/classes"));
     const body = await response.json();
     expect(body.sessions[0].staffNotes).toBeUndefined();
-    expect(body.sessions[0].startsAt).toBe("2030-01-01T12:00:00.000Z");
+    expect(body.sessions[0].startsAt).toBe("2099-01-01T12:00:00.000Z");
+    expect(body.sessions[0].roster).toBeUndefined();
+    expect(body.sessions[0].paidSeats).toBeUndefined();
     expect(response.headers.get("cache-control")).toBe("no-store");
   });
   it("rejects malformed dates before querying", async () => {
