@@ -1,4 +1,5 @@
 import { BOOKING, HOURS, windowDaysFor, type Hours } from "@/lib/config/site";
+import { CATALOG } from "@/lib/content/catalog";
 import { dayOfWeekIso, fromMinutes, labelForHHMM, toMinutes, zonedToUtc, RANGE_TZ } from "@/lib/time";
 
 export type SlotWindow = { time: string; startsAt: Date; endsAt: Date };
@@ -81,21 +82,26 @@ export function unitsInUse(start: Date, end: Date, load: Load[]): number {
   return used;
 }
 
+/**
+ * Maximum concurrent units in use at any instant inside [start, end).
+ * Concurrency can only rise where a booking starts, so probing the window
+ * start plus every booking start inside it finds the true peak. Back-to-back
+ * bookings that never overlap each other are therefore not double counted.
+ * Shared by applyLoad (the calendar) and canFit (the writer) so they agree.
+ */
+export function peakUnits(start: Date, end: Date, load: Load[]): number {
+  const probes = [start.getTime()];
+  for (const b of load) {
+    if (b.startsAt > start && b.startsAt < end) probes.push(b.startsAt.getTime());
+  }
+  let worst = 0;
+  for (const t of probes) worst = Math.max(worst, unitsInUse(new Date(t), new Date(t + 1), load));
+  return worst;
+}
+
 /** Attach remaining-unit counts to each slot window. */
 export function applyLoad(windows: SlotWindow[], load: Load[], capacity: number): Slot[] {
-  return windows.map((w) => {
-    const used = unitsInUse(w.startsAt, w.endsAt, load);
-    // Overlap within a slot can vary by sub-interval; take the worst case at
-    // every slot boundary inside the window.
-    let worst = used;
-    for (const b of load) {
-      if (b.startsAt > w.startsAt && b.startsAt < w.endsAt) {
-        const probeEnd = new Date(b.startsAt.getTime() + 1);
-        worst = Math.max(worst, unitsInUse(b.startsAt, probeEnd, load));
-      }
-    }
-    return { ...w, label: labelForHHMM(w.time), available: Math.max(0, capacity - worst) };
-  });
+  return windows.map((w) => ({ ...w, label: labelForHHMM(w.time), available: Math.max(0, capacity - peakUnits(w.startsAt, w.endsAt, load)) }));
 }
 
 /**
@@ -104,15 +110,19 @@ export function applyLoad(windows: SlotWindow[], load: Load[], capacity: number)
  * the start instant.
  */
 export function canFit(start: Date, end: Date, units: number, load: Load[], capacity: number): boolean {
-  const probes = [start.getTime()];
-  for (const b of load) {
-    if (b.startsAt > start && b.startsAt < end) probes.push(b.startsAt.getTime());
-  }
-  for (const t of probes) {
-    const used = unitsInUse(new Date(t), new Date(t + 1), load);
-    if (used + units > capacity) return false;
-  }
-  return true;
+  return peakUnits(start, end, load) + units <= capacity;
+}
+
+/**
+ * Free-cancellation window for an experience. The catalog sets `cancelHours`
+ * on suites and the course; anything else falls back to the config default
+ * (with the suite/event default for those categories, should a catalog entry
+ * ever be removed while bookings still reference it).
+ */
+export function cancelWindowHours(experience: { slug: string; category: string }): number {
+  const fromCatalog = CATALOG.find((c) => c.slug === experience.slug)?.cancelHours;
+  if (fromCatalog) return fromCatalog;
+  return experience.category === "suite" || experience.category === "event" ? BOOKING.suiteFreeCancelHours : BOOKING.freeCancelHours;
 }
 
 /** Latest bookable date for the public (tier null) or a member of `tier`. */

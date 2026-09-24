@@ -1,9 +1,18 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { HOURS } from "@/lib/config/site";
-import { addDaysIso, compareIso, dayOfWeekIso } from "@/lib/time";
+import { useId, useMemo, useState } from "react";
+import { BOOKING, HOURS } from "@/lib/config/site";
+import { compareIso, dayOfWeekIso, formatDateLong } from "@/lib/time";
 import { cn } from "@/lib/cn";
+
+/** "two hours'" from BOOKING.leadTimeMin, so the footnote moves with the config the calendar enforces. */
+function leadNotice(): string {
+  const min = BOOKING.leadTimeMin;
+  if (min % 60 !== 0) return `${min} minutes'`;
+  const h = min / 60;
+  const words = ["", "one", "two", "three", "four", "five", "six"];
+  return `${words[h] ?? h} hour${h === 1 ? "'s" : "s'"}`;
+}
 
 type Props = {
   value: string | null;
@@ -29,6 +38,7 @@ function daysInMonth(y: number, m: number) {
 export function Calendar({ value, onChange, minDate, maxDate }: Props) {
   const start = monthKey(value ?? minDate);
   const [cursor, setCursor] = useState(start);
+  const titleId = useId();
 
   const cells = useMemo(() => {
     const first = `${cursor.y}-${pad(cursor.m)}-01`;
@@ -75,7 +85,9 @@ export function Calendar({ value, onChange, minDate, maxDate }: Props) {
             <path d="M8 2L2 8l6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
-        <p className="t-4">{title}</p>
+        <p className="t-4" id={titleId}>
+          {title}
+        </p>
         <button
           type="button"
           onClick={() => move(1)}
@@ -88,7 +100,8 @@ export function Calendar({ value, onChange, minDate, maxDate }: Props) {
           </svg>
         </button>
       </div>
-      <div className="grid grid-cols-7 gap-y-1 text-center" role="grid" aria-label="Choose a date">
+      {/* A group of plain buttons, not an ARIA grid: the weekday is in each button's name, so the header row stays decorative. */}
+      <div className="grid grid-cols-7 gap-y-1 text-center" role="group" aria-labelledby={titleId}>
         {WEEKDAYS.map((d, i) => (
           <div key={i} className="t-footnote py-1 font-semibold text-ink-faint" aria-hidden="true">
             {d}
@@ -96,18 +109,20 @@ export function Calendar({ value, onChange, minDate, maxDate }: Props) {
         ))}
         {cells.map((c, i) =>
           c ? (
-            <div key={c.iso} className="flex items-center justify-center py-0.5" role="gridcell">
+            <div key={c.iso} className="flex items-center justify-center py-0.5">
               {(() => {
                 const closed = HOURS[dayOfWeekIso(c.iso)] === null;
                 const out = compareIso(c.iso, minDate) < 0 || compareIso(c.iso, maxDate) > 0;
                 const disabled = closed || out;
                 const selected = value === c.iso;
+                const reason = closed ? ", closed" : out ? ", not yet open for reservations" : "";
                 return (
                   <button
                     type="button"
                     disabled={disabled}
                     aria-pressed={selected}
-                    aria-label={c.iso}
+                    aria-label={`${formatDateLong(c.iso)}${reason}`}
+                    data-calendar-day
                     onClick={() => onChange(c.iso)}
                     className={cn(
                       "flex h-10 w-10 items-center justify-center rounded-full text-[0.9375rem] transition-[background-color,color,transform] duration-200",
@@ -126,8 +141,8 @@ export function Calendar({ value, onChange, minDate, maxDate }: Props) {
           ),
         )}
       </div>
-      <p className="t-footnote mt-3 text-ink-faint">
-        {value ? addDaysIso(value, 0) === minDate ? "Today · same-day reservations need one hour's notice" : "" : "Select a day to see available start times"}
+      <p className="t-footnote mt-3 text-ink-muted">
+        {value ? (value === minDate ? `Today · same-day reservations need ${leadNotice()} notice` : "") : "Select a day to see available start times"}
       </p>
     </div>
   );

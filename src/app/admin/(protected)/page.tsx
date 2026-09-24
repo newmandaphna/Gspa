@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { requireAdmin } from "@/lib/auth";
 import Link from "next/link";
 import { listBookings } from "@/lib/booking";
 import { listInquiries } from "@/lib/inquiries";
@@ -9,6 +10,7 @@ import { BookingRow } from "@/components/admin/BookingRow";
 export const metadata: Metadata = { title: "Front desk · Today", robots: { index: false } };
 
 export default async function AdminHome() {
+  await requireAdmin();
   const today = todayIso();
   const from = zonedToUtc(today, "00:00");
   const to = zonedToUtc(addDaysIso(today, 1), "00:00");

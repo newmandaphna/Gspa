@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import { requireAdmin } from "@/lib/auth";
 import Link from "next/link";
 import { updateRequestAction } from "@/app/admin/actions";
-import { adminInput } from "@/components/admin/AdminForms";
+import { adminInput } from "@/app/admin/styles";
 import { listMemberRequests, REQUEST_KINDS } from "@/lib/members/service";
 import { formatInstant } from "@/lib/time";
 import { cn } from "@/lib/cn";
@@ -17,6 +18,7 @@ const TONE: Record<string, string> = {
 };
 
 export default async function AdminRequests({ searchParams }: { searchParams: Promise<{ all?: string }> }) {
+  await requireAdmin();
   const { all } = await searchParams;
   const rows = await listMemberRequests({ openOnly: all !== "1" });
   return (

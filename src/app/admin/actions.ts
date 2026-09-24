@@ -3,25 +3,26 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { adminConfigured, checkAdminPassword, clearAdminSession, isAdmin, setAdminSession } from "@/lib/auth";
+import { adminConfigured, checkAdminPassword, clearAdminSession, requireAdmin, setAdminSession } from "@/lib/auth";
 import { adminSetStatus } from "@/lib/booking";
 import { TIERS, type TierKey } from "@/lib/config/site";
 import { createMember, regenerateActivation, updateMember, updateMemberRequest } from "@/lib/members/service";
-import { rateLimit } from "@/lib/ratelimit";
+import { clientIp, rateLimit } from "@/lib/ratelimit";
 
 export type AdminActionState = { error?: string; ok?: boolean; code?: string };
 
-async function requireAdmin(): Promise<void> {
-  if (!(await isAdmin())) redirect("/admin/login");
-}
-
 export async function adminLoginAction(_prev: AdminActionState, formData: FormData): Promise<AdminActionState> {
   if (!adminConfigured()) return { error: "ADMIN_PASSWORD is not set (or is shorter than 6 characters). Add it to your environment and restart." };
-  const h = await headers();
-  const addr = h.get("x-forwarded-for")?.split(",")[0]?.trim() || "anon";
-  if (!rateLimit(`admin-login:${addr}`, { limit: 8, windowMs: 15 * 60_000 })) return { error: "Too many attempts. Wait a few minutes." };
+  const addr = clientIp(await headers());
+  // One shared password, so the per-address bucket alone is not enough: a global bucket caps guessing from any number of addresses.
+  if (!rateLimit(`admin-login:${addr}`, { limit: 8, windowMs: 15 * 60_000 }) || !rateLimit("admin-login:global", { limit: 30, windowMs: 15 * 60_000 })) {
+    return { error: "Too many attempts. Wait a few minutes." };
+  }
   const password = String(formData.get("password") ?? "");
-  if (!checkAdminPassword(password)) return { error: "Incorrect password." };
+  if (!checkAdminPassword(password)) {
+    await new Promise((r) => setTimeout(r, 500));
+    return { error: "Incorrect password." };
+  }
   await setAdminSession();
   redirect("/admin");
 }
@@ -38,7 +39,7 @@ export async function setBookingStatusAction(formData: FormData): Promise<void> 
   const paymentStatus = String(formData.get("paymentStatus") ?? "");
   if (!Number.isInteger(id) || id <= 0) return;
   const patch: { status?: string; paymentStatus?: string } = {};
-  if (["confirmed", "cancelled", "pending"].includes(status)) patch.status = status;
+  if (["confirmed", "cancelled"].includes(status)) patch.status = status;
   if (["paid", "unpaid", "pay_on_arrival", "refunded"].includes(paymentStatus)) patch.paymentStatus = paymentStatus;
   if (Object.keys(patch).length) await adminSetStatus(id, patch);
   revalidatePath("/admin");

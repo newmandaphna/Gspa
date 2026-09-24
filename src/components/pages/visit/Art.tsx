@@ -72,7 +72,9 @@ function lerp(a: number, b: number, t: number) {
 /**
  * Three hairlines with station dots converging on a gold pin. Paths carry the
  * `draw` class and animate when a parent gets `in-view`. Labels are HTML so
- * they stay legible at phone width.
+ * they stay legible on wide screens; below `sm` the three origin labels are
+ * hidden because the drawing is too small to hold them and the transit chips
+ * under the sketch carry the same information.
  */
 export function TransitSketch({ lines, className }: { lines: TransitLine[]; className?: string }) {
   return (
@@ -112,7 +114,7 @@ export function TransitSketch({ lines, className }: { lines: TransitLine[]; clas
           <span
             key={line.id}
             className={cn(
-              "absolute font-mono text-[0.75rem] leading-none text-ink-muted",
+              "absolute hidden whitespace-nowrap font-mono text-[0.75rem] leading-none text-ink-muted sm:block",
               o.anchor === "middle" && "-translate-x-1/2",
               o.anchor === "end" && "-translate-x-full",
             )}

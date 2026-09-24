@@ -22,7 +22,25 @@ export function rateLimit(key: string, opts: { limit: number; windowMs: number }
   return true;
 }
 
+/**
+ * The client address as seen by the trusted edge. Proxies append the address
+ * they observed to X-Forwarded-For, so the left-most entry is whatever the
+ * client typed; the trustworthy one sits TRUSTED_PROXY_HOPS from the right
+ * (default 1: the entry the last proxy added). x-real-ip is client-settable
+ * without a proxy and is never used. Fails closed: with no header, every
+ * request shares one bucket.
+ */
+export function clientIp(headers: { get(name: string): string | null }): string {
+  const fwd = headers.get("x-forwarded-for");
+  if (!fwd) return "anon";
+  const parts = fwd
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const hops = Math.max(1, Number(process.env.TRUSTED_PROXY_HOPS) || 1);
+  return parts[Math.max(0, parts.length - hops)] || "anon";
+}
+
 export function clientKey(req: Request): string {
-  const fwd = req.headers.get("x-forwarded-for");
-  return (fwd ? fwd.split(",")[0] : req.headers.get("x-real-ip")) ?? "anon";
+  return clientIp(req.headers);
 }

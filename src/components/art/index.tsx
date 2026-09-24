@@ -41,8 +41,12 @@ export function TargetRings({ className, tone = "dark", rings = 6, animate = tru
   );
 }
 
-/** A lane receding into darkness: converging light rails and a lit target frame. */
-export function LanePerspective({ className }: { className?: string }) {
+/**
+ * A lane receding into darkness: converging light rails and a lit target frame.
+ * Pass `target={false}` when used as a full-bleed backdrop behind centred copy:
+ * the hard-edged target box lands at the visual centre and reads as an overlap.
+ */
+export function LanePerspective({ className, target = true }: { className?: string; target?: boolean }) {
   return (
     <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" className={cn("h-full w-full", className)} aria-hidden="true">
       <defs>
@@ -84,10 +88,14 @@ export function LanePerspective({ className }: { className?: string }) {
       <path d="M470 900 L790 445" stroke="url(#lp-rail)" strokeWidth="2" />
       <path d="M1130 900 L810 445" stroke="url(#lp-rail)" strokeWidth="2" />
       {/* target frame */}
-      <rect x="770" y="400" width="60" height="70" rx="2" fill="#0a0a0b" stroke="rgba(226,201,138,0.7)" strokeWidth="1.2" />
-      <circle cx="800" cy="435" r="16" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="1" />
-      <circle cx="800" cy="435" r="8" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="1" />
-      <circle cx="800" cy="435" r="2.5" fill="#e2c98a" />
+      {target && (
+        <>
+          <rect x="770" y="400" width="60" height="70" rx="2" fill="#0a0a0b" stroke="rgba(226,201,138,0.7)" strokeWidth="1.2" />
+          <circle cx="800" cy="435" r="16" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="1" />
+          <circle cx="800" cy="435" r="8" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="1" />
+          <circle cx="800" cy="435" r="2.5" fill="#e2c98a" />
+        </>
+      )}
       <rect width="1600" height="900" fill="url(#lp-fade)" opacity="0.35" />
     </svg>
   );

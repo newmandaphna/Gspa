@@ -135,7 +135,7 @@ export const VISIT_FAQ: SectionCopy = {
 export const VISIT_CONTACT: SectionCopy = {
   eyebrow: "Contact",
   headline: "Call the desk.",
-  subhead: "A concierge answers, 10 to 10.",
+  subhead: "A concierge answers whenever the club is open.",
   body: "Call or write. Groups and buyouts start with the desk.",
   secondary: { label: "Press and partnerships", href: `mailto:${SITE.email}?subject=Press%20and%20partnerships`, external: true },
 };

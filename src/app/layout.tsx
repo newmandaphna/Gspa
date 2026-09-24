@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
+import { MotionProvider } from "@/components/MotionProvider";
 import { SITE } from "@/lib/config/site";
 
 export const metadata: Metadata = {
@@ -41,11 +42,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           Skip to content
         </a>
-        <Nav />
-        <main id="main" className="flex-1">
-          {children}
-        </main>
-        <Footer />
+        <MotionProvider>
+          <Nav />
+          <main id="main" className="flex-1">
+            {children}
+          </main>
+          <Footer id="site-footer" />
+        </MotionProvider>
       </body>
     </html>
   );

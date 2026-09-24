@@ -55,7 +55,7 @@ const COURSE_CANCEL_DAYS = Math.round((course?.cancelHours ?? 168) / 24);
 const FEE = formatMoney(SCREENING_FEE_CENTS);
 const founders = tierByKey("founders");
 const FOUNDERS_NAME = founders?.name ?? "Founders";
-/** Tiers that pay the screening fee at application (refunded if declined). */
+/** Tiers that pay the screening fee (refunded if declined). */
 const FEE_TIERS = MEMBERSHIP_TIERS.filter((t) => !t.screeningFeeWaived)
   .map((t) => t.name)
   .join(" and ");
@@ -92,7 +92,7 @@ export const RETENTION_ROWS: RetentionRow[] = [
   { data: "Screening results", why: `${SCREENING_VENDOR} holds the consumer report. The club keeps the decision and any adverse-action record.`, howLong: "Decision 5 years; the report itself 1 year" },
   { data: "Event leads", why: "To quote and plan the event.", howLong: "2 years" },
   { data: "Lane credit ledger", why: "To apply credit at the desk.", howLong: "12 months after the credit expires" },
-  { data: "Member-match cookie", why: "A signed, httpOnly cookie holding only a member id, set after you open the emailed link.", howLong: "30 days" },
+  { data: "Member-match cookie", why: "A signed, httpOnly cookie holding only a member id, set when you sign in to the members portal.", howLong: "30 days" },
   { data: "Analytics", why: "[Privacy-preserving analytics vendor, or none.] No cross-site tracking, no advertising pixels.", howLong: "[Per vendor]" },
 ];
 
@@ -252,7 +252,7 @@ export const SCREENING: LegalSection = {
     {
       heading: "The fee",
       paragraphs: [
-        `${FEE_TIERS} applicants pay a ${FEE} screening fee at application. It is refunded in full if the application is declined. ${FOUNDERS_NAME} applicants pay no fee.`,
+        `${FEE_TIERS} applicants pay a ${FEE} screening fee. It is refunded in full if the application is declined. ${FOUNDERS_NAME} applicants pay no fee.`,
       ],
     },
   ],

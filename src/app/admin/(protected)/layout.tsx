@@ -14,6 +14,7 @@ const LINKS = [
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  // Navigation-level guard only; each page under (protected) calls requireAdmin() itself.
   if (!(await isAdmin())) redirect("/admin/login");
   return (
     <div data-theme="light" className="min-h-dvh bg-paper-2 pt-[var(--nav-h)] text-ink">

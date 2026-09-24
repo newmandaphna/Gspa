@@ -18,7 +18,7 @@ export type Tier = {
   screeningFeeWaived?: boolean;
 };
 
-/** One fee, one place. Club and Signature pay it at application; refunded if declined. */
+/** One fee, one place. Club and Signature pay it; refunded if declined. When it is collected is stated only in the Apply section (at orientation until online payment goes live). */
 export const SCREENING_FEE_CENTS = 15000;
 
 /** Prices are placeholders until the owner confirms. Bracketed values are unconfirmed. */
@@ -112,7 +112,7 @@ export const BENEFITS: BenefitRow[] = [
   { label: "Founders' Suite", club: "Public rate", signature: "Public rate", founders: "Member rate" },
   { label: "Locker", club: "Half size", signature: "Full size, biometric", founders: "Full size, biometric" },
   { label: "Gunsmith bench time", club: true, signature: true, founders: true },
-  { label: "Firearm detailing", club: "Member rate", signature: true, founders: true },
+  { label: "Firearm detailing", club: false, signature: true, founders: true },
   { label: "Training and simulator", club: "10% off", signature: "20% off", founders: "20% off, 4 hrs instruction included" },
   { label: "Private event", club: false, signature: false, founders: "1 a year" },
   { label: "Founders wall", club: false, signature: false, founders: true },

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { requireAdmin } from "@/lib/auth";
 import Link from "next/link";
 import { BookingRow } from "@/components/admin/BookingRow";
 import { listBookings } from "@/lib/booking";
@@ -7,6 +8,7 @@ import { addDaysIso, formatDateLong, isIsoDate, todayIso, zonedToUtc } from "@/l
 export const metadata: Metadata = { title: "Front desk · Reservations", robots: { index: false } };
 
 export default async function AdminBookings({ searchParams }: { searchParams: Promise<{ date?: string; all?: string }> }) {
+  await requireAdmin();
   const sp = await searchParams;
   const date = sp.date && isIsoDate(sp.date) ? sp.date : todayIso();
   const includeCancelled = sp.all === "1";

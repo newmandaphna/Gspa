@@ -40,10 +40,13 @@ export function AirFlow({ className }: { className?: string }) {
 
 /* ------------------------------------------------------------- suites */
 
-/** Two suites with the shared wall dashed. */
+/**
+ * Two suites with the shared wall dashed. The caller owns the width: `cn` does not
+ * merge conflicting utilities, so a base `w-full` would beat a passed `w-28`.
+ */
 export function SuitePlan({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 240 100" className={cn("h-auto w-full", className)} aria-hidden="true">
+    <svg viewBox="0 0 240 100" className={cn("h-auto", className ?? "w-full")} aria-hidden="true">
       <g fill="none" stroke={LIGHT_LINE} strokeWidth="1">
         <rect x="10.5" y="10.5" width="110" height="80" rx="3" />
         <rect x="120.5" y="10.5" width="110" height="80" rx="3" />

@@ -1,12 +1,13 @@
 import { randomInt } from "node:crypto";
-import { and, asc, eq, gt, inArray, lt, sql } from "drizzle-orm";
+import { and, asc, eq, gt, inArray, lt, sql, type SQL } from "drizzle-orm";
 import { getDb, type Db } from "@/lib/db";
 import { bookings, experiences, type Booking, type Experience } from "@/lib/db/schema";
 import { BOOKING, RESOURCES, tierSatisfies, type ResourceKey } from "@/lib/config/site";
-import { applyLoad, buildSlotWindows, canFit, computeAmount, hoursFor, maxBookableDate, type Load, type Slot } from "@/lib/availability";
+import { applyLoad, buildSlotWindows, canFit, cancelWindowHours, computeAmount, hoursFor, maxBookableDate, type Load, type Slot } from "@/lib/availability";
 import { addDaysIso, compareIso, isHHMM, isIsoDate, todayIso, zonedToUtc } from "@/lib/time";
 import { members } from "@/lib/db/schema";
 import type { MemberContext } from "@/lib/members/service";
+import { expireCheckoutSession, refundPaymentIntent, stripeEnabled } from "@/lib/stripe";
 
 export type PaymentMode = "stripe" | "on_arrival";
 
@@ -45,12 +46,23 @@ export function canAccess(experience: Pick<Experience, "memberOnly" | "minTier">
   return { ok: true };
 }
 
-/** A typed member number counts only if it belongs to an active member. Returns their number and tier. */
-async function validatedMemberNumber(db: Db, memberNumber: string | null | undefined): Promise<{ memberNumber: string; tier: string } | null> {
+/**
+ * A typed member number counts only if it belongs to an active member and,
+ * when the booker's email is known, matches the email on file, so a number
+ * seen on someone else's confirmation cannot borrow their window or put their
+ * name on a reservation. Returns the number and tier.
+ */
+async function validatedMemberNumber(db: Db, memberNumber: string | null | undefined, email?: string): Promise<{ memberNumber: string; tier: string } | null> {
   const n = memberNumber?.trim().toUpperCase();
   if (!n) return null;
-  const [m] = await db.select({ memberNumber: members.memberNumber, status: members.status, tier: members.tier }).from(members).where(eq(members.memberNumber, n)).limit(1);
-  return m && m.status === "active" ? { memberNumber: m.memberNumber, tier: m.tier } : null;
+  const [m] = await db
+    .select({ memberNumber: members.memberNumber, status: members.status, tier: members.tier, email: members.email })
+    .from(members)
+    .where(eq(members.memberNumber, n))
+    .limit(1);
+  if (!m || m.status !== "active") return null;
+  if (email !== undefined && m.email !== email.trim().toLowerCase()) return null;
+  return { memberNumber: m.memberNumber, tier: m.tier };
 }
 export type BookingResult =
   | { ok: true; booking: Booking; experience: Experience }
@@ -80,13 +92,19 @@ export async function listExperiences(db?: Db): Promise<Experience[]> {
   return d.select().from(experiences).where(eq(experiences.active, true)).orderBy(asc(experiences.sortOrder));
 }
 
-/** Cancel Stripe holds that were never paid. Cheap; runs before availability reads. */
+/**
+ * Cancel Stripe holds that were never paid. Cheap; runs before availability
+ * reads. Only unpaid rows qualify: a hold the desk marked paid stays. The
+ * cutoff trails Stripe's own expiry by BOOKING.holdGraceMin so a payment in
+ * the last seconds of checkout (and its webhook) lands on a pending row; the
+ * checkout.session.expired webhook frees abandoned holds on time.
+ */
 export async function sweepExpiredHolds(db: Db, now: Date): Promise<void> {
-  const cutoff = new Date(now.getTime() - BOOKING.pendingHoldMin * 60_000);
+  const cutoff = new Date(now.getTime() - (BOOKING.pendingHoldMin + BOOKING.holdGraceMin) * 60_000);
   await db
     .update(bookings)
     .set({ status: "cancelled", updatedAt: now })
-    .where(and(eq(bookings.status, "pending"), lt(bookings.createdAt, cutoff)));
+    .where(and(eq(bookings.status, "pending"), eq(bookings.paymentStatus, "unpaid"), lt(bookings.createdAt, cutoff)));
 }
 
 export async function loadForResource(db: Db, resource: string, from: Date, to: Date): Promise<Load[]> {
@@ -172,7 +190,10 @@ export async function createBooking(input: CreateBookingInput): Promise<BookingR
   const { units, amountCents } = computeAmount(experience, guests, Boolean(input.member));
 
   const today = todayIso(undefined, now);
-  const validated = input.member ? { memberNumber: input.member.memberNumber, tier: input.member.tier } : await validatedMemberNumber(db, input.memberNumber);
+  const validated = input.member ? { memberNumber: input.member.memberNumber, tier: input.member.tier } : await validatedMemberNumber(db, input.memberNumber, input.email);
+  if (!input.member && input.memberNumber?.trim() && !validated) {
+    return { ok: false, code: "INVALID", error: "That member number wasn't recognized, or doesn't match the email on file. Leave it blank, or use the email your membership is registered under." };
+  }
   const memberNumber = validated?.memberNumber ?? null;
   if (compareIso(input.date, today) < 0) return { ok: false, code: "INVALID", error: "That date has passed." };
   if (compareIso(input.date, maxBookableDate(today, validated?.tier ?? null)) > 0) return { ok: false, code: "INVALID", error: "That date is beyond your online booking window." };
@@ -183,8 +204,10 @@ export async function createBooking(input: CreateBookingInput): Promise<BookingR
   if (!slot) return { ok: false, code: "UNAVAILABLE", error: "That start time is no longer available. Please choose another." };
 
   const capacity = capacityFor(experience.resource);
-  const status = input.paymentMode === "stripe" ? "pending" : "confirmed";
-  const paymentStatus = input.paymentMode === "stripe" ? "unpaid" : "pay_on_arrival";
+  // Nothing to collect (a member-included service) confirms immediately; Stripe rejects a $0 Checkout.
+  const mode: PaymentMode = amountCents === 0 ? "on_arrival" : input.paymentMode;
+  const status = mode === "stripe" ? "pending" : "confirmed";
+  const paymentStatus = mode === "stripe" ? "unpaid" : "pay_on_arrival";
 
   await sweepExpiredHolds(db, now);
 
@@ -260,30 +283,82 @@ export async function markPaidBySession(sessionId: string, paymentIntentId: stri
   return row ?? null;
 }
 
+/** The booking attached to a Checkout session, whatever its status. */
+export async function getBookingBySession(sessionId: string): Promise<Booking | null> {
+  const db = await getDb();
+  const [row] = await db.select().from(bookings).where(eq(bookings.stripeSessionId, sessionId)).limit(1);
+  return row ?? null;
+}
+
+/** Records a refund issued for a session's payment (e.g. paid after the hold was cancelled). */
+export async function markRefundedBySession(sessionId: string, paymentIntentId: string | null): Promise<void> {
+  const db = await getDb();
+  await db.update(bookings).set({ paymentStatus: "refunded", stripePaymentIntentId: paymentIntentId, updatedAt: new Date() }).where(eq(bookings.stripeSessionId, sessionId));
+}
+
+/** Stripe reports the Checkout page closed unpaid. Only an unpaid hold is released. */
 export async function cancelBySession(sessionId: string): Promise<void> {
   const db = await getDb();
   await db
     .update(bookings)
     .set({ status: "cancelled", updatedAt: new Date() })
-    .where(and(eq(bookings.stripeSessionId, sessionId), eq(bookings.status, "pending")));
+    .where(and(eq(bookings.stripeSessionId, sessionId), eq(bookings.status, "pending"), eq(bookings.paymentStatus, "unpaid")));
 }
 
 export type CancelResult = { ok: true; booking: Booking } | { ok: false; error: string };
 
-/** Guest self-service cancellation: must match the email on file and respect the cancellation window. */
-export async function cancelBooking(code: string, opts: { email?: string; byAdmin?: boolean; now?: Date }): Promise<CancelResult> {
+export type CancelOptions = {
+  email?: string;
+  byAdmin?: boolean;
+  now?: Date;
+  /** Refunds a paid card booking; defaults to Stripe. Injectable for tests. */
+  refund?: (paymentIntentId: string, bookingCode: string) => Promise<void>;
+};
+
+/**
+ * Cancellation. Guests must match the email on file and respect the free
+ * window for the experience (24 h for lanes, 72 h for suites and events).
+ * Inside that window a guest's card is refunded in full before the row is
+ * cancelled; if the refund fails the reservation stays active. Staff cancel
+ * without a refund (no-shows and inside-window cancels keep the fee per the
+ * Terms) and issue any refund deliberately. A still-open Checkout page is
+ * closed first so nobody pays for a released slot.
+ */
+export async function cancelBooking(code: string, opts: CancelOptions): Promise<CancelResult> {
   const now = opts.now ?? new Date();
   const found = await getBookingByCode(code);
   if (!found) return { ok: false, error: "Reservation not found." };
-  const { booking } = found;
+  const { booking, experience } = found;
   if (booking.status === "cancelled") return { ok: false, error: "This reservation is already cancelled." };
   if (!opts.byAdmin) {
     if (!opts.email || opts.email.trim().toLowerCase() !== booking.email) return { ok: false, error: "The email address does not match this reservation." };
-    const cutoff = new Date(booking.startsAt.getTime() - BOOKING.freeCancelHours * 3_600_000);
-    if (now > cutoff) return { ok: false, error: `Online cancellation closes ${BOOKING.freeCancelHours} hours before your session. Please call us.` };
+    const hours = cancelWindowHours(experience);
+    const cutoff = new Date(booking.startsAt.getTime() - hours * 3_600_000);
+    if (now > cutoff) return { ok: false, error: `Online cancellation closes ${hours} hours before your session. Please call us.` };
   }
+
+  if (booking.status === "pending" && booking.stripeSessionId) {
+    const result = await expireCheckoutSession(booking.stripeSessionId);
+    if (result.status === "paid") {
+      await markPaidBySession(booking.stripeSessionId, result.paymentIntentId);
+      return { ok: false, error: "Payment for this reservation just completed, so it is now confirmed. Reload the page to cancel it." };
+    }
+  }
+
+  const patch: { status: string; paymentStatus?: string; updatedAt: Date } = { status: "cancelled", updatedAt: now };
+  const refundable = !opts.byAdmin && booking.paymentStatus === "paid" && booking.stripePaymentIntentId && booking.amountCents > 0;
+  if (refundable && (opts.refund || stripeEnabled())) {
+    try {
+      await (opts.refund ?? refundPaymentIntent)(booking.stripePaymentIntentId!, booking.code);
+      patch.paymentStatus = "refunded";
+    } catch (err) {
+      console.error(`[booking] refund failed for ${booking.code}`, err);
+      return { ok: false, error: "We couldn't refund your card automatically, so the reservation is still active. Please call us and we'll take care of it." };
+    }
+  }
+
   const db = await getDb();
-  const [row] = await db.update(bookings).set({ status: "cancelled", updatedAt: now }).where(eq(bookings.id, booking.id)).returning();
+  const [row] = await db.update(bookings).set(patch).where(eq(bookings.id, booking.id)).returning();
   return { ok: true, booking: row };
 }
 
@@ -302,7 +377,29 @@ export async function listBookings(opts: { from: Date; to: Date; includeCancelle
     .orderBy(asc(bookings.startsAt));
 }
 
+/**
+ * Front-desk status patch. Cancelled is terminal here (a stale "Confirm" on
+ * a swept hold cannot resurrect it into a slot that has since been resold);
+ * marking a pending hold paid also confirms it so the sweep leaves it alone;
+ * cancelling a pending hold closes its open Checkout page first.
+ */
 export async function adminSetStatus(id: number, patch: { status?: string; paymentStatus?: string }): Promise<void> {
   const db = await getDb();
-  await db.update(bookings).set({ ...patch, updatedAt: new Date() }).where(eq(bookings.id, id));
+  const set: { status?: string | SQL; paymentStatus?: string; updatedAt: Date } = { ...patch, updatedAt: new Date() };
+  if (patch.status === "cancelled") {
+    const [row] = await db.select({ status: bookings.status, stripeSessionId: bookings.stripeSessionId }).from(bookings).where(eq(bookings.id, id)).limit(1);
+    if (row?.status === "pending" && row.stripeSessionId) {
+      const result = await expireCheckoutSession(row.stripeSessionId);
+      if (result.status === "paid") {
+        // The guest just paid: keep the reservation. Staff can cancel again (and refund) from a fresh page.
+        await markPaidBySession(row.stripeSessionId, result.paymentIntentId);
+        return;
+      }
+    }
+  }
+  if (patch.paymentStatus === "paid" && patch.status === undefined) {
+    set.status = sql`CASE WHEN ${bookings.status} = 'pending' THEN 'confirmed' ELSE ${bookings.status} END`;
+  }
+  const where = patch.status ? and(eq(bookings.id, id), inArray(bookings.status, [...ACTIVE])) : eq(bookings.id, id);
+  await db.update(bookings).set(set).where(where);
 }

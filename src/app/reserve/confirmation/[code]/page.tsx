@@ -6,10 +6,11 @@ import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { Row, Rows } from "@/components/ui/List";
 import { Section } from "@/components/ui/Section";
+import { cancelWindowHours } from "@/lib/availability";
 import { getBookingByCode, markPaidBySession } from "@/lib/booking";
 import { BOOKING, SITE } from "@/lib/config/site";
 import { requirementsFor } from "@/lib/content/requirements";
-import { getStripe, stripeEnabled } from "@/lib/stripe";
+import { checkAmountCollected, getStripe, paymentIntentIdOf, stripeEnabled } from "@/lib/stripe";
 import { formatInstant, formatMoney } from "@/lib/time";
 import { cn } from "@/lib/cn";
 
@@ -21,8 +22,8 @@ function unitNoun(category: string, n: number): string {
   return `${n} ${base}${n === 1 ? "" : "s"}`;
 }
 
-function cancellableNow(startsAt: Date): boolean {
-  return startsAt.getTime() - Date.now() > BOOKING.freeCancelHours * 3_600_000;
+function cancellableNow(startsAt: Date, hours: number): boolean {
+  return startsAt.getTime() - Date.now() > hours * 3_600_000;
 }
 
 function maskEmail(email: string): string {
@@ -48,8 +49,8 @@ export default async function ConfirmationPage({
     try {
       const session = await getStripe().checkout.sessions.retrieve(session_id);
       if (session.payment_status === "paid") {
-        const pi = typeof session.payment_intent === "string" ? session.payment_intent : (session.payment_intent?.id ?? null);
-        await markPaidBySession(session_id, pi);
+        const paid = await markPaidBySession(session_id, paymentIntentIdOf(session));
+        if (paid) checkAmountCollected(paid, session);
         found = (await getBookingByCode(code)) ?? found;
       }
     } catch (err) {
@@ -64,7 +65,8 @@ export default async function ConfirmationPage({
       : booking.status === "pending"
         ? { label: "Awaiting payment", tone: "bg-accent/25 text-accent-deep" }
         : { label: "Confirmed", tone: "bg-success/15 text-[#1f7a3a]" };
-  const canCancel = booking.status !== "cancelled" && cancellableNow(booking.startsAt);
+  const cancelHours = cancelWindowHours(experience);
+  const canCancel = booking.status !== "cancelled" && cancellableNow(booking.startsAt, cancelHours);
   const headline = booking.status === "cancelled" ? "Reservation cancelled." : booking.status === "pending" ? "Almost there." : `See you soon, ${booking.firstName}.`;
 
   return (
@@ -128,7 +130,7 @@ export default async function ConfirmationPage({
             <div className="rounded-card bg-paper-2 p-6">
               <p className="t-4">Need to change plans?</p>
               <p className="t-caption mt-2 text-ink-muted">
-                Free cancellation up to {BOOKING.freeCancelHours} hours before your session. After that, call {SITE.phone}.
+                Free cancellation up to {cancelHours} hours before your session. After that, call {SITE.phone}.
               </p>
               {canCancel ? <CancelForm code={booking.code} /> : booking.status !== "cancelled" ? <p className="t-caption mt-3 font-semibold">Online cancellation has closed for this reservation.</p> : null}
             </div>

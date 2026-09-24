@@ -1,17 +1,18 @@
 import type { Metadata } from "next";
+import { requireAdmin } from "@/lib/auth";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { regenerateActivationAction, updateMemberAction } from "@/app/admin/actions";
-import { adminInput } from "@/components/admin/AdminForms";
+import { adminInput, adminTextarea } from "@/app/admin/styles";
 import { TIERS } from "@/lib/config/site";
 import { MEMBERSHIP_TIERS } from "@/lib/content/membership";
 import { getMemberById, listMemberBookings, listMemberRequests, REQUEST_KINDS } from "@/lib/members/service";
 import { formatInstant, formatMoney } from "@/lib/time";
-import { cn } from "@/lib/cn";
 
 export const metadata: Metadata = { title: "Front desk · Member", robots: { index: false } };
 
 export default async function AdminMemberDetail({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ created?: string; saved?: string }> }) {
+  await requireAdmin();
   const { id } = await params;
   const sp = await searchParams;
   const memberId = Number(id);
@@ -104,7 +105,7 @@ export default async function AdminMemberDetail({ params, searchParams }: { para
             <label htmlFor="notes" className="t-caption font-semibold">
               Internal notes
             </label>
-            <textarea id="notes" name="notes" rows={3} defaultValue={member.notes ?? ""} className={cn(adminInput, "h-auto py-2")} />
+            <textarea id="notes" name="notes" rows={3} defaultValue={member.notes ?? ""} className={adminTextarea} />
           </div>
           <div className="sm:col-span-2">
             <button type="submit" className="h-10 rounded-pill bg-ink px-5 text-[0.9375rem] font-medium text-snow">

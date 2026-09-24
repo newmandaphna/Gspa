@@ -6,8 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { TIERS } from "@/lib/config/site";
 import { MEMBERSHIP_TIERS } from "@/lib/content/membership";
 import { cn } from "@/lib/cn";
-
-export const adminInput = "mt-1.5 h-10 w-full rounded-lg bg-white px-3 text-[0.9375rem] ring-1 ring-inset ring-ink/15 placeholder:text-ink-faint focus:ring-ink";
+import { adminInput, adminTextarea } from "@/app/admin/styles";
 
 export function AdminLoginForm() {
   const [state, action, pending] = useActionState(adminLoginAction, {} as AdminActionState);
@@ -92,7 +91,7 @@ export function CreateMemberForm() {
         <label htmlFor="notes" className="t-caption font-semibold">
           Notes (internal)
         </label>
-        <textarea id="notes" name="notes" rows={2} className={cn(adminInput, "h-auto py-2")} />
+        <textarea id="notes" name="notes" rows={2} className={cn(adminTextarea, "min-h-0")} />
       </div>
       {state.error && (
         <p role="alert" className="t-caption rounded-lg bg-[#fff2f0] px-3 py-2 text-[#c0392b] sm:col-span-2">

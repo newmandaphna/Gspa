@@ -3,13 +3,13 @@ import { FOOTER_COLUMNS } from "@/lib/content/nav";
 import { SITE } from "@/lib/config/site";
 import { Wordmark } from "@/components/Wordmark";
 
-export function Footer() {
+export function Footer({ id }: { id?: string }) {
   const year = new Date().getFullYear();
   return (
-    <footer data-theme="light" className="bg-paper-2 text-ink-muted">
+    <footer id={id} data-theme="light" className="bg-paper-2 text-ink-muted">
       <div className="mx-auto max-w-[1180px] px-5 py-12 sm:px-8">
-        <div className="grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-5">
-          <div className="col-span-2 md:col-span-1">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-3 lg:grid-cols-[1.4fr_repeat(5,1fr)]">
+          <div className="col-span-2 md:col-span-3 lg:col-span-1">
             <Wordmark tagline className="text-[30px]" />
             <p className="t-footnote mt-4 max-w-[220px] leading-relaxed">
               A private shooting club and luxury indoor range in {SITE.address.neighborhood}.
@@ -32,9 +32,9 @@ export function Footer() {
         </div>
 
         <div className="mt-12 border-t border-ink/10 pt-5">
+          {/* Licensing rules live only in requirements.ts (counsel-reviewed); the footer links there rather than restating them. */}
           <p className="t-footnote leading-relaxed">
-            Firearms are handled under the supervision of certified Range Safety Officers. Handguns require a valid New York City pistol license.
-            Long guns require government photo ID and are subject to New York State and City law. See{" "}
+            Firearms are handled under the supervision of certified Range Safety Officers. See{" "}
             <Link href="/visit#requirements" className="underline underline-offset-2 hover:text-ink">
               requirements
             </Link>

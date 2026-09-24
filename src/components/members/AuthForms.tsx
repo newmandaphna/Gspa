@@ -60,7 +60,7 @@ export function ActivateForm() {
         <input id="email" name="email" type="email" autoComplete="email" required className={input} />
       </div>
       <div>
-        <Label htmlFor="code" hint="from your welcome packet">
+        <Label htmlFor="code" hint="from the club">
           Activation code
         </Label>
         <input id="code" name="code" required placeholder="XXXX-XXXX" autoCapitalize="characters" className={cn(input, "font-mono uppercase tracking-widest")} />

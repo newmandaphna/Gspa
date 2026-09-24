@@ -105,11 +105,11 @@ export function Ladder({ rungs, className }: { rungs: ReadonlyArray<Rung>; class
             </span>
           </>
         );
+        // `sm:min-h-24` keeps one-line and two-line titles the same card height so the steps stay even.
         const tread =
-          "group block h-full rounded-card-sm border-t border-l border-hairline bg-paper px-4 pt-4 pb-5 transition-[border-color,background-color] duration-300 ease-[var(--ease-apple)]";
+          "group block h-full rounded-card-sm border-t border-l border-hairline bg-paper px-4 pt-4 pb-5 transition-[border-color,background-color] duration-300 ease-[var(--ease-apple)] sm:min-h-24";
         return (
           <li key={r.slug} className="sm:flex sm:flex-col sm:justify-end">
-            <div className="hidden sm:block" style={{ height: `${i * 44}px` }} aria-hidden="true" />
             {r.href ? (
               <Link href={r.href} className={cn(tread, "hover:border-accent-deep hover:bg-paper-2 focus-visible:border-accent-deep")}>
                 {inner}
@@ -117,6 +117,8 @@ export function Ladder({ rungs, className }: { rungs: ReadonlyArray<Rung>; class
             ) : (
               <div className={cn(tread, "opacity-70")}>{inner}</div>
             )}
+            {/* The spacer sits under the tread: with the row bottom-aligned, each tread rises 44px per rung. */}
+            <div className="hidden sm:block" style={{ height: `${i * 44}px` }} aria-hidden="true" />
           </li>
         );
       })}
@@ -137,14 +139,15 @@ export function StepRail({ steps, className }: { steps: ReadonlyArray<string>; c
         style={{ transitionDelay: "0.2s" }}
       />
       {steps.map((label, i) => (
-        <li key={label} className="flex flex-col items-center text-center">
+        <li key={label} className="flex flex-col items-center px-0.5 text-center">
           <span
             aria-hidden="true"
             className="block h-[15px] w-[15px] scale-50 rounded-full bg-night-2 ring-1 ring-inset ring-white/25 transition-[transform,background-color,box-shadow] duration-500 ease-[var(--ease-apple)] [.in-view_&]:scale-100 [.in-view_&]:bg-accent [.in-view_&]:ring-accent"
             style={{ transitionDelay: `${0.25 + i * 0.22}s` }}
           />
-          <span className="t-eyebrow mt-4 text-[0.625rem] text-mist sm:text-[0.75rem]">
-            <span className="font-mono normal-case tracking-normal text-mist/70">{String(i + 1).padStart(2, "0")} </span>
+          {/* On phones the number stacks above the word and the tracking tightens so five labels fit in ~70px columns. */}
+          <span className="t-eyebrow mt-4 text-[0.5625rem] tracking-[0.1em] text-mist sm:text-[0.75rem] sm:tracking-[0.16em]">
+            <span className="block font-mono normal-case tracking-normal text-mist/70 sm:inline">{String(i + 1).padStart(2, "0")} </span>
             {label}
           </span>
         </li>

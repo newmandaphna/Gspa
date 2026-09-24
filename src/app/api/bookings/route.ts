@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { attachStripeSession, createBooking } from "@/lib/booking";
 import { sendBookingConfirmation } from "@/lib/email";
+import { expectedJson, isJsonRequest } from "@/lib/http";
 import { getCurrentMember } from "@/lib/members/auth";
 import { toContext } from "@/lib/members/service";
 import { clientKey, rateLimit } from "@/lib/ratelimit";
@@ -13,6 +14,7 @@ export async function POST(req: Request) {
   if (!rateLimit(`book:${clientKey(req)}`, { limit: 10, windowMs: 10 * 60_000 })) {
     return NextResponse.json({ error: "Too many attempts. Please try again in a few minutes." }, { status: 429 });
   }
+  if (!isJsonRequest(req)) return expectedJson();
   let json: unknown;
   try {
     json = await req.json();
@@ -43,7 +45,8 @@ export async function POST(req: Request) {
   }
 
   const { booking, experience } = result;
-  if (paymentMode === "stripe") {
+  // Branch on what was persisted: a $0 (member-included) booking confirms without Checkout even when Stripe is on.
+  if (booking.paymentStatus === "unpaid") {
     try {
       const session = await createCheckoutSession(booking, experience);
       await attachStripeSession(booking.id, session.id);

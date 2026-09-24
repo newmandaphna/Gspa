@@ -199,14 +199,15 @@ export function StepRail({ steps, className }: { steps: ReadonlyArray<string>; c
         style={{ transitionDelay: "0.2s" }}
       />
       {steps.map((label, i) => (
-        <li key={label} className="flex flex-col items-center text-center">
+        <li key={label} className="flex flex-col items-center px-0.5 text-center">
           <span
             aria-hidden="true"
             className="block h-[15px] w-[15px] scale-50 rounded-full bg-paper ring-1 ring-inset ring-hairline transition-[transform,background-color,box-shadow] duration-500 ease-[var(--ease-apple)] [.in-view_&]:scale-100 [.in-view_&]:bg-accent [.in-view_&]:ring-accent"
             style={{ transitionDelay: `${0.25 + i * 0.22}s` }}
           />
-          <span className="t-eyebrow mt-4 text-[0.625rem] text-ink-muted sm:text-[0.75rem]">
-            <span className="font-mono normal-case tracking-normal text-ink-faint">{String(i + 1).padStart(2, "0")} </span>
+          {/* On phones the number stacks above the word and the tracking tightens so five labels fit in ~70px columns. */}
+          <span className="t-eyebrow mt-4 text-[0.5625rem] tracking-[0.1em] text-ink-muted sm:text-[0.75rem] sm:tracking-[0.16em]">
+            <span className="block font-mono normal-case tracking-normal text-ink-faint sm:inline">{String(i + 1).padStart(2, "0")} </span>
             {label}
           </span>
         </li>

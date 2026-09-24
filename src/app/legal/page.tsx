@@ -38,12 +38,12 @@ const MEASURE = "max-w-[34em]";
 
 /** Mono "Last updated [date]" stamp. Inherits the band's muted color. */
 function Stamp({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <p className={cn("mt-4 font-mono text-[0.8125rem] leading-[1.5] text-ink-faint [[data-theme=dark]_&]:text-mist", className)}>{children}</p>;
+  return <p className={cn("mt-4 font-mono text-[0.8125rem] leading-[1.5] text-ink-muted [[data-theme=dark]_&]:text-mist", className)}>{children}</p>;
 }
 
 /** Bracketed counsel note, rendered verbatim. */
 function CounselNote({ children }: { children: React.ReactNode }) {
-  return <p className="mt-8 font-mono text-[0.8125rem] leading-[1.5] text-ink-faint [[data-theme=dark]_&]:text-mist">{children}</p>;
+  return <p className="mt-8 font-mono text-[0.8125rem] leading-[1.5] text-ink-muted [[data-theme=dark]_&]:text-mist">{children}</p>;
 }
 
 /** One long-form section: headline block, stamp, clauses with hairlines. */

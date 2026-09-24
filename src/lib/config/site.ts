@@ -27,8 +27,37 @@ export const SITE = {
   social: {
     instagram: "https://instagram.com/thegunspa",
   },
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:5000",
+  /**
+   * Server-authoritative. Client bundles only see NEXT_PUBLIC_SITE_URL, so in
+   * the browser this may read the localhost fallback; nothing on the client
+   * reads it today.
+   */
+  url: resolveSiteUrl({
+    NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
+    REPLIT_DOMAINS: process.env.REPLIT_DOMAINS,
+    REPLIT_DEV_DOMAIN: process.env.REPLIT_DEV_DOMAIN,
+    NODE_ENV: process.env.NODE_ENV,
+  }),
 } as const;
+
+/**
+ * The public origin: NEXT_PUBLIC_SITE_URL, else the Replit deployment domain
+ * (REPLIT_DOMAINS, first entry), else the Replit workspace domain, else
+ * localhost. A value typed without a scheme gets https://. Never throws: an
+ * unparsable value falls back so a typo in a secret cannot take every page down.
+ */
+export function resolveSiteUrl(env: Record<string, string | undefined>): string {
+  const fallback = "http://localhost:5000";
+  const raw = env.NEXT_PUBLIC_SITE_URL?.trim() || env.REPLIT_DOMAINS?.split(",")[0]?.trim() || env.REPLIT_DEV_DOMAIN?.trim() || fallback;
+  const withScheme = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+  try {
+    const u = new URL(withScheme);
+    return u.origin;
+  } catch {
+    if (env.NODE_ENV === "production") console.error(`[site] NEXT_PUBLIC_SITE_URL is not a valid URL: ${JSON.stringify(raw)}; using ${fallback}`);
+    return fallback;
+  }
+}
 
 /**
  * Physical facts, in one place, so a single edit (say, 16 lanes instead of 12)
@@ -140,8 +169,14 @@ export const BOOKING = {
   maxAdvanceDays: 7,
   /** The calendar never opens further than this for anyone. */
   calendarCapDays: 30,
-  /** Unpaid Stripe checkouts hold the slot this long. */
+  /** Unpaid Stripe checkouts hold the slot this long (also the Checkout page's lifetime). */
   pendingHoldMin: 30,
+  /**
+   * The database keeps the hold this much longer than Stripe keeps the Checkout
+   * page open, so a payment made in the last seconds (plus webhook latency)
+   * always lands on a row that is still pending.
+   */
+  holdGraceMin: 5,
   /** Guests may cancel free of charge up to this many hours before start (lanes, training, simulator). */
   freeCancelHours: 24,
   /** Suites and events use a longer window. */

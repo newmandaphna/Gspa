@@ -144,11 +144,21 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
     if (experience && date) void loadSlots(experience.slug, date, typedMember);
   };
 
+  // Set by goTo and consumed when the next step's heading mounts (after AnimatePresence swaps panels),
+  // so focus follows the step change instead of dropping to <body> when the clicked button unmounts.
+  const pendingFocus = useRef(false);
   const goTo = (s: 0 | 1 | 2) => {
+    pendingFocus.current = true;
     setStep(s);
     setError(null);
     requestAnimationFrame(() => topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
   };
+  const focusOnMount = useCallback((el: HTMLHeadingElement | null) => {
+    if (el && pendingFocus.current) {
+      pendingFocus.current = false;
+      el.focus({ preventScroll: true });
+    }
+  }, []);
 
   const chooseExperience = (e: CatalogItem) => {
     setExperience(e);
@@ -244,8 +254,9 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
               <button
                 type="button"
                 disabled={i > step || (i === 1 && !experience)}
+                aria-current={active ? "step" : undefined}
                 onClick={() => goTo(i as 0 | 1 | 2)}
-                className={cn("flex items-center gap-2 rounded-full text-[0.9375rem] transition-opacity", active ? "opacity-100" : "opacity-60 hover:opacity-100 disabled:hover:opacity-60")}
+                className={cn("relative flex items-center gap-2 rounded-full text-[0.9375rem] transition-opacity", active ? "opacity-100" : "opacity-60 hover:opacity-100 disabled:hover:opacity-60")}
               >
                 <span
                   className={cn(
@@ -261,7 +272,9 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
                     i + 1
                   )}
                 </span>
-                <span className={cn("hidden sm:inline", active && "font-semibold")}>{label}</span>
+                {/* Visually hidden below sm, but always part of the accessible name. */}
+                <span className={cn("sr-only sm:not-sr-only", active && "font-semibold")}>{label}</span>
+                {done && <span className="sr-only">, completed</span>}
               </button>
               {i < STEPS.length - 1 && <span className="h-px w-6 bg-ink/15 sm:w-10" aria-hidden="true" />}
             </li>
@@ -274,13 +287,15 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
           <AnimatePresence mode="wait" initial={false}>
             {step === 0 && (
               <motion.div key="s0" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.3 }}>
-                <h2 className="t-2">What would you like to do?</h2>
-                <div className="no-scrollbar mt-6 flex gap-1 overflow-x-auto rounded-pill bg-paper-2 p-1" role="tablist" aria-label="Experience type">
+                <h2 className="t-2 outline-none" tabIndex={-1} ref={focusOnMount}>
+                  What would you like to do?
+                </h2>
+                {/* Filters the card grid rather than swapping a panel, so toggle buttons in a group, not a tablist. */}
+                <div className="no-scrollbar mt-6 flex gap-1 overflow-x-auto rounded-pill bg-paper-2 p-1" role="group" aria-label="Experience type">
                   {categories.map((c) => (
                     <button
                       key={c}
-                      role="tab"
-                      aria-selected={category === c}
+                      aria-pressed={category === c}
                       type="button"
                       onClick={() => setCategory(c)}
                       className={cn(
@@ -354,7 +369,9 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
 
             {step === 1 && experience && (
               <motion.div key="s1" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.3 }}>
-                <h2 className="t-2">When?</h2>
+                <h2 className="t-2 outline-none" tabIndex={-1} ref={focusOnMount}>
+                  When?
+                </h2>
                 <p className="t-body mt-2 text-ink-muted">
                   {experience.name} · {durationLabel(experience.durationMin)}.{" "}
                   {member
@@ -412,8 +429,8 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
                           placeholder="GS-M-1001"
                           className="mt-2 h-11 w-full rounded-xl bg-white px-4 font-mono text-[1rem] uppercase ring-1 ring-inset ring-ink/15 placeholder:text-ink-faint focus:ring-ink"
                         />
-                        <p className="t-footnote mt-1 text-ink-faint">
-                          Extends your booking window.{" "}
+                        <p className="t-footnote mt-1 text-ink-muted">
+                          Extends your booking window. Use the email your membership is registered under.{" "}
                           <Link href="/members/login?next=/reserve" className="underline underline-offset-2">
                             Sign in
                           </Link>{" "}
@@ -424,7 +441,7 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
 
                     <p className="t-caption font-semibold text-ink">Start time</p>
                     <div className="mt-2 min-h-[120px]" aria-live="polite">
-                      {!date && <p className="t-body text-ink-faint">Pick a date first.</p>}
+                      {!date && <p className="t-body text-ink-muted">Pick a date first.</p>}
                       {date && loadingSlots && (
                         <div className="grid grid-cols-3 gap-2">
                           {Array.from({ length: 9 }).map((_, i) => (
@@ -440,8 +457,9 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
                       {date && !loadingSlots && availability?.open && availability.slots.length === 0 && (
                         <p className="t-body text-ink-muted">No start times left on {formatDateLong(date)}. Try another day.</p>
                       )}
+                      {/* Toggle buttons in a group (same pattern as the calendar), not a listbox: every slot is its own tab stop. */}
                       {date && !loadingSlots && availability?.open && availability.slots.length > 0 && (
-                        <div className="grid grid-cols-3 gap-2" role="listbox" aria-label="Available start times">
+                        <div className="grid grid-cols-3 gap-2" role="group" aria-label="Available start times">
                           {availability.slots.map((s) => {
                             const ok = s.available >= units;
                             const selected = time === s.time;
@@ -452,9 +470,9 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
                               <button
                                 key={s.time}
                                 type="button"
-                                role="option"
-                                aria-selected={selected}
+                                aria-pressed={selected}
                                 disabled={!ok}
+                                data-time-slot
                                 onClick={() => setTime(s.time)}
                                 className={cn(
                                   "relative h-11 rounded-xl text-[0.9375rem] font-medium ring-1 ring-inset transition-[background-color,color,box-shadow] duration-200",
@@ -462,8 +480,12 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
                                 )}
                               >
                                 {s.label}
+                                {!ok && <span className="sr-only">, sold out</span>}
                                 {scarce && !selected && (
-                                  <span className="absolute -top-1.5 right-2 rounded-pill bg-accent px-1.5 text-[0.625rem] font-semibold text-night">{s.available} left</span>
+                                  <>
+                                    <span className="sr-only">, </span>
+                                    <span className="absolute -top-1.5 right-2 rounded-pill bg-accent px-1.5 text-[0.625rem] font-semibold text-night">{s.available} left</span>
+                                  </>
                                 )}
                               </button>
                             );
@@ -487,7 +509,9 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
 
             {step === 2 && experience && date && time && (
               <motion.form key="s2" onSubmit={submit} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.3 }}>
-                <h2 className="t-2">{member ? "Confirm your details." : "Who's coming?"}</h2>
+                <h2 className="t-2 outline-none" tabIndex={-1} ref={focusOnMount}>
+                  {member ? "Confirm your details." : "Who's coming?"}
+                </h2>
                 <p className="t-body mt-2 text-ink-muted">We&apos;ll send the confirmation and a check-in link to this email.</p>
                 <div className="mt-8 grid gap-4 sm:grid-cols-2">
                   <Field label="First name" id="firstName" autoComplete="given-name" required value={form.firstName} onChange={(v) => setForm({ ...form, firstName: v })} />
@@ -528,7 +552,7 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
                     <input type="checkbox" required checked={form.ack} onChange={(e) => setForm({ ...form, ack: e.target.checked })} className="mt-1 h-5 w-5 shrink-0 accent-ink" />
                     <span className="t-caption text-ink">{ACK_SUMMARY}</span>
                   </label>
-                  <p className="t-footnote mt-3 text-ink-faint">{CANCELLATION_POLICY}</p>
+                  <p className="t-footnote mt-3 text-ink-muted">{CANCELLATION_POLICY}</p>
                 </div>
 
                 <div className="mt-10 flex flex-wrap items-center gap-3">
@@ -566,7 +590,7 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
                 </dl>
                 <div className="mt-5 border-t border-ink/10 pt-4">
                   <Row label="Total" value={total === 0 ? "Included" : formatMoney(total)} strong />
-                  <p className="t-footnote mt-1 text-ink-faint">
+                  <p className="t-footnote mt-1 text-ink-muted">
                     {total === 0 ? "Included with your membership. " : stripeEnabled ? "Charged securely at checkout. " : "Pay at the front desk on arrival. "}
                     {unitPrice > 0 &&
                       (experience.fixedUnits
