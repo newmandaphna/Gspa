@@ -27,7 +27,7 @@ test("isolated scheduled-class enrollment and private documents", async ({ page,
     })) await form.getByLabel(label, { exact: true }).fill(value);
   };
   await page.goto("/training/classes");
-  await expect(page.getByRole("heading", { name: "Choose a class date." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Pick a date, hold a seat." })).toBeVisible();
   await page.goto("/admin/classes");
   await expect(page).toHaveURL(/\/admin\/login/);
   await page.getByLabel("Admin password").fill("isolated-test-only");

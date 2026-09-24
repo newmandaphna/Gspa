@@ -36,22 +36,33 @@ Marketing site, real-time reservations, members portal, and a front-desk admin.
 | `STRIPE_SECRET_KEY` | optional | Turns on card payment at reservation time |
 | `STRIPE_WEBHOOK_SECRET` | with Stripe | Webhook endpoint `/api/stripe/webhook` |
 | `RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_BCC` | optional | Confirmation, cancellation and reminder emails via Resend. Reply-To is `SITE.email` (`src/lib/config/site.ts`), so the sending domain needs SPF and DKIM verified in Resend and someone reading the desk inbox |
-| `CRON_SECRET` | with reminders | Bearer token for `GET /api/cron/reminders`, the day-before reminder run. Without it the route answers 401 to every caller (the missing secret is logged, not disclosed) and no reminder is sent. Without `RESEND_API_KEY` it answers 503 and stamps nothing, so the guests stay due |
+| `CRON_SECRET` | with reminders | Bearer token for `GET /api/cron/run`, the hourly scheduled run (reminders, class mail retries, document purge). Without it the route answers 401 to every caller (the missing secret is logged, not disclosed) and nothing is sent. Without `RESEND_API_KEY` it answers 503 and stamps nothing, so the guests stay due |
 
-## Scheduled Deployment (day-before reminders)
+## Scheduled Deployment (hourly run)
 
-Reminders go out from a Replit **Scheduled Deployment**, not from the web server. Create one that runs
-once a day at 10:00 America/New_York with the command
+Reminders and class mail retries go out from one Replit **Scheduled Deployment**, not from the web
+server. Create one that runs every hour with the command
 
 ```
-curl -fsS -H "Authorization: Bearer $CRON_SECRET" https://gunspa.com/api/cron/reminders
+curl -fsS -H "Authorization: Bearer $CRON_SECRET" https://gunspa.com/api/cron/run
 ```
 
-and give it the same `CRON_SECRET` secret as the Autoscale deployment. The route mails every confirmed
-reservation that starts the next day in New York time and stamps `bookings.reminder_sent_at` before
-each email goes out, so a second run the same day, or one that overlaps a slow first run, sends
-nothing twice. Sends are spaced half a second apart for Resend's rate limit and a refused one is
-left unstamped for a retry. The response lists the codes sent, any Resend refused, and any skipped.
+and give it the same `CRON_SECRET` secret as the Autoscale deployment. Each run does three things
+in order: it purges expired class ID documents, it reconciles and drains the `class_mail_outbox`
+(class confirmations are sent at enrollment; the outbox only holds retries), and it mails the
+day-before reminders. A reservation is due for its reminder from 25 hours before it starts down to
+12 hours before, provided it was made a day or more ahead, so the first hourly run inside that span
+mails it 24 to 25 hours ahead and a run that was missed, even for half a day, still catches it on
+the next one. `bookings.reminder_sent_at` is stamped before each email goes out, so a second run,
+or one that overlaps a slow first run, sends nothing twice. Sends are spaced half a second apart
+for Resend's rate limit and a refused one is left unstamped for the next run. The response is one
+JSON summary: the purge, the outbox reconcile and delivery counts, and the reminder codes sent,
+refused, and skipped.
+
+`/api/cron/reminders` and `/api/cron/class-mail` still answer, as aliases of the same run, so an
+older schedule keeps working; new schedules should call `/api/cron/run`. Between runs, an
+enrollment or a hit on `/api/health` retries up to five pending outbox rows on the side (at most
+once a minute per process), so a refused send does not wait a full hour.
 
 ## Where things live
 

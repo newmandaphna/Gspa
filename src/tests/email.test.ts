@@ -248,9 +248,13 @@ describe("email copy", () => {
 });
 
 describe("reminder selection (in-memory Postgres)", () => {
+  const HOUR = 3_600_000;
   const today = todayIso(undefined, NOW);
   const tomorrow = addDaysIso(today, 1);
   const dayAfter = addDaysIso(today, 2);
+  const dayThree = addDaysIso(today, 3);
+  /** Reservations in these tests were made three days before NOW unless a test says otherwise. */
+  const MADE = new Date(NOW.getTime() - 3 * 24 * HOUR);
   const base = {
     experienceSlug: lane.slug,
     guests: 1,
@@ -259,63 +263,112 @@ describe("reminder selection (in-memory Postgres)", () => {
     phone: "+1 718 555 0100",
     ackRequirements: true,
     paymentMode: "on_arrival" as const,
-    now: NOW,
+    now: MADE,
   };
 
-  it("covers tomorrow in New York, midnight to midnight", () => {
+  it("covers 12 to 25 hours ahead and rolls with the clock", () => {
     const w = reminderWindow(NOW);
-    expect(w.dateISO).toBe("2026-10-06");
-    expect(w.from.toISOString()).toBe("2026-10-06T04:00:00.000Z");
-    expect(w.to.toISOString()).toBe("2026-10-07T04:00:00.000Z");
-    // Late in the evening it is still today's run, so the window is still tomorrow.
-    expect(reminderWindow(new Date("2026-10-06T02:30:00Z")).dateISO).toBe("2026-10-06");
+    expect(w.from.toISOString()).toBe("2026-10-06T02:00:00.000Z");
+    expect(w.to.toISOString()).toBe("2026-10-06T15:00:00.000Z");
+    expect(w.label).toBe("2026-10-06T02:00:00.000Z/2026-10-06T15:00:00.000Z");
+    const later = reminderWindow(new Date(NOW.getTime() + HOUR));
+    expect(later.from.getTime() - w.from.getTime()).toBe(HOUR);
+    expect(later.to.getTime() - w.to.getTime()).toBe(HOUR);
   });
 
-  it("picks confirmed bookings starting tomorrow, once each", async () => {
+  it("picks confirmed bookings about a day away that were made a day or more ahead, once each", async () => {
     const db = await getDb();
-    const tmr = await createBooking({ ...base, date: tomorrow, time: "19:00", email: "tomorrow@example.com" });
-    const morning = await createBooking({ ...base, date: tomorrow, time: "10:00", email: "morning@example.com" });
-    const later = await createBooking({ ...base, date: dayAfter, time: "19:00", email: "later@example.com" });
+    // 10:00 tomorrow is 24 hours away: due now.
+    const tmr = await createBooking({ ...base, date: tomorrow, time: "10:00", email: "tomorrow@example.com" });
+    // 19:00 tomorrow is 33 hours away: due in eight hours, not now.
+    const evening = await createBooking({ ...base, date: tomorrow, time: "19:00", email: "evening@example.com" });
+    // 20:00 today is 10 hours away: under the 12 hour floor, so a run that missed it stays quiet.
+    const soon = await createBooking({ ...base, date: today, time: "20:00", email: "soon@example.com" });
+    // Made 23 and a half hours before it starts: its confirmation is fresh, so no reminder ever.
+    const late = await createBooking({ ...base, date: tomorrow, time: "10:00", email: "late@example.com", now: new Date(NOW.getTime() + 30 * 60_000) });
     const gone = await createBooking({ ...base, date: tomorrow, time: "15:00", email: "gone@example.com" });
     const held = await createBooking({ ...base, date: tomorrow, time: "16:00", email: "held@example.com", paymentMode: "stripe" });
-    expect([tmr, morning, later, gone, held].every((r) => r.ok)).toBe(true);
+    expect([tmr, evening, soon, late, gone, held].every((r) => r.ok)).toBe(true);
     if (!gone.ok) return;
     expect((await cancelBooking(gone.booking.code, { email: "gone@example.com", now: NOW })).ok).toBe(true);
 
     const due = await listDueReminders(db, NOW);
-    expect(due.map((r) => r.booking.email)).toEqual(["morning@example.com", "tomorrow@example.com"]);
+    expect(due.map((r) => r.booking.email)).toEqual(["tomorrow@example.com"]);
 
-    // No RESEND_API_KEY in tests: nothing goes out and nothing is stamped, so the guests stay due.
+    // No RESEND_API_KEY in tests: nothing goes out and nothing is stamped, so the guest stays due.
     const dry = await runReminders(NOW, { pauseMs: 0 });
     expect(dry.sent).toEqual([]);
-    expect(dry.skipped.length).toBe(2);
-    expect((await listDueReminders(db, NOW)).length).toBe(2);
+    expect(dry.skipped.length).toBe(1);
+    expect((await listDueReminders(db, NOW)).length).toBe(1);
 
-    // A refused send is released for a retry the same day.
-    const refused = await runReminders(NOW, { pauseMs: 0, send: async (b) => (b.email === "morning@example.com" ? "refused" : "sent") });
+    // A refused send is released for the next hourly run.
+    const refused = await runReminders(NOW, { pauseMs: 0, send: async () => "refused" });
     expect(refused.failed.length).toBe(1);
-    expect(refused.sent.length).toBe(1);
-    expect((await listDueReminders(db, NOW)).map((r) => r.booking.email)).toEqual(["morning@example.com"]);
+    expect((await listDueReminders(db, NOW)).map((r) => r.booking.email)).toEqual(["tomorrow@example.com"]);
 
     const run = await runReminders(NOW, { pauseMs: 0, send: async () => "sent" });
-    expect(run.window).toBe(tomorrow);
+    expect(run.window).toBe(reminderWindow(NOW).label);
     expect(run.sent.length).toBe(1);
     expect(run.failed).toEqual([]);
     expect(await listDueReminders(db, NOW)).toEqual([]);
     const again = await runReminders(NOW, { pauseMs: 0, send: async () => "sent" });
     expect(again.due).toBe(0);
 
-    // The day after, the remaining booking comes up.
-    const nextDay = new Date(NOW.getTime() + 24 * 3_600_000);
-    const nextDue = await listDueReminders(db, nextDay);
-    expect(nextDue.map((r) => r.booking.email)).toEqual(["later@example.com"]);
+    // Nine hours on, the evening reservation is 24 hours away and comes up; the others never do.
+    const nineLater = new Date(NOW.getTime() + 9 * HOUR);
+    expect((await listDueReminders(db, nineLater)).map((r) => r.booking.email)).toEqual(["evening@example.com"]);
+    expect(await runReminders(nineLater, { pauseMs: 0, send: async () => "sent" })).toMatchObject({ sent: [evening.ok ? evening.booking.code : ""] });
+    for (let h = 10; h <= 40; h++) {
+      expect(await listDueReminders(db, new Date(NOW.getTime() + h * HOUR))).toEqual([]);
+    }
+  });
+
+  it("reminds each booking exactly once under hourly runs, 24 to 25 hours ahead, and catches up after missed runs", async () => {
+    const madeEarlier = new Date(NOW.getTime() - 2 * 24 * HOUR);
+    const seeds: Array<[string, string]> = [
+      [dayAfter, "10:00"], // 48 hours out: first due at run 24
+      [dayAfter, "13:00"], // 51 hours out: first due at run 27, inside the outage
+      [dayAfter, "18:00"], // 56 hours out: first due at run 32, the first run after the outage
+      [dayThree, "11:00"], // 73 hours out: first due at run 49
+      [dayThree, "20:00"], // 82 hours out: first due at run 58
+    ];
+    const starts = new Map<string, Date>();
+    for (const [i, [date, time]] of seeds.entries()) {
+      const res = await createBooking({ ...base, now: madeEarlier, date, time, email: `hourly-${i}@example.com` });
+      expect(res.ok).toBe(true);
+      if (res.ok) starts.set(res.booking.code, res.booking.startsAt);
+    }
+
+    const sends = new Map<string, Date[]>();
+    const send = async (b: Booking, _e: Experience, at: Date) => {
+      sends.set(b.code, [...(sends.get(b.code) ?? []), at]);
+      return "sent" as const;
+    };
+    // Hourly for three and a half days, except a six hour outage in which runs 26 through 31 never happen.
+    for (let h = 0; h <= 84; h++) {
+      if (h >= 26 && h <= 31) continue;
+      await runReminders(new Date(NOW.getTime() + h * HOUR), { pauseMs: 0, send });
+    }
+
+    // Nothing at all was mailed twice, including leftovers from the other tests.
+    for (const times of sends.values()) expect(times.length).toBe(1);
+    const leadHours = (code: string) => (starts.get(code)!.getTime() - sends.get(code)![0].getTime()) / HOUR;
+    const [first, inOutage, afterOutage, third, fourth] = [...starts.keys()];
+    for (const code of [first, afterOutage, third, fourth]) {
+      expect(sends.get(code)?.length).toBe(1);
+      expect(leadHours(code)).toBeGreaterThanOrEqual(24);
+      expect(leadHours(code)).toBeLessThan(25);
+    }
+    // The one that fell due during the outage went out on the first run after it, 19 hours ahead, once.
+    expect(sends.get(inOutage)?.length).toBe(1);
+    expect(leadHours(inOutage)).toBe(19);
   });
 
   it("claims a booking before mailing it, so overlapping runs send once", async () => {
     const db = await getDb();
-    const twoDays = addDaysIso(today, 4);
-    const at = new Date(NOW.getTime() + 3 * 24 * 3_600_000);
-    const res = await createBooking({ ...base, date: twoDays, time: "12:00", email: "twice@example.com" });
+    const fourDays = addDaysIso(today, 4);
+    const at = new Date(NOW.getTime() + 3 * 24 * HOUR + 2 * HOUR); // 24 hours before the noon slot
+    const res = await createBooking({ ...base, date: fourDays, time: "12:00", email: "twice@example.com" });
     expect(res.ok).toBe(true);
     if (!res.ok) return;
     expect(await claimReminder(db, res.booking.id, at)).toBe(true);

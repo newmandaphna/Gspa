@@ -1,6 +1,7 @@
 import { createClassBooking, getClassSession } from "@/lib/classes";
 import { classEnrollmentSchema } from "@/lib/classes-validation";
 import { attachStripeSession, cancelBooking } from "@/lib/booking";
+import { scheduleOpportunisticClassMailDrain } from "@/lib/class-mail";
 import { sendBookingConfirmation } from "@/lib/email";
 import { createCheckoutSession, expireCheckoutSession, stripeEnabled } from "@/lib/stripe";
 import { DOCUMENT_TOTAL_BYTES, documentUploadsEnabled, normalizeClassDocument, purgeExpiredClassDocuments, storeClassDocuments } from "@/lib/class-documents";
@@ -10,6 +11,8 @@ export const runtime = "nodejs";
 export async function POST(req: Request) {
   try {
     await guard(req);
+    // A refused confirmation from an earlier enrollment is retried after this response, not on the next hourly run.
+    scheduleOpportunisticClassMailDrain();
     const type = req.headers.get("content-type") ?? "";
     if (!/^multipart\/form-data\b/i.test(type)) throw new RequestError("Send multipart/form-data.", 415);
     const bytes = await boundedBody(req, DOCUMENT_TOTAL_BYTES + 128 * 1024);

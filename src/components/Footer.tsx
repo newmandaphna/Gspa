@@ -3,7 +3,7 @@ import { LiveStatus } from "@/components/LiveStatus";
 import { Wordmark } from "@/components/Wordmark";
 import { Owner } from "@/components/ui/Owner";
 import { SITE } from "@/lib/config/site";
-import { FOOTER_COLUMNS, HOUSE_RULES_LINK, TRAINING_CLASSES_LINK, type NavItem } from "@/lib/content/nav";
+import { FOOTER_COLUMNS, HOUSE_RULES_LINK, type NavItem } from "@/lib/content/nav";
 import { computeOpenStatus } from "@/lib/hours";
 
 /** Shared footer destinations. */
@@ -12,7 +12,6 @@ function pick(title: string, label: string): NavItem | undefined {
 }
 
 const ROW: NavItem[] = [
-  TRAINING_CLASSES_LINK,
   { label: "Reserve", href: "/reserve" },
   { label: "Manage a reservation", href: "/reserve/manage" },
   pick("Members", "Sign in") ?? { label: "Sign in", href: "/members/login" },

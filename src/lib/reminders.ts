@@ -1,39 +1,63 @@
 /**
- * The day-before reminder. A daily cron (GET /api/cron/reminders, 10:00 ET)
- * mails every confirmed reservation that starts tomorrow in the club's
- * timezone and has not been reminded yet. `reminder_sent_at` is the claim as
- * well as the record: a row is stamped before its email goes out, only if it
- * was still unstamped, so two overlapping runs (a slow first request and its
- * retry) cannot both mail the same guest. A send that does not go through
- * clears the stamp again.
+ * The day-before reminder. The hourly scheduled run (GET /api/cron/run) mails
+ * every confirmed reservation that is about a day away and has not been
+ * reminded yet. The window rolls with the clock instead of naming a calendar
+ * day: a booking is due from 25 hours before it starts down to 12 hours
+ * before, so hourly runs reach it on the first run inside that span (24 to
+ * 25 hours ahead) and a run that was missed, even for half a day, still finds
+ * it on the next one. A reservation made less than a day before it starts
+ * has just had its confirmation and is not reminded again.
+ *
+ * `reminder_sent_at` is the claim as well as the record: a row is stamped
+ * before its email goes out, only if it was still unstamped, so two
+ * overlapping runs (a slow first request and its retry) cannot both mail the
+ * same guest, and every later hourly run sees it stamped and leaves it be. A
+ * send that does not go through clears the stamp again.
  */
-import { and, asc, eq, gte, isNull, lt } from "drizzle-orm";
+import { and, asc, eq, gte, isNull, lt, lte, sql } from "drizzle-orm";
 import { getDb, type Db } from "@/lib/db";
 import { ensureSchema } from "@/lib/db/migrate";
 import { bookings, experiences, type Booking, type Experience } from "@/lib/db/schema";
 import { sendBookingReminder, type SendResult } from "@/lib/email";
-import { SITE } from "@/lib/config/site";
-import { addDaysIso, todayIso, zonedToUtc } from "@/lib/time";
 
-export type ReminderWindow = { dateISO: string; from: Date; to: Date };
+const HOUR_MS = 3_600_000;
 
-/** Tomorrow, as a calendar day in the club's timezone, as a UTC interval [from, to). */
-export function reminderWindow(now: Date = new Date(), tz: string = SITE.timezone): ReminderWindow {
-  const dateISO = addDaysIso(todayIso(tz, now), 1);
-  return { dateISO, from: zonedToUtc(dateISO, "00:00", tz), to: zonedToUtc(addDaysIso(dateISO, 1), "00:00", tz) };
+/** A booking becomes due once it is this close: the first hourly run inside the span mails it. */
+export const REMINDER_LEAD_MAX_HOURS = 25;
+/** A booking stops being due this close to its start; runs missed for up to 13 hours still catch it. */
+export const REMINDER_LEAD_MIN_HOURS = 12;
+/** Only reservations made at least this long before they start get a day-before reminder. */
+export const REMINDER_MIN_NOTICE_HOURS = 24;
+
+export type ReminderWindow = { from: Date; to: Date; label: string };
+
+/** The start times that are due at `now`: a UTC interval [from, to), 12 to 25 hours ahead. */
+export function reminderWindow(now: Date = new Date()): ReminderWindow {
+  const from = new Date(now.getTime() + REMINDER_LEAD_MIN_HOURS * HOUR_MS);
+  const to = new Date(now.getTime() + REMINDER_LEAD_MAX_HOURS * HOUR_MS);
+  return { from, to, label: `${from.toISOString()}/${to.toISOString()}` };
 }
 
 export type ReminderRow = { booking: Booking; experience: Experience };
 
-/** Confirmed, starting tomorrow, not yet reminded. Earliest first. */
+/** Confirmed, starting 12 to 25 hours from now, made a day or more ahead, not yet reminded. Earliest first. */
 export async function listDueReminders(db: Db, now: Date = new Date()): Promise<ReminderRow[]> {
   const { from, to } = reminderWindow(now);
+  const notice = sql`${bookings.startsAt} - make_interval(hours => ${REMINDER_MIN_NOTICE_HOURS})`;
   const query = () =>
     db
       .select({ booking: bookings, experience: experiences })
       .from(bookings)
       .innerJoin(experiences, eq(bookings.experienceId, experiences.id))
-      .where(and(eq(bookings.status, "confirmed"), gte(bookings.startsAt, from), lt(bookings.startsAt, to), isNull(bookings.reminderSentAt)))
+      .where(
+        and(
+          eq(bookings.status, "confirmed"),
+          gte(bookings.startsAt, from),
+          lt(bookings.startsAt, to),
+          lte(bookings.createdAt, notice),
+          isNull(bookings.reminderSentAt),
+        ),
+      )
       .orderBy(asc(bookings.startsAt));
   try {
     return await query();
@@ -64,11 +88,12 @@ export async function releaseReminder(db: Db, bookingId: number): Promise<void> 
 export const SEND_PAUSE_MS = 500;
 
 export type ReminderRunResult = {
+  /** The UTC interval of start times this run covered, as "from/to". */
   window: string;
   due: number;
   /** Delivered to Resend and stamped. */
   sent: string[];
-  /** Resend refused; left unstamped so a retry today can pick them up. */
+  /** Resend refused; left unstamped so the next hourly run can pick them up. */
   failed: string[];
   /** No RESEND_API_KEY, so nothing went out and nothing was stamped. */
   skipped: string[];
@@ -83,9 +108,9 @@ export type RunReminderOptions = {
 
 /**
  * Send what is due and record each one. A message Resend refuses, or that
- * could not be sent for want of a key, is left unmarked so a retry the same
- * day picks it up; a booking still unsent once its day arrives is simply out
- * of the window.
+ * could not be sent for want of a key, is left unmarked so the next hourly
+ * run picks it up; a booking still unsent once it is under 12 hours away is
+ * simply out of the window.
  */
 export async function runReminders(now: Date = new Date(), opts: RunReminderOptions = {}): Promise<ReminderRunResult> {
   const send = opts.send ?? sendBookingReminder;
@@ -108,5 +133,5 @@ export async function runReminders(now: Date = new Date(), opts: RunReminderOpti
     await releaseReminder(db, booking.id);
     (result === "skipped" ? skipped : failed).push(booking.code);
   }
-  return { window: reminderWindow(now).dateISO, due: due.length, sent, failed, skipped };
+  return { window: reminderWindow(now).label, due: due.length, sent, failed, skipped };
 }
