@@ -11,11 +11,10 @@ export function isNavActive(pathname: string, href: string): boolean {
 /** The house rules page. The footer, the club page and the legal page all point here. */
 export const HOUSE_RULES_LINK: NavItem = { label: "House rules", href: "/house-rules" };
 
-/** Primary navigation (order matters). Edit here to rename or reorder. */
+/** Primary navigation (order matters). Edit here to rename or reorder. Five items; the classes page is reached from /training and the footer columns. */
 export const NAV: NavItem[] = [
   { label: "The Club", href: "/club" },
   { label: "Training", href: "/training" },
-  TRAINING_CLASSES_LINK,
   { label: "Membership", href: "/membership" },
   { label: "Events", href: "/events" },
   { label: "Visit", href: "/visit" },

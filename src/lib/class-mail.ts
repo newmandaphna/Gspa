@@ -1,4 +1,5 @@
 import { and, asc, eq, inArray, isNotNull, isNull, lte, or, sql } from "drizzle-orm";
+import { after } from "next/server";
 import { getDb, type Db } from "@/lib/db";
 import { classMailOutbox, type ClassMailOutboxRow } from "@/lib/db/class-mail-schema";
 import { bookings, experiences, type Booking } from "@/lib/db/schema";
@@ -193,6 +194,48 @@ export async function processClassMailQueue(db?: Db, opts: ProcessClassMailOptio
     result[delivery === "skipped" ? "skipped" : "failed"]++;
   }
   return result;
+}
+
+/** How many pending rows an ordinary request may drain on the side, and how often one process does so. */
+export const OPPORTUNISTIC_DRAIN_LIMIT = 5;
+export const OPPORTUNISTIC_DRAIN_INTERVAL_MS = 60_000;
+
+let lastOpportunisticDrainAt = Number.NEGATIVE_INFINITY;
+
+/**
+ * A small drain that ordinary traffic can trigger (enrollment, the health
+ * check) so a refused immediate send is retried before the hourly run gets
+ * to it. At most five rows, at most once a minute per process; the claim
+ * inside processClassMailQueue keeps two processes off the same row. Returns
+ * null when throttled. Never throws: the request that triggered it must not
+ * fail because a retry did.
+ */
+export async function drainClassMailOpportunistically(
+  opts: ProcessClassMailOptions & { db?: Db } = {},
+): Promise<ClassMailQueueResult | null> {
+  const now = opts.now ?? new Date();
+  if (now.getTime() - lastOpportunisticDrainAt < OPPORTUNISTIC_DRAIN_INTERVAL_MS) return null;
+  lastOpportunisticDrainAt = now.getTime();
+  try {
+    return await processClassMailQueue(opts.db, { now, limit: opts.limit ?? OPPORTUNISTIC_DRAIN_LIMIT, send: opts.send });
+  } catch (err) {
+    console.error("[email] opportunistic class mail drain failed", err);
+    return null;
+  }
+}
+
+/**
+ * Runs the opportunistic drain once the current response has been sent, so
+ * the caller's request is not slowed down. Outside a request scope (tests,
+ * scripts) it simply runs detached.
+ */
+export function scheduleOpportunisticClassMailDrain(): void {
+  const run = () => drainClassMailOpportunistically().then(() => undefined);
+  try {
+    after(run);
+  } catch {
+    void run();
+  }
 }
 
 export type ClassMailReconcileResult = { scanned: number; enqueued: number; failed: number };

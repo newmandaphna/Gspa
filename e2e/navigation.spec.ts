@@ -5,10 +5,11 @@ test("class links fit desktop and tablet and select only the schedule", async ({
     await page.setViewportSize({ width, height: 900 });
     await page.goto("/training/classes");
     const nav = page.getByRole("navigation", { name: "Primary" });
-    await expect(nav.getByRole("link", { name: "Training Classes", exact: true })).toHaveAttribute("aria-current", "page");
-    await expect(nav.getByRole("link", { name: "Training", exact: true })).not.toHaveAttribute("aria-current");
+    // The classes page sits under Training in the bar; it has no item of its own.
+    await expect(nav.getByRole("link", { name: "Training", exact: true })).toHaveAttribute("aria-current", "page");
+    await expect(nav.getByRole("link", { name: "Training Classes", exact: true })).toHaveCount(0);
     await expect(nav.getByRole("link", { name: "Reserve", exact: true })).toHaveAttribute("href", "/reserve");
-    await expect(page.getByRole("navigation", { name: "Footer", exact: true }).getByRole("link", { name: "Training Classes" })).toHaveAttribute("href", "/training/classes");
+    await expect(page.getByRole("navigation", { name: "Footer", exact: true }).getByRole("link", { name: "Training Classes" })).toHaveCount(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     const links = nav.getByRole("link");
     const boxes = [];
@@ -63,13 +64,13 @@ test("mobile keyboard navigation closes the menu and restores scrolling and focu
   await page.keyboard.press("Tab");
   await expect(page.locator("#mobile-menu").getByRole("link", { name: "Training", exact: true })).toBeFocused();
   await page.keyboard.press("Tab");
-  const classes = page.locator("#mobile-menu").getByRole("link", { name: "Training Classes", exact: true });
-  await expect(classes).toBeFocused();
+  const membership = page.locator("#mobile-menu").getByRole("link", { name: "Membership", exact: true });
+  await expect(membership).toBeFocused();
   await page.keyboard.press("Enter");
-  await expect(page).toHaveURL(/\/training\/classes$/);
+  await expect(page).toHaveURL(/\/membership$/);
   // App Router updates the URL before the destination commits and resets scroll.
   // Wait for both before testing wheel input on the new page.
-  await expect(page.getByRole("heading", { name: "Choose a class date." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Fifty Founders." })).toBeVisible();
   await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
   await expect(page.locator("#mobile-menu")).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.style.overflow)).toBe("");

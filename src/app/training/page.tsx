@@ -14,7 +14,7 @@ import { Section } from "@/components/ui/Section";
 import { DecisionTree, GroupingTarget, Ladder, MonthGrid, PortraitArt, ProcessLine, SeatDots, StepRail } from "@/components/pages/training/Art";
 import { InView } from "@/components/pages/training/InView";
 import { FACILITY } from "@/lib/config/site";
-import { COURSES, FIRST_SESSION, HERO, LADDER, LICENSE, PRIVATE, SIMULATOR, TRAINING_META } from "@/lib/content/pages/training";
+import { COURSES, FIRST_SESSION, HERO, LADDER, LICENSE, PRIVATE, SIMULATOR, TRAINING_META, UPCOMING_CLASSES } from "@/lib/content/pages/training";
 
 export const metadata: Metadata = pageMeta("/training", {
   title: TRAINING_META.title,
@@ -154,8 +154,8 @@ export default function TrainingPage() {
               </div>
               <div className="mt-8">
                 <Button href={COURSES.cta.href}>{COURSES.cta.label}</Button>
-                <LinkArrow href="/training/classes" className="ml-5">
-                  Browse scheduled classes
+                <LinkArrow href={UPCOMING_CLASSES.link.href} className="ml-5">
+                  {UPCOMING_CLASSES.link.label}
                 </LinkArrow>
               </div>
             </div>

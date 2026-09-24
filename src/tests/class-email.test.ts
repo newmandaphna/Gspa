@@ -8,7 +8,15 @@ delete process.env.RESEND_API_KEY;
 import { getDb } from "@/lib/db";
 import { classMailOutbox } from "@/lib/db/class-mail-schema";
 import { bookings, classSessions, experiences, type Booking, type Experience } from "@/lib/db/schema";
-import { deliverClassMail, ensureClassMailSchema, enqueueClassMail, processClassMailQueue, reconcileClassMailOutbox } from "@/lib/class-mail";
+import {
+  deliverClassMail,
+  drainClassMailOpportunistically,
+  ensureClassMailSchema,
+  enqueueClassMail,
+  OPPORTUNISTIC_DRAIN_LIMIT,
+  processClassMailQueue,
+  reconcileClassMailOutbox,
+} from "@/lib/class-mail";
 import { cancellationText, confirmationText, reminderText } from "@/lib/email";
 import type { EmailMessage } from "@/lib/email";
 
@@ -258,5 +266,40 @@ describe("scheduled class mail outbox", () => {
     const rows = await db.select().from(classMailOutbox).where(eq(classMailOutbox.bookingId, b.id));
     expect(rows.find((row) => row.kind === "confirmation")?.status).toBe("suppressed");
     expect(rows.find((row) => row.kind === "reminder")?.status).toBe("suppressed");
+  });
+
+  it("drains a handful of pending rows on the side, at most once a minute per process", async () => {
+    const db = await getDb();
+    const [catalog] = await db.select().from(experiences).limit(1);
+    await db
+      .insert(classSessions)
+      .values({ id: 9903, experienceId: catalog.id, title: "Busy Class", startsAt: START, endsAt: END, priceCents: 1000, capacity: 10, maxPerBooking: 2, status: "open" })
+      .onConflictDoNothing();
+    const pending = OPPORTUNISTIC_DRAIN_LIMIT + 2;
+    for (let i = 0; i < pending; i++) {
+      const b: Booking = { ...booking(), id: 9910 + i, code: `GS-OPP0${i}`, classSessionId: 9903, experienceId: catalog.id };
+      await db.insert(bookings).values(b).onConflictDoNothing();
+      await enqueueClassMail(b, "confirmation", confirmationText(b, catalog, { now: NOW }), db);
+    }
+    const sent: string[] = [];
+    const send = async (_kind: string, to: string) => {
+      sent.push(to);
+      return "sent" as const;
+    };
+    const t0 = new Date("2027-03-01T12:00:00Z");
+
+    const first = await drainClassMailOpportunistically({ db, now: t0, send });
+    expect(first?.sent).toBe(OPPORTUNISTIC_DRAIN_LIMIT);
+    // Thirty seconds on, the throttle holds: the same process does not drain again.
+    expect(await drainClassMailOpportunistically({ db, now: new Date(t0.getTime() + 30_000), send })).toBeNull();
+    expect(sent.length).toBe(OPPORTUNISTIC_DRAIN_LIMIT);
+    // A minute on, the rest go.
+    const second = await drainClassMailOpportunistically({ db, now: new Date(t0.getTime() + 60_000), send });
+    expect(second?.sent).toBe(2);
+    const rows = await db.select().from(classMailOutbox).where(eq(classMailOutbox.status, "sent"));
+    expect(rows.length).toBe(pending);
+    // With nothing left it is a cheap no-op, and a sender that throws is absorbed rather than surfaced to the caller.
+    const idle = await drainClassMailOpportunistically({ db, now: new Date(t0.getTime() + 120_000), send: async () => { throw new Error("boom"); } });
+    expect(idle).toEqual({ claimed: 0, sent: 0, failed: 0, skipped: 0 });
   });
 });

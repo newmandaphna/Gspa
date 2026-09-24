@@ -188,3 +188,89 @@ export const LICENSE = {
   cta: { label: "Read the FAQ", href: "/visit#faq" },
   requirements: { label: "See requirements", href: "/visit#requirements" },
 } as const;
+
+/* ------------------------------------------------------------------------
+   Scheduled classes. The dates the desk has posted, with a seat form.
+   Counts come from the live list; the seat count comes from FACILITY.
+   --------------------------------------------------------------------- */
+const seatsWord = spell(FACILITY.classroomSeats);
+
+export const CLASSES = {
+  meta: {
+    title: "Classes",
+    description: `Scheduled classes at ${SITE.name} in Jamaica, Queens: the dates the desk has posted, ${seatsWord} seats to a date, reserved online and held in the order they come in.`,
+  },
+  /** Running head while the list loads, and the stem once it has. */
+  head: {
+    seats: `${FACILITY.classroomSeats} seats per date`,
+    cadence: "new dates post monthly",
+    open: (n: number) => `${n} open ${n === 1 ? "date" : "dates"}`,
+  },
+  headline: "Pick a date, hold a seat.",
+  subhead: `${cap(seatsWord)} seats to a date, held in the order they are reserved.`,
+  filter: { label: "Class date", clear: "Show every date" },
+  loading: "Reading the schedule.",
+  empty: {
+    all: { headline: "No dates are listed yet.", body: "The desk posts new ones monthly." },
+    day: { headline: "No dates are listed for that day.", body: "Clear the date to see every one posted." },
+  },
+  errors: {
+    load: "The schedule could not be read.",
+    retry: "Try again",
+    unavailable: "That class is no longer listed, or it has already started.",
+    unavailableLink: "See every date",
+  },
+  /** The panel before a date is chosen. */
+  choose: {
+    headline: "Choose a date on the left.",
+    body: "Its requirements and the seat form appear here.",
+  },
+  enroll: {
+    eyebrow: "Reserve a seat",
+    labels: {
+      seats: "Seats",
+      firstName: "First name",
+      lastName: "Last name",
+      email: "Email",
+      phone: "Phone",
+      address: "Mailing address",
+      line1: "Address line 1",
+      line2: "Address line 2 (optional)",
+      city: "City",
+      state: "State",
+      postalCode: "Postal code",
+      country: "Country",
+      attendees: "Attendees",
+      attendeeFirst: (i: number) => `Attendee ${i} first name`,
+      attendeeLast: (i: number) => `Attendee ${i} last name`,
+      photoId: (i: number) => `Photo ID for attendee ${i}`,
+      consent: "I consent to private ID collection for this class.",
+      ack: "I acknowledge the class requirements above.",
+      submitPaid: "Continue to payment",
+      submitFree: "Reserve seat",
+      sending: "Reserving",
+    },
+    idNote: "Photo IDs are private to staff for verification, never public or sent by email, and deleted 30 days after class. JPEG or PNG only; 2 MiB each, 8 MiB total.",
+    notices: {
+      payments: "Online payment is not available for this class right now. Please contact the desk.",
+      documents: "Secure ID collection is temporarily unavailable. Please contact the desk to book.",
+      closed: "Enrollment is closed for this class.",
+      soldOut: "This class is sold out.",
+    },
+    errors: {
+      idCount: "Add one photo ID for each attendee.",
+      idSize: "Each ID image must be 2 MiB or smaller.",
+      idTotal: "Documents exceed 8 MiB total. Reduce the attendee count or use smaller files.",
+      generic: "Could not reserve this class.",
+    },
+  },
+} as const;
+
+/** The home page teaser: the next three dates, or nothing at all. */
+export const UPCOMING_CLASSES = {
+  head: (n: number) => `${n} ${n === 1 ? "date" : "dates"} posted · ${FACILITY.classroomSeats} seats per date`,
+  headline: "Seats are open on these dates.",
+  subhead: `${cap(seatsWord)} seats to a date. Reserve one and the desk has your name.`,
+  link: { label: "See every date", href: "/training/classes" },
+  error: { line: "The class list could not be read.", retry: "Try again" },
+} as const;
