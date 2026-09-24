@@ -1,11 +1,10 @@
-# Replit configuration for The Gun Spa (Next.js 16)
-modules = ["nodejs-22", "web"]
+modules = ["nodejs-20", "web"]
 run = "npm run dev"
 entrypoint = "src/app/page.tsx"
 hidden = [".config", ".next", "node_modules", ".data", "tsconfig.tsbuildinfo"]
 
 [nix]
-channel = "stable-24_11"
+channel = "stable-25_05"
 
 [deployment]
 deploymentTarget = "autoscale"
