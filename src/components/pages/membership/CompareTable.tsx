@@ -18,7 +18,7 @@ function Cell({ value }: { value: string | boolean }) {
   if (value === false) {
     return (
       <span className="text-ink-faint">
-        <span aria-hidden="true">—</span>
+        <span aria-hidden="true">·</span>
         <span className="sr-only">Not included</span>
       </span>
     );

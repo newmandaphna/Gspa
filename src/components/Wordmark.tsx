@@ -30,20 +30,20 @@ export function Wordmark({ className, tone = "brand", tagline = false }: { class
     <span className={cn("inline-flex flex-col items-start", className)}>
       <span className="flex h-[1em] items-center gap-[0.32em]" style={{ fontSize: "1em" }}>
         <span
-          className="font-[family-name:var(--font-display)] font-medium uppercase leading-none tracking-[0.2em]"
-          style={{ color: gun, fontSize: "0.92em" }}
+          className="font-[family-name:var(--font-brand)] font-medium uppercase leading-none tracking-[0.22em]"
+          style={{ color: gun, fontSize: "0.9em" }}
         >
           Gun
         </span>
         <Cartridge className="h-[1.25em] w-auto" body={gun} />
-        <span className="font-[family-name:var(--font-display)] font-medium uppercase leading-none tracking-[0.2em]" style={{ color: GOLD, fontSize: "0.92em" }}>
+        <span className="font-[family-name:var(--font-brand)] font-medium uppercase leading-none tracking-[0.22em]" style={{ color: GOLD, fontSize: "0.9em" }}>
           Spa
         </span>
       </span>
       {tagline && (
         <>
           <span className="mt-[0.35em] block h-[0.14em] w-full" style={{ background: GOLD }} aria-hidden="true" />
-          <span className="mt-[0.32em] font-[family-name:var(--font-display)] text-[0.42em] font-semibold uppercase leading-none tracking-[0.14em]">
+          <span className="mt-[0.32em] font-[family-name:var(--font-brand)] text-[0.42em] font-semibold uppercase leading-none tracking-[0.14em]">
             <span style={{ color: gun }}>Ready? Aim. </span>
             <span style={{ color: GOLD }}>Relax!</span>
           </span>

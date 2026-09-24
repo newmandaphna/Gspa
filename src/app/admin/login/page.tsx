@@ -18,7 +18,7 @@ export default async function AdminLoginPage() {
         <p className="t-body mt-3 text-ink-muted">Reservations, members, requests and inquiries.</p>
         {!adminConfigured() && (
           <p className="t-caption mt-6 rounded-lg bg-paper-2 px-4 py-3">
-            No <code className="font-mono">ADMIN_PASSWORD</code> is set. Add one (6+ characters) to your environment — on Replit, under Tools → Secrets — and restart the app.
+            No <code className="font-mono">ADMIN_PASSWORD</code> is set. Add one of at least 6 characters to your environment (on Replit, under Tools, then Secrets) and restart the app.
           </p>
         )}
         <div className="mt-8 max-w-[400px]">

@@ -62,9 +62,9 @@ export default async function AdminMembers() {
                     <td className="px-4 py-3">
                       <span className={cn("t-footnote rounded-pill px-2 py-0.5 font-semibold capitalize", TONE[m.status] ?? TONE.expired)}>{m.status}</span>
                     </td>
-                    <td className="px-4 py-3">{m.lockerNumber ?? "—"}</td>
+                    <td className="px-4 py-3">{m.lockerNumber ?? <span className="text-ink-faint">None</span>}</td>
                     <td className="px-4 py-3">
-                      {m.passwordHash ? <span className="t-footnote text-ink-muted">Activated</span> : <span className="t-footnote font-mono">{m.activationCode ?? "—"}</span>}
+                      {m.passwordHash ? <span className="t-footnote text-ink-muted">Activated</span> : <span className="t-footnote font-mono">{m.activationCode ?? "No code"}</span>}
                     </td>
                   </tr>
                 ))}

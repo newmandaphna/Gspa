@@ -80,7 +80,7 @@ function HeroHeadline({ text }: { text: string }) {
   return (
     <>
       {text.slice(0, i + 1)}
-      <span className="text-accent">{text.slice(i + 1)}</span>
+      <span className="t-italic text-accent">{text.slice(i + 1)}</span>
     </>
   );
 }

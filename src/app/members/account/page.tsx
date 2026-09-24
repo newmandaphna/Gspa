@@ -24,7 +24,7 @@ export default async function AccountPage() {
             <Row label="Name" value={`${member.firstName} ${member.lastName}`} />
             <Row label="Member number" value={member.memberNumber} mono />
             <Row label="Email" value={member.email} />
-            <Row label="Phone" value={member.phone ?? "—"} />
+            <Row label="Phone" value={member.phone ?? "Not on file"} />
             <Row label="Tier" value={`${tier?.name ?? member.tier} · ${member.billing === "lifetime" ? "Lifetime" : "Annual"}`} />
             <Row label="Status" value={member.status} />
           </dl>

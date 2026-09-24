@@ -73,7 +73,7 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
               </div>
               <dl className="mt-8 grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4">
                 <Stat label="Tier" value={tier?.name ?? member.tier} />
-                <Stat label={member.billing === "lifetime" ? "Term" : "Renews"} value={member.billing === "lifetime" ? "Lifetime" : (renews ?? "—")} />
+                <Stat label={member.billing === "lifetime" ? "Term" : "Renews"} value={member.billing === "lifetime" ? "Lifetime" : (renews ?? "Not set")} />
                 <Stat label="Guests per visit" value={String(tier?.guestsPerVisit ?? 1)} />
                 <Stat label="Booking window" value={`${tier?.bookingWindowDays ?? 60} days`} />
               </dl>

@@ -558,8 +558,8 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
               <>
                 <p className="t-3 mt-3">{experience.name}</p>
                 <dl className="mt-4 space-y-2 t-body">
-                  <Row label="Date" value={date ? formatDateLong(date) : "—"} />
-                  <Row label="Time" value={selectedSlot ? `${selectedSlot.label} · ${durationLabel(experience.durationMin)}` : (time ?? "—")} />
+                  <Row label="Date" value={date ? formatDateLong(date) : "Choose a day"} />
+                  <Row label="Time" value={selectedSlot ? `${selectedSlot.label} · ${durationLabel(experience.durationMin)}` : (time ?? "Choose a time")} />
                   <Row label="Guests" value={`${guests} · ${unitNoun(experience, units)}`} />
                   {member && <Row label="Member" value={member.memberNumber} />}
                   {!member && typedMember && <Row label="Member no." value={typedMember.toUpperCase()} />}

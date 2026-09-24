@@ -120,7 +120,7 @@ export default async function AdminMemberDetail({ params, searchParams }: { para
               <p className="t-caption mt-1 text-ink-muted">Activated. Regenerating a code lets the member set a new password.</p>
             ) : (
               <p className="t-caption mt-1 text-ink-muted">
-                Not activated. Code: <span className="font-mono text-ink">{member.activationCode ?? "—"}</span>
+                Not activated. Code: <span className="font-mono text-ink">{member.activationCode ?? "none yet"}</span>
               </p>
             )}
             <form action={regenerateActivationAction} className="mt-3">

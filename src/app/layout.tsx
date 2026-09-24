@@ -7,15 +7,15 @@ import { SITE } from "@/lib/config/site";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: {
-    default: `${SITE.name} — Private Shooting Club, Jamaica, Queens`,
-    template: `%s — ${SITE.name}`,
+    default: `${SITE.name}: Private Shooting Club, Jamaica, Queens`,
+    template: `%s · ${SITE.name}`,
   },
   description: SITE.description,
   applicationName: SITE.name,
   openGraph: {
     type: "website",
     siteName: SITE.name,
-    title: `${SITE.name} — Private Shooting Club, Jamaica, Queens`,
+    title: `${SITE.name}: Private Shooting Club, Jamaica, Queens`,
     description: SITE.description,
     locale: "en_US",
   },
