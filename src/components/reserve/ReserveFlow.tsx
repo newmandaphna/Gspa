@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { Calendar } from "@/components/reserve/Calendar";
 import { Button } from "@/components/ui/Button";
+import { Row as ListRow, Rows } from "@/components/ui/List";
 import { CATEGORY_LABELS, ELIGIBILITY_LABELS, type CatalogItem, type Category } from "@/lib/content/catalog";
 import { ACK_SUMMARY, CANCELLATION_POLICY, requirementsFor } from "@/lib/content/requirements";
 import { BOOKING, TIER_WINDOW_DAYS, windowDaysFor } from "@/lib/config/site";
@@ -511,17 +512,16 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
 
                 <div className="mt-8 rounded-card-sm bg-paper-2 p-5">
                   <p className="t-caption font-semibold text-ink">Before you arrive</p>
-                  <ul className="mt-3 space-y-2">
+                  <Rows mark="dot" size="sm" className="mt-3">
                     {requirementsFor(experience.eligibility, Boolean(member))
                       .slice(0, 5)
                       .map((r) => (
-                        <li key={r.text} className="t-caption flex gap-2 text-ink-muted">
-                          <span aria-hidden="true" className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-accent-deep" />
+                        <ListRow key={r.text} tone="muted">
                           {r.text}
-                        </li>
+                        </ListRow>
                       ))}
-                  </ul>
-                  <Link href="/visit#requirements" className="link-arrow mt-2 text-[0.875rem]">
+                  </Rows>
+                  <Link href="/visit#requirements" className="link-arrow mt-4 text-[0.875rem]">
                     All requirements
                   </Link>
                   <label className="mt-4 flex cursor-pointer items-start gap-3">

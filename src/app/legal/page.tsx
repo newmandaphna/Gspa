@@ -4,6 +4,7 @@ import { RetentionTable } from "@/components/pages/legal/RetentionTable";
 import { Container } from "@/components/ui/Container";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { LinkArrow } from "@/components/ui/LinkArrow";
+import { Numbered, NumberedItem, Row, Rows } from "@/components/ui/List";
 import { Reveal } from "@/components/ui/Reveal";
 import { Section } from "@/components/ui/Section";
 import { cn } from "@/lib/cn";
@@ -70,11 +71,11 @@ function LongForm({ section }: { section: LegalSection }) {
               </p>
             ))}
             {c.bullets && (
-              <ul className="t-body mt-3 list-disc space-y-2 pl-5 text-ink marker:text-accent">
+              <Rows mark="dot" className="mt-4">
                 {c.bullets.map((b) => (
-                  <li key={b}>{b}</li>
+                  <Row key={b}>{b}</Row>
                 ))}
-              </ul>
+              </Rows>
             )}
             {c.slot === "retention-table" && <RetentionTable rows={RETENTION_ROWS} />}
           </div>
@@ -116,47 +117,26 @@ function RangeRules() {
             <Stamp>Last updated {c.updated}</Stamp>
           </Reveal>
 
-          <ol className="mt-12 border-t border-white/10">
+          <Numbered className="mt-12">
             {RANGE_RULES.map((rule, i) => (
-              <Reveal
-                as="li"
-                key={rule}
-                delay={i * 0.08}
-                className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-5 border-b border-white/10 py-4 sm:gap-x-8 sm:py-6"
-              >
-                <span className="t-numeral tabular w-[1.7em] text-[clamp(3.5rem,8vw,7.5rem)] text-night-4" aria-hidden="true">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <span className="t-3 max-w-[18em] text-snow">
-                  <span className="sr-only">Rule {i + 1}. </span>
-                  {rule}
-                </span>
-              </Reveal>
+              <NumberedItem key={rule} index={i} size="lg" srLabel={`Rule ${i + 1}.`} delay={i * 0.08}>
+                {rule}
+              </NumberedItem>
             ))}
-          </ol>
+          </Numbered>
 
           <div className="mt-16">
             <Reveal className={MEASURE}>
               <h3 className="t-3">{c.requirementsHeading}</h3>
               <p className="t-body mt-2 text-mist">{c.requirementsIntro}</p>
             </Reveal>
-            <ol className="mt-8 border-t border-white/10">
+            <Numbered className="mt-8">
               {REQUIREMENTS.map((r, i) => (
-                <li key={r.text} className="grid gap-3 border-b border-white/10 py-5 lg:grid-cols-[minmax(0,34em)_minmax(0,1fr)] lg:gap-8">
-                  <p className="t-body text-snow/90">
-                    <span className="mr-3 font-mono text-[0.8125rem] text-mist">{String(i + 1).padStart(2, "0")}</span>
-                    {r.text}
-                  </p>
-                  <ul className="flex flex-wrap gap-1.5 lg:justify-end lg:self-start" aria-label="Applies to">
-                    {r.tags.map((t) => (
-                      <li key={t} className="inline-flex items-center rounded-pill px-2.5 py-0.5 font-mono text-[0.75rem] text-mist ring-1 ring-inset ring-white/15">
-                        {TAG_LABELS[t] ?? t}
-                      </li>
-                    ))}
-                  </ul>
-                </li>
+                <NumberedItem key={r.text} index={i} tags={r.tags.map((t) => TAG_LABELS[t] ?? t)}>
+                  {r.text}
+                </NumberedItem>
               ))}
-            </ol>
+            </Numbered>
             <div className="mt-6 flex flex-wrap items-center justify-between gap-x-8 gap-y-3">
               <p className="font-mono text-[0.8125rem] leading-[1.5] text-mist">
                 {c.reviewedLabel} {REQUIREMENTS_LAST_REVIEWED}

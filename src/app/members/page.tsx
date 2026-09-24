@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { cancelRequestAction, signOutAction } from "@/app/members/actions";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
+import { Row as ListRow, Rows } from "@/components/ui/List";
 import { Section } from "@/components/ui/Section";
 import { Reticle } from "@/components/art";
 import { LOCKERS_TOTAL, tierSatisfies } from "@/lib/config/site";
@@ -135,21 +136,25 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
             {upcoming.length === 0 ? (
               <p className="t-body mt-4 text-ink-muted">No reservations yet.</p>
             ) : (
-              <ul className="mt-6 divide-y divide-ink/10 rounded-card bg-white ring-1 ring-ink/8">
+              <Rows className="mt-6 rounded-card bg-white px-6 ring-1 ring-ink/8" top={false}>
                 {upcoming.map(({ booking, experience }) => (
-                  <li key={booking.id} className="flex items-center justify-between gap-4 px-6 py-4">
-                    <div>
-                      <p className="t-4">{experience.name}</p>
-                      <p className="t-caption text-ink-muted">
-                        {formatInstant(booking.startsAt)} · {booking.guests} guest{booking.guests === 1 ? "" : "s"} · {formatMoney(booking.amountCents)}
-                      </p>
-                    </div>
-                    <Link href={`/reserve/confirmation/${booking.code}`} className="link-arrow text-[0.9375rem]">
-                      Details
-                    </Link>
-                  </li>
+                  <ListRow
+                    key={booking.id}
+                    className="last:border-b-0"
+                    detailMono={false}
+                    detail={
+                      <Link href={`/reserve/confirmation/${booking.code}`} className="link-arrow text-[0.9375rem]">
+                        Details
+                      </Link>
+                    }
+                  >
+                    <span className="t-4 block">{experience.name}</span>
+                    <span className="t-caption block text-ink-muted">
+                      {formatInstant(booking.startsAt)} · {booking.guests} guest{booking.guests === 1 ? "" : "s"} · {formatMoney(booking.amountCents)}
+                    </span>
+                  </ListRow>
                 ))}
-              </ul>
+              </Rows>
             )}
           </div>
           <div>
@@ -157,15 +162,17 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
             {requests.length === 0 ? (
               <p className="t-body mt-4 text-ink-muted">Nothing pending. Lockers, guest passes and storage requests show up here.</p>
             ) : (
-              <ul className="mt-6 divide-y divide-ink/10 rounded-card bg-white ring-1 ring-ink/8">
+              <Rows className="mt-6 rounded-card bg-white px-6 ring-1 ring-ink/8" top={false}>
                 {requests.map(({ request }) => (
-                  <li key={request.id} className="px-6 py-4">
-                    <div className="flex items-center justify-between gap-4">
-                      <p className="t-4">{REQUEST_KINDS[request.kind as keyof typeof REQUEST_KINDS] ?? request.kind}</p>
-                      <span className={cn("t-footnote rounded-pill px-2.5 py-1 font-semibold capitalize", STATUS_TONE[request.status] ?? STATUS_TONE.fulfilled)}>{request.status}</span>
-                    </div>
-                    <p className="t-caption mt-1 text-ink-muted">{request.details}</p>
-                    {request.staffNotes && <p className="t-caption mt-1 text-ink">Team: {request.staffNotes}</p>}
+                  <ListRow
+                    key={request.id}
+                    className="last:border-b-0"
+                    detailMono={false}
+                    detail={<span className={cn("t-footnote rounded-pill px-2.5 py-1 font-semibold capitalize", STATUS_TONE[request.status] ?? STATUS_TONE.fulfilled)}>{request.status}</span>}
+                  >
+                    <span className="t-4 block">{REQUEST_KINDS[request.kind as keyof typeof REQUEST_KINDS] ?? request.kind}</span>
+                    <span className="t-caption mt-1 block text-ink-muted">{request.details}</span>
+                    {request.staffNotes && <span className="t-caption mt-1 block text-ink">Team: {request.staffNotes}</span>}
                     {request.status === "requested" && (
                       <form action={cancelRequestAction} className="mt-2">
                         <input type="hidden" name="id" value={request.id} />
@@ -174,9 +181,9 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
                         </button>
                       </form>
                     )}
-                  </li>
+                  </ListRow>
                 ))}
-              </ul>
+              </Rows>
             )}
             <Link href="/members/account" className="link-arrow mt-6 text-[0.9375rem]">
               Account settings

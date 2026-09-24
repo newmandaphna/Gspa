@@ -24,13 +24,13 @@ export function Faq({ items, className }: { items: FaqItem[]; className?: string
   }, [items]);
 
   return (
-    <div className={cn("w-full border-t border-hairline", className)}>
+    <div className={cn("hairline w-full border-t", className)}>
       {items.map((item) => {
         const isOpen = open === item.id;
         const panelId = `faq-panel-${item.id}`;
         const buttonId = `faq-button-${item.id}`;
         return (
-          <div key={item.id} id={item.id} className="scroll-mt-[calc(var(--nav-h)+1.5rem)] border-b border-hairline">
+          <div key={item.id} id={item.id} className="hairline scroll-mt-[calc(var(--nav-h)+1.5rem)] border-b">
             <h3 className="m-0">
               <button
                 type="button"
@@ -38,7 +38,7 @@ export function Faq({ items, className }: { items: FaqItem[]; className?: string
                 aria-expanded={isOpen}
                 aria-controls={panelId}
                 onClick={() => setOpen(isOpen ? null : item.id)}
-                className="group flex w-full items-start justify-between gap-6 py-5 text-left sm:py-6"
+                className="group flex w-full items-start justify-between gap-6 py-4 text-left sm:py-5"
               >
                 <span className="t-4">{item.q}</span>
                 <span
@@ -60,7 +60,7 @@ export function Faq({ items, className }: { items: FaqItem[]; className?: string
               className={cn("grid transition-[grid-template-rows] duration-400 ease-[var(--ease-apple)]", isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]")}
             >
               <div className="min-h-0 overflow-hidden">
-                <p className={cn("max-w-[34em] pb-6 pr-12 text-[1.0625rem] leading-[1.47] text-ink-muted transition-opacity duration-300", isOpen ? "opacity-100" : "opacity-0")}>
+                <p className={cn("t-body max-w-[34em] pb-5 pr-12 text-muted transition-opacity duration-300 sm:pb-6", isOpen ? "opacity-100" : "opacity-0")}>
                   {item.a}
                 </p>
               </div>

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { ImageSlot } from "@/components/ui/ImageSlot";
 import { LinkArrow } from "@/components/ui/LinkArrow";
+import { Row, Rows } from "@/components/ui/List";
 import { Item, Reveal, Stagger } from "@/components/ui/Reveal";
 import { Section } from "@/components/ui/Section";
 import { DecisionTree, GroupingTarget, Ladder, MonthGrid, PairDiagram, ProcessLine, SeatDots, StepRail } from "@/components/pages/training/Art";
@@ -127,13 +128,11 @@ export default function TrainingPage() {
                     <p className="t-footnote text-mist">{FIRST_SESSION.card.priceNote}</p>
                   </div>
                 </div>
-                <ul className="mt-6 divide-y divide-white/10 border-y border-white/10">
+                <Rows mark="check" size="sm" className="mt-6">
                   {FIRST_SESSION.card.includes.map((line) => (
-                    <li key={line} className="t-caption py-2.5 text-snow/90">
-                      {line}
-                    </li>
+                    <Row key={line}>{line}</Row>
                   ))}
-                </ul>
+                </Rows>
                 <div className="mt-6 flex flex-wrap items-center gap-3">
                   <Badge tone="dark">{FIRST_SESSION.card.eligibility}</Badge>
                   {FIRST_SESSION.card.secondStudent && (

@@ -8,6 +8,7 @@ import { Container } from "@/components/ui/Container";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { ImageSlot } from "@/components/ui/ImageSlot";
 import { LinkArrow } from "@/components/ui/LinkArrow";
+import { Row, Rows, Specs } from "@/components/ui/List";
 import { Item, Reveal, Stagger } from "@/components/ui/Reveal";
 import { Section } from "@/components/ui/Section";
 import { cn } from "@/lib/cn";
@@ -96,20 +97,24 @@ function FormatCardView({ card }: { card: FormatCard }) {
         <PlanGlyph lanes={card.lanes} />
         <p className="mt-2 text-center font-mono text-[0.75rem] uppercase tracking-[0.08em] text-ink-muted">{FORMAT_LABELS.lanes(card.lanes)}</p>
       </div>
-      <dl className="tabular mt-6 flex items-center justify-between border-t border-hairline pt-4 font-mono text-[0.9375rem]">
-        <div>
-          <dt className="sr-only">Duration</dt>
-          <dd className="text-ink-muted">{card.duration}</dd>
-        </div>
-        <div className="text-right">
-          <dt className="sr-only">Price</dt>
-          <dd className="text-ink">{card.price}</dd>
-        </div>
-      </dl>
+      <Specs
+        className="mt-6"
+        items={[
+          { label: "Duration", value: card.duration },
+          { label: "Price", value: card.price },
+        ]}
+      />
       <p className="t-body mt-4 text-ink-muted">{item.tagline}</p>
       <div className="mt-4">
         <Badge eligibility={item.eligibility} tone="light" />
       </div>
+      {item.includes.length > 0 && (
+        <Rows mark="check" size="sm" className="mt-6">
+          {item.includes.map((line) => (
+            <Row key={line}>{line}</Row>
+          ))}
+        </Rows>
+      )}
       <div className="mt-8 pt-2 sm:mt-auto sm:pt-8">
         {bookable ? (
           <Button href={card.cta.href} size="md">

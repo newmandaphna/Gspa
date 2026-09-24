@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { CancelForm } from "@/components/reserve/CancelForm";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
+import { Row, Rows } from "@/components/ui/List";
 import { Section } from "@/components/ui/Section";
 import { getBookingByCode, markPaidBySession } from "@/lib/booking";
 import { BOOKING, SITE } from "@/lib/config/site";
@@ -111,17 +112,16 @@ export default async function ConfirmationPage({
           <div className="space-y-6">
             <div className="rounded-card bg-paper-2 p-6">
               <p className="t-4">Bring</p>
-              <ul className="mt-3 space-y-2">
+              <Rows mark="dot" size="sm" className="mt-3">
                 {requirementsFor(experience.eligibility as "handgun" | "longgun" | "simulator" | "anyone", Boolean(booking.memberId))
                   .slice(0, 3)
                   .map((r) => (
-                    <li key={r.text} className="t-caption flex gap-2 text-ink-muted">
-                      <span aria-hidden="true" className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-accent-deep" />
+                    <Row key={r.text} tone="muted">
                       {r.text}
-                    </li>
+                    </Row>
                   ))}
-              </ul>
-              <Link href="/visit#requirements" className="link-arrow mt-3 text-[0.9375rem]">
+              </Rows>
+              <Link href="/visit#requirements" className="link-arrow mt-4 text-[0.9375rem]">
                 All requirements
               </Link>
             </div>

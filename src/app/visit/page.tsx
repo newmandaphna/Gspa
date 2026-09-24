@@ -10,6 +10,7 @@ import { Container } from "@/components/ui/Container";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { ImageSlot } from "@/components/ui/ImageSlot";
 import { LinkArrow } from "@/components/ui/LinkArrow";
+import { Numbered, NumberedItem } from "@/components/ui/List";
 import { Item, Reveal, Stagger } from "@/components/ui/Reveal";
 import { Section } from "@/components/ui/Section";
 import { cn } from "@/lib/cn";
@@ -150,24 +151,14 @@ export default function VisitPage() {
           <Head copy={VISIT_REQUIREMENTS} />
           <Reveal delay={0.1} className="mt-12">
             <GlassPanel tone="dark" className="p-5 sm:p-8 lg:p-10">
-              <ol className="divide-y divide-white/10">
+              <Numbered top={false}>
                 {REQUIREMENTS.map((r, i) => (
-                  <li key={r.text} className="grid gap-3 py-5 sm:grid-cols-[3rem_minmax(0,1fr)] sm:gap-4">
-                    <span className="font-mono text-[0.75rem] text-accent sm:pt-1.5">{String(i + 1).padStart(2, "0")}</span>
-                    <div>
-                      <p className="max-w-[34em] text-[1.0625rem] leading-[1.47] text-snow">{r.text}</p>
-                      <div className="mt-3 flex flex-wrap gap-1.5">
-                        {r.tags.map((t) => (
-                          <span key={t} className="inline-flex items-center rounded-pill px-2.5 py-0.5 font-mono text-[0.6875rem] text-mist ring-1 ring-inset ring-white/15">
-                            {t}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </li>
+                  <NumberedItem key={r.text} index={i} tags={r.tags}>
+                    {r.text}
+                  </NumberedItem>
                 ))}
-              </ol>
-              <p className="mt-6 border-t border-white/10 pt-5 font-mono text-[0.75rem] text-mist">
+              </Numbered>
+              <p className="mt-6 pt-5 font-mono text-[0.75rem] text-mist">
                 {LAST_REVIEWED_LABEL} {REQUIREMENTS_LAST_REVIEWED}
               </p>
             </GlassPanel>

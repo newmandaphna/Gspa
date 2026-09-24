@@ -7,11 +7,13 @@ import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { ImageSlot } from "@/components/ui/ImageSlot";
 import { LinkArrow } from "@/components/ui/LinkArrow";
+import { Row, Rows } from "@/components/ui/List";
 import { Item, Reveal, Stagger } from "@/components/ui/Reveal";
 import { Section } from "@/components/ui/Section";
 import { ExteriorArt, FloorPlan, HospitalityIcon, LoungeArt, SimArt, SimulatorScreen, StepRail, SuiteArt, SuitePlan, TransitSketch, Waveform } from "@/components/pages/home/Art";
 import { InView } from "@/components/pages/home/InView";
 import { cn } from "@/lib/cn";
+import { tierByKey } from "@/lib/content/membership";
 import { AVAILABILITY, FIRST_SESSION, HERO, HOME_META, HOSPITALITY, LANES, MEMBERSHIP, QUIET, SIMULATOR, SUITES, VISIT } from "@/lib/content/pages/home";
 
 export const metadata: Metadata = {
@@ -299,6 +301,13 @@ export default function HomePage() {
                   </div>
                   <p className="t-body mt-3 text-ink-muted">{t.tagline}</p>
                   {t.limited && <p className="t-footnote mt-3 text-accent-deep">{t.limited}</p>}
+                  <Rows mark="check" size="sm" className="mt-6">
+                    {(tierByKey(t.key)?.perks ?? []).slice(0, 3).map((p) => (
+                      <Row key={p} tone="muted">
+                        {p}
+                      </Row>
+                    ))}
+                  </Rows>
                 </Link>
               </Item>
             ))}

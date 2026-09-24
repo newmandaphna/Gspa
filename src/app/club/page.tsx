@@ -10,6 +10,7 @@ import { Container } from "@/components/ui/Container";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { ImageSlot } from "@/components/ui/ImageSlot";
 import { LinkArrow } from "@/components/ui/LinkArrow";
+import { Row, Rows, Specs, type Spec } from "@/components/ui/List";
 import { Item, Reveal, Stagger } from "@/components/ui/Reveal";
 import { Section } from "@/components/ui/Section";
 import { cn } from "@/lib/cn";
@@ -40,12 +41,21 @@ import {
   SIMULATOR_CHIPS,
   SUITE_PHOTO_ALT,
   SUITE_PLAN_CAPTION,
-  SUITE_SPECS,
   TARGET_STOPS,
+  numberWord,
   type SectionCopy,
 } from "@/lib/content/pages/club";
 import { RANGE_RULES } from "@/lib/content/requirements";
+import { FACILITY } from "@/lib/config/site";
 import { formatMoney } from "@/lib/time";
+
+/** Suite facts as label / value pairs, read from the catalog item and FACILITY (the same sources as SUITE_SPECS). */
+const SUITE_FACTS: ReadonlyArray<Spec> = [
+  { label: "Lanes", value: numberWord(FACILITY.lanesPerSuite).replace(/^\w/, (c) => c.toUpperCase()) },
+  { label: "Guests", value: `Up to ${numberWord(PRIVATE_SUITE.maxGuestsPerUnit)}` },
+  { label: "Range officer", value: "Dedicated" },
+  { label: "Duration", value: `${PRIVATE_SUITE.durationMin} minutes` },
+];
 
 export const metadata: Metadata = {
   title: CLUB_META.title,
@@ -134,14 +144,7 @@ export default function ClubPage() {
               <div className="grid gap-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-12">
                 <div className="flex flex-col">
                   <Eyebrow>{PRIVATE_SUITE.name}</Eyebrow>
-                  <ul className="mt-4 divide-y divide-hairline border-y border-hairline">
-                    {SUITE_SPECS.map((spec, i) => (
-                      <li key={spec} className="flex items-baseline gap-4 py-3">
-                        <span className="font-mono text-[0.75rem] text-ink-faint">0{i + 1}</span>
-                        <span className="t-body">{spec}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  <Specs className="mt-4" aria-label={`${PRIVATE_SUITE.name} at a glance`} items={SUITE_FACTS} />
                   <p className="tabular mt-4 t-caption text-ink-muted">
                     From {formatMoney(PRIVATE_SUITE.priceCents)} for the suite
                     {PRIVATE_SUITE.memberPriceCents !== undefined && <> · members {formatMoney(PRIVATE_SUITE.memberPriceCents)}</>}
@@ -251,14 +254,16 @@ export default function ClubPage() {
                 <ServiceTools />
               </div>
               <p className="mt-3 font-mono text-[0.75rem] uppercase tracking-[0.12em] text-mist">{SERVICES_CAPTION}</p>
-              <ul className="mt-6 divide-y divide-white/10 border-y border-white/10">
+              <Rows className="mt-6">
                 {[GUNSMITH, DETAILING].map((s) => (
-                  <li key={s.slug} className="flex flex-col gap-1 py-4 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
-                    <span className="t-4">{s.name}</span>
-                    <span className="t-caption text-mist">{s.tagline}</span>
-                  </li>
+                  <Row key={s.slug}>
+                    <span className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
+                      <span className="t-4">{s.name}</span>
+                      <span className="t-caption text-mist sm:text-right">{s.tagline}</span>
+                    </span>
+                  </Row>
                 ))}
-              </ul>
+              </Rows>
               {CLUB_LOCKERS.cta && (
                 <div className="mt-6">
                   <LinkArrow href={CLUB_LOCKERS.cta.href}>{CLUB_LOCKERS.cta.label}</LinkArrow>

@@ -11,6 +11,7 @@ import { Container } from "@/components/ui/Container";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { ImageSlot } from "@/components/ui/ImageSlot";
 import { LinkArrow } from "@/components/ui/LinkArrow";
+import { Row, Rows } from "@/components/ui/List";
 import { Item, Reveal, Stagger } from "@/components/ui/Reveal";
 import { Section } from "@/components/ui/Section";
 import { cn } from "@/lib/cn";
@@ -94,13 +95,11 @@ function TierCard({ tier }: { tier: Tier }) {
       {tier.altPrice && <p className="t-caption tabular mt-1 text-ink-muted">{tier.altPrice}</p>}
       {tier.limited && <p className="mt-2 font-mono text-[0.75rem] text-accent-deep">{tier.limited}</p>}
       <p className="t-body mt-4 text-ink">{tier.tagline}</p>
-      <ul className="mt-6 flex-1 divide-y divide-hairline border-y border-hairline">
+      <Rows mark="check" size="sm" className="mt-6 flex-1">
         {tier.perks.map((p) => (
-          <li key={p} className="t-caption py-3 text-ink-muted">
-            {p}
-          </li>
+          <Row key={p}>{p}</Row>
         ))}
-      </ul>
+      </Rows>
       <Button href={TIER_CARD.cta.href} variant={lifted ? "primary" : "secondary"} className="mt-7 w-full">
         {TIER_CARD.cta.label}
       </Button>
