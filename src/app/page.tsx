@@ -47,10 +47,9 @@ function Head({ id, head, headline, subhead, className, as: Tag = "h2" }: { id: 
 const SUITE = itemBySlug("private-suite");
 
 const TICKER = [
-  `${FACILITY.laneCount} lanes`,
-  `${FACILITY.laneYards} yards`,
-  `${spell(FACILITY.suites)} private suites`,
-  `${spell(FACILITY.simulatorBays)} simulator bays`,
+  ...(SITE.facilityDetailsPublic
+    ? [`${FACILITY.laneCount} lanes`, `${FACILITY.laneYards} yards`, `${spell(FACILITY.suites)} private suites`, `${spell(FACILITY.simulatorBays)} simulator bays`]
+    : [SITE.area, "Membership by application", "Instruction for every level", SITE.tagline]),
   "Espresso, never alcohol",
   `${FACILITY.transit.driveFromJfkMin} minutes from JFK`,
   "Warm towels off the line",
@@ -106,6 +105,9 @@ export default function HomePage() {
         </Container>
       </Section>
 
+      {/* Lanes, the quiet room, and the suites describe the built space: shown only with SITE.facilityDetailsPublic. */}
+      {SITE.facilityDetailsPublic && (
+        <>
       {/* ---------------------------------------------------------------- Lanes */}
       <Section theme="black" id="lanes" aria-labelledby="lanes-title" className="overflow-hidden">
         <Container>
@@ -144,13 +146,17 @@ export default function HomePage() {
         </Container>
       </Section>
 
+        </>
+      )}
+
       {/* ---------------------------------------------------------------- Brass: product shot band */}
       <section aria-hidden="true" className="relative h-[46vw] max-h-[720px] min-h-[300px] overflow-hidden bg-night">
         <Image src="/renders/round-side.webp" alt="" fill sizes="100vw" className="object-cover" />
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,10,11,0)_55%,rgba(10,10,11,1)_100%)]" />
       </section>
 
-      {/* ---------------------------------------------------------------- Suites */}
+      {SITE.facilityDetailsPublic && (
+      /* ---------------------------------------------------------------- Suites */
       <Section theme="black" id="suites" padding="normal" aria-labelledby="suites-title" className="!pt-4">
         <Container>
           <div className="grid gap-12 lg:grid-cols-12 lg:gap-10">
@@ -184,11 +190,13 @@ export default function HomePage() {
         </Container>
       </Section>
 
+      )}
+
       {/* ---------------------------------------------------------------- Simulator */}
       <Section theme="dark" id="simulator" aria-labelledby="simulator-title">
         <Container>
           <div className="grid gap-10 lg:grid-cols-12 lg:items-end">
-            <Head id="simulator-title" className="lg:col-span-7" head={`${FACILITY.simulatorBays} bays · no live ammunition · ID only`} headline={SIMULATOR.headline} subhead={SIMULATOR.subhead} />
+            <Head id="simulator-title" className="lg:col-span-7" head={SITE.facilityDetailsPublic ? `${FACILITY.simulatorBays} bays · no live ammunition · ID only` : "No live ammunition · ID only"} headline={SIMULATOR.headline} subhead={SIMULATOR.subhead} />
             <p className="t-body-lg text-mist lg:col-span-5">{SIMULATOR.body}</p>
           </div>
           <div className="mt-14 sm:mt-20">
@@ -232,7 +240,7 @@ export default function HomePage() {
         <Container>
           <div className="grid gap-14 lg:grid-cols-12 lg:gap-10">
             <div className="lg:col-span-6">
-              <Head id="hospitality-title" head="The lounge · behind the glass" headline={HOSPITALITY.headline} subhead={HOSPITALITY.subhead} />
+              <Head id="hospitality-title" head={SITE.facilityDetailsPublic ? "The lounge · behind the glass" : "The lounge"} headline={HOSPITALITY.headline} subhead={HOSPITALITY.subhead} />
               <p className="t-body-lg mt-8 max-w-[30em] text-ink-muted">{HOSPITALITY.body}</p>
               <div className="mt-10">
                 <LinkArrow href={HOSPITALITY.link.href}>{HOSPITALITY.link.label}</LinkArrow>

@@ -172,7 +172,7 @@ export function TargetPractice({ ctaHref = "/reserve?type=lane", className }: { 
     <div className={cn("grid items-center gap-10 lg:grid-cols-12 lg:gap-14", className)}>
       {/* Scorecard */}
       <div className="order-2 lg:order-1 lg:col-span-5">
-        <p className="t-eyebrow text-ink-muted">25 yards · 9 mm · five rounds</p>
+        <p className="t-eyebrow text-ink-muted">{SITE.facilityDetailsPublic ? "25 yards · 9 mm · five rounds" : "9 mm · five rounds"}</p>
         <h2 id={titleId} className="t-1 mt-5">
           Five shots.
           <br />
