@@ -6,6 +6,8 @@ import { Container } from "@/components/ui/Container";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Section } from "@/components/ui/Section";
 import { CLASSES } from "@/lib/content/pages/training";
+import { NotYetOpen } from "@/components/NotYetOpen";
+import { SITE } from "@/lib/config/site";
 
 export const metadata: Metadata = pageMeta("/training/classes", {
   title: CLASSES.meta.title,
@@ -29,6 +31,7 @@ function Fallback() {
 }
 
 export default function ClassesPage() {
+  if (!SITE.openForBusiness) return <NotYetOpen what="Training classes" />;
   return (
     /* The first band is paper, like /reserve and /legal, and clears the fixed bar the same way they do. */
     <Section theme="light" padding="normal" className="pt-[calc(var(--nav-h)+3rem)] sm:pt-[calc(var(--nav-h)+4.5rem)]">

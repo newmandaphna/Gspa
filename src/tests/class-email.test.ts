@@ -19,6 +19,7 @@ import {
 } from "@/lib/class-mail";
 import { cancellationText, confirmationText, reminderText } from "@/lib/email";
 import type { EmailMessage } from "@/lib/email";
+import { SITE } from "@/lib/config/site";
 
 const START = new Date("2027-02-12T15:00:00Z");
 const END = new Date("2027-02-12T18:30:00Z");
@@ -29,7 +30,7 @@ function booking(): Booking {
     id: 9001,
     code: "GS-CLASS1",
     classSessionId: 42,
-    mailingAddress: { line1: "PRIVATE HOME", city: "Queens", state: "NY", postalCode: "11434", country: "US" },
+    mailingAddress: { line1: "PRIVATE HOME", city: "Queens", state: "NY", postalCode: "11000", country: "US" },
     attendees: [{ firstName: "PRIVATE", lastName: "ATTENDEE" }],
     classDetails: { title: "Defensive Handgun I", instructor: "Morgan Lee", requirements: "Eye and ear protection\n50 rounds of ammunition", collectId: true },
     experienceId: 7,
@@ -107,7 +108,8 @@ describe("scheduled class email", () => {
     expect(ics).toContain("DTEND;TZID=America/New_York:20270212T133000");
     expect(ics).toContain("Morgan Lee");
     expect(ics).toContain("Eye and ear protection");
-    expect(ics).toContain("Rockaway Blvd");
+    // The location follows SITE.address.public: the street when public, only the area while it is held back.
+    expect(ics).toContain((SITE.address.public ? SITE.address.line1 : SITE.area).replace(/,/g, "\\,"));
     expect(ics).not.toContain("PRIVATE");
   });
 });

@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { SITE } from "../src/lib/config/site";
 
 /**
  * Smoke test + screenshot pass. Run with `npm run e2e` after `npm run build`.
@@ -45,8 +46,24 @@ for (const path of PAGES) {
   });
 }
 
+test("before opening day, reservations are closed on the page and at the API", async ({ page, request }) => {
+  // Follows SITE.openForBusiness; the booking flow below covers the open state.
+  const res = await request.post("/api/bookings", { data: {} });
+  const page_ = await page.goto("/reserve");
+  expect(page_?.status()).toBeLessThan(400);
+  if (SITE.openForBusiness) {
+    expect(res.status()).not.toBe(403);
+    await expect(page.getByRole("group", { name: "Experience type" })).toBeVisible();
+  } else {
+    expect(res.status()).toBe(403);
+    await expect(page.getByRole("heading", { name: /Opening\s*soon/i })).toBeVisible();
+    await expect(page.getByRole("group", { name: "Experience type" })).toHaveCount(0);
+  }
+});
+
 test("books a lane end to end (pay on arrival)", async ({ page }) => {
   test.skip(Boolean(process.env.STRIPE_SECRET_KEY), "Stripe enabled: checkout redirect is external");
+  test.skip(!SITE.openForBusiness, "Reservations are closed until opening day (SITE.openForBusiness); the test above covers that state.");
   await page.goto("/reserve");
   // Step 1: first bookable card
   await page.getByRole("group", { name: "Experience type" }).getByRole("button", { name: "Lanes" }).click();

@@ -7,10 +7,12 @@ import { toContext } from "@/lib/members/service";
 import { clientKey, rateLimit } from "@/lib/ratelimit";
 import { createCheckoutSession, stripeEnabled } from "@/lib/stripe";
 import { bookingInputSchema, firstIssue } from "@/lib/validation";
+import { SITE } from "@/lib/config/site";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
+  if (!SITE.openForBusiness) return NextResponse.json({ error: "We are not taking reservations yet." }, { status: 403 });
   if (!rateLimit(`book:${clientKey(req)}`, { limit: 10, windowMs: 10 * 60_000 })) {
     return NextResponse.json({ error: "Too many attempts. Please try again in a few minutes." }, { status: 429 });
   }

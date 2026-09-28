@@ -3,12 +3,16 @@
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/cn";
 import { computeOpenStatus, type OpenStatus } from "@/lib/hours";
+import { SITE } from "@/lib/config/site";
 
 /**
  * The open/closed line. The server computes the first value so it is in the
  * HTML; after mount the browser recomputes it every minute (and on the next
  * minute boundary) so "Open until 10 PM" turns over without a reload.
  */
+/** Before opening day every open/closed line reads SITE.openingLine; no hours are implied. */
+const PRE_OPENING = (dow: number): OpenStatus => ({ dow, open: false, short: SITE.openingLine, long: `${SITE.openingLine}.`, hero: `${SITE.openingLine}.` });
+
 export function useOpenStatus(initial: OpenStatus): OpenStatus {
   const [status, setStatus] = useState(initial);
   useEffect(() => {
@@ -25,7 +29,7 @@ export function useOpenStatus(initial: OpenStatus): OpenStatus {
       if (interval !== undefined) window.clearInterval(interval);
     };
   }, []);
-  return status;
+  return SITE.openForBusiness ? status : PRE_OPENING(status.dow);
 }
 
 type Props = {

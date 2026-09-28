@@ -76,7 +76,7 @@ describe("placeholder gate wiring", () => {
     expect(findPlaceholder("desk@example.com")).toBe("example.com");
     // The desk address every email asks guests to reply to is a TODO(owner) default until confirmed.
     expect(findPlaceholder("mailto:desk@gunspa.com")).toBe("desk@gunspa.com");
-    expect(findPlaceholder("158-12 Rockaway Blvd")).toBeNull();
+    expect(findPlaceholder("100 Main St")).toBeNull();
   });
 });
 

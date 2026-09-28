@@ -27,6 +27,14 @@ export const SITE = {
    */
   clubPageLive: false,
   /**
+   * Owner's call: the club is not open yet. While false, no reservations or
+   * class seats are taken (the pages say so and the APIs refuse), the live
+   * open/closed line reads `openingLine`, and the live availability bands are
+   * hidden. Set true on opening day.
+   */
+  openForBusiness: false,
+  openingLine: "Opening soon",
+  /**
    * Owner's call: prices stay off the public site until they are final. When
    * false every price reads `pricePending` (or drops out of a sentence); the
    * catalog keeps the real figures. Set true to publish them all at once.
@@ -37,18 +45,19 @@ export const SITE = {
   area: "Queens, New York",
   address: {
     /**
-     * Owner's call: the street address stays off the public site until they say
-     * otherwise. When false, pages, share cards and structured data show only
-     * `area`; set to true to bring the address, map and directions back.
+     * Owner's call: the street address is off the site, the emails and the
+     * calendar files until they say otherwise. The values are blanked here too,
+     * so the address is not even in the page scripts; it is in git history
+     * (before this change). To bring it back, fill these in and set public: true.
      */
     public: false,
-    line1: "158-12 Rockaway Blvd",
-    city: "Jamaica",
+    line1: "",
+    city: "",
     state: "NY",
-    zip: "11434",
-    neighborhood: "Jamaica, Queens",
-    mapsUrl: "https://maps.apple.com/?q=158-12+Rockaway+Blvd,+Jamaica,+NY+11434",
-    googleMapsUrl: "https://www.google.com/maps/search/?api=1&query=158-12+Rockaway+Blvd,+Jamaica,+NY+11434",
+    zip: "",
+    neighborhood: "Queens",
+    mapsUrl: "",
+    googleMapsUrl: "",
   },
   social: {
     instagram: "https://instagram.com/thegunspa",
@@ -142,14 +151,14 @@ export const FACILITY = {
   sqft: "[11,600]", // building record; owner to confirm the club's footprint
   airChangesPerHour: "[N]",
   /**
-   * 158-12 Rockaway Blvd sits on the north edge of JFK, off the Van Wyck.
+   * The club sits on the north edge of JFK, off the Van Wyck.
    * Bracketed values are the owner's to confirm.
    */
   transit: {
     driveFromJfkMin: 5,
     driveFromManhattanMin: "[25]",
     expressway: "Van Wyck Expressway (I-678)",
-    exit: "Rockaway Blvd",
+    exit: "[exit]",
     busLine: "[Q7]",
     busWalkMin: "[N]",
     nearestLirr: "Locust Manor",

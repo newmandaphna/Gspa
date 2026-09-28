@@ -53,7 +53,7 @@ const VAN_WYCK = FACILITY.transit.expressway.split(" (")[0];
 const DIRECTIONS = [
   `From the JFK terminals: ${VAN_WYCK} north, ${FACILITY.transit.exit} exit, ${FACILITY.transit.driveFromJfkMin} minutes.`,
   `From Manhattan: ${VAN_WYCK} south, ${FACILITY.transit.exit} exit, ${FACILITY.transit.driveFromManhattanMin} minutes.`,
-  `${FACILITY.transit.busLine} bus along Rockaway Blvd, ${FACILITY.transit.busWalkMin} minutes on foot.`,
+  `${FACILITY.transit.busLine} bus along [street], ${FACILITY.transit.busWalkMin} minutes on foot.`,
 ];
 
 /* --------------------------------------------------------------- page */

@@ -134,7 +134,7 @@ export const FAQ: Faq[] = [
     id: "parking",
     q: "Is there parking?",
     a: SITE.address.public
-      ? "[Owner to confirm on-site spaces.] The club sits on Rockaway Blvd just north of JFK, off the Van Wyck, so most guests drive or take a car from the airport. Rideshares drop at the front door, and the [Q7] bus stops on the boulevard."
+      ? "[Owner to confirm on-site spaces.] The club sits on [street] just north of JFK, off the Van Wyck, so most guests drive or take a car from the airport. Rideshares drop at the front door, and the [Q7] bus stops on the boulevard."
       : "[Owner to confirm on-site spaces.] Most guests drive or take a car from the airport, and rideshares drop at the front door. Directions go out with your confirmation.",
   },
   {

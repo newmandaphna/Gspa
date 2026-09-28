@@ -50,10 +50,26 @@ export function manageUrl(booking: Pick<Booking, "code">): string {
 }
 
 export function fullAddress(): string {
+  if (!SITE.address.public) return SITE.area;
   return `${SITE.address.line1}, ${SITE.address.city}, ${SITE.address.state} ${SITE.address.zip}`;
 }
 
-/** "5 minutes from the JFK terminals via the Van Wyck Expressway (I-678), Rockaway Blvd exit." */
+/** The map link, or null while the address is held back. */
+function mapUrl(): string | null {
+  return SITE.address.public ? SITE.address.googleMapsUrl : null;
+}
+
+/** Where to go: the address and the drive, or a promise that the desk sends them. */
+function doorsText(): string {
+  return SITE.address.public ? `${fullAddress()}. ${drivingLine()}` : "The desk sends the address and directions before your visit.";
+}
+
+function doorsHtml(): string {
+  const map = mapUrl();
+  return map ? `<a href="${escape(map)}" style="color:${INK}">${escape(fullAddress())}</a>. ${escape(drivingLine())}` : escape(doorsText());
+}
+
+/** "5 minutes from the JFK terminals via the expressway, and the exit to take." */
 export function drivingLine(): string {
   return `${FACILITY.transit.driveFromJfkMin} minutes from the JFK terminals via the ${FACILITY.transit.expressway}, ${FACILITY.transit.exit} exit.`;
 }
@@ -191,7 +207,7 @@ function para(html: string, opts: { muted?: boolean; size?: number } = {}): stri
 }
 
 function shell(opts: { title: string; preheader: string; headline: string; body: string }): string {
-  const mapHref = SITE.address.googleMapsUrl;
+  const mapHref = mapUrl();
   const wordmark = `${origin()}/email/wordmark@2x.png`;
   const phone = deskPhone();
   return `<!doctype html>
@@ -218,7 +234,7 @@ function shell(opts: { title: string; preheader: string; headline: string; body:
 </table>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;font-family:${BODY}">
   <tr><td style="padding:24px 32px 0;font-size:13px;line-height:1.6;color:${MUTED}">
-    <a href="${escape(mapHref)}" style="color:${MUTED};text-decoration:underline">${escape(SITE.name)}, ${escape(fullAddress())}</a><br>
+    ${mapHref ? `<a href="${escape(mapHref)}" style="color:${MUTED};text-decoration:underline">${escape(SITE.name)}, ${escape(fullAddress())}</a>` : `${escape(SITE.name)}, ${escape(fullAddress())}`}<br>
     ${phone ? `${escape(phone)}<br>` : ""}
     Reply to this email and a person at the desk answers.
   </td></tr>
@@ -230,7 +246,8 @@ function shell(opts: { title: string; preheader: string; headline: string; body:
 }
 
 function textFooter(): string[] {
-  return [``, `${SITE.name}`, fullAddress(), `Map: ${SITE.address.googleMapsUrl}`, deskPhone(), `Reply to this email and a person at the desk answers.`].filter((l): l is string => l !== null);
+  const map = mapUrl();
+  return [``, `${SITE.name}`, fullAddress(), map ? `Map: ${map}` : null, deskPhone(), `Reply to this email and a person at the desk answers.`].filter((l): l is string => l !== null);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -281,7 +298,7 @@ export function confirmationText(booking: Booking, experience: Experience, opts:
     idLine,
     ...bring.map((b) => `- ${b}`),
     ``,
-    `Doors: ${fullAddress()}. ${drivingLine()}`,
+    `Doors: ${doorsText()}`,
     hostLine,
     ``,
     cancelLine,
@@ -307,7 +324,7 @@ export function confirmationText(booking: Booking, experience: Experience, opts:
     para(booking.classDetails ? `Arrive 15 minutes early for check-in and the safety briefing.` : `<strong>Bring a valid government photo ID.</strong> Arrive 15 minutes early for check-in and the safety briefing.`),
     idLine ? para(escape(idLine)) : "",
     `<ul style="margin:0 0 20px;padding-left:20px;font-size:15px;line-height:1.55;color:${INK}">${bring.map((b) => `<li style="margin:0 0 6px">${escape(b)}</li>`).join("")}</ul>`,
-    para(`<strong>Doors:</strong> <a href="${escape(SITE.address.googleMapsUrl)}" style="color:${INK}">${escape(fullAddress())}</a>. ${escape(drivingLine())}`),
+    para(`<strong>Doors:</strong> ${doorsHtml()}`),
     hostLine ? para(escape(hostLine)) : "",
     para(escape(cancelLine), { muted: true, size: 14 }),
   ].join("\n");
@@ -401,8 +418,8 @@ export function reminderText(booking: Booking, experience: Experience, now: Date
     lane ? `Lane ${lane} requested; the desk confirms at check-in.` : null,
     `Confirmation code: ${booking.code}`,
     ``,
-    `Doors: ${fullAddress()}. ${drivingLine()}`,
-    `Map: ${SITE.address.googleMapsUrl}`,
+    `Doors: ${doorsText()}`,
+    mapUrl() ? `Map: ${mapUrl()}` : null,
     ``,
     booking.classDetails ? lateLine : `Bring a valid government photo ID. ${lateLine}`,
     idLine,
@@ -421,12 +438,12 @@ export function reminderText(booking: Booking, experience: Experience, now: Date
     para(`${escape(title)}, ${escape(when)}, ${guests}.${lane ? ` Lane ${lane} requested; the desk confirms at check-in.` : ""} Code <span style="font-family:${CODE};letter-spacing:.04em">${booking.code}</span>.`),
     classEnd ? para(escape(classEnd)) : "",
     instructor ? para(escape(instructor)) : "",
-    para(`<strong>Doors:</strong> <a href="${escape(SITE.address.googleMapsUrl)}" style="color:${INK}">${escape(fullAddress())}</a>. ${escape(drivingLine())}`),
+    para(`<strong>Doors:</strong> ${doorsHtml()}`),
     para(booking.classDetails ? escape(lateLine) : `<strong>Bring a valid government photo ID.</strong> ${escape(lateLine)}`),
     idLine ? para(escape(idLine)) : "",
     `<ul style="margin:0 0 20px;padding-left:20px;font-size:15px;line-height:1.55;color:${INK}">${bring.map((b) => `<li style="margin:0 0 6px">${escape(b)}</li>`).join("")}</ul>`,
     para(escape(cancelLine), { muted: true, size: 14 }),
-    `<p style="margin:0 0 24px">${button(url, "Manage reservation")} &nbsp; ${button(SITE.address.googleMapsUrl, "Directions", "secondary")}</p>`,
+    `<p style="margin:0 0 24px">${button(url, "Manage reservation")}${mapUrl() ? ` &nbsp; ${button(mapUrl() as string, "Directions", "secondary")}` : ""}</p>`,
     para(`To stop reminders for this reservation, reply with the word STOP.`, { muted: true, size: 13 }),
   ].join("\n");
 

@@ -9,7 +9,7 @@ import { BOOKING, deskPhone, FACILITY, SITE } from "@/lib/config/site";
 import { CATALOG } from "@/lib/content/catalog";
 import { getDb } from "@/lib/db";
 import type { Booking, Experience } from "@/lib/db/schema";
-import { cancellationText, confirmationText, icsFor, googleCalendarUrlFor, reminderText, requestedLane, toResendAttachments } from "@/lib/email";
+import { cancellationText, confirmationText, fullAddress, icsFor, googleCalendarUrlFor, reminderText, requestedLane, toResendAttachments } from "@/lib/email";
 import { buildIcs, escapeText, foldLine, googleCalendarUrl, localStamp } from "@/lib/ics";
 import { claimReminder, listDueReminders, releaseReminder, reminderWindow, runReminders } from "@/lib/reminders";
 import { addDaysIso, todayIso, zonedToUtc } from "@/lib/time";
@@ -92,7 +92,9 @@ describe("ics", () => {
     expect(ics).toContain("DTEND;TZID=America/New_York:20261008T213000");
     expect(ics).toContain("DTSTAMP:20261005T140000Z");
     expect(ics).toContain(`UID:GS-TEST01@${SITE.domain}`);
-    expect(ics).toContain("LOCATION:The Gun Spa\\, 158-12 Rockaway Blvd\\, Jamaica\\, NY 11434");
+    // The location follows SITE.address.public: the full street address when public, the area otherwise.
+    expect(ics).toContain(`LOCATION:The Gun Spa\\, ${fullAddress().replace(/,/g, "\\,")}`);
+    if (!SITE.address.public) expect(ics).not.toMatch(/\d{3}-\d{2} /);
     expect(ics).toContain("/reserve/confirmation/GS-TEST01");
     // Every line ends in CRLF and none runs past 75 octets.
     const lines = ics.split("\r\n");
@@ -119,7 +121,7 @@ describe("ics", () => {
     expect(g.hostname).toBe("calendar.google.com");
     expect(g.searchParams.get("dates")).toBe("20270116T000000Z/20270116T010000Z");
     expect(g.searchParams.get("ctz")).toBe("America/New_York");
-    expect(g.searchParams.get("location")).toContain("Rockaway Blvd");
+    expect(g.searchParams.get("location")).toContain(fullAddress());
   });
 
   it("escapes and folds text values", () => {

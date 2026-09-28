@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { PRICE_PENDING, PRICES_PUBLIC } from "../src/lib/pricing";
+import { SITE } from "../src/lib/config/site";
 
 const session = (id: number, overrides = {}) => ({
   id, title: `Public class ${id}`, experienceName: "Instruction",
@@ -9,6 +10,24 @@ const session = (id: number, overrides = {}) => ({
 });
 const payload = { sessions: [session(4), session(2, { priceCents: 5000 }), session(1), session(3, { status: "closed" }), session(5, { status: "cancelled" })], paymentsEnabled: false, documentsEnabled: false };
 
+test("before opening day, the home page lists no class dates and the classes page takes no seats", async ({ page, request }) => {
+  await page.route("**/api/classes*", route => route.fulfill({ json: payload }));
+  await page.goto("/");
+  if (SITE.openForBusiness) {
+    await expect(page.locator("#upcoming-classes")).toHaveCount(1);
+    return;
+  }
+  await expect(page.getByRole("heading", { name: /Ready\? Aim\./ })).toBeVisible();
+  await expect(page.locator("#upcoming-classes")).toHaveCount(0);
+  await page.goto("/training/classes");
+  await expect(page.getByRole("heading", { name: /Opening\s*soon/i })).toBeVisible();
+  const enroll = await request.post("/api/classes/enroll", { multipart: { payload: "{}" } });
+  expect(enroll.status()).toBe(403);
+});
+
+// The class list itself, once the club is open (SITE.openForBusiness); the test above covers the closed state.
+test.describe(() => {
+  test.skip(!SITE.openForBusiness, "Classes are closed until opening day.");
 for (const width of [1280, 390]) {
   test(`homepage classes and exact deep links at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
@@ -59,4 +78,5 @@ test("homepage renders nothing while loading or empty, says a read failure once,
   mode = "ready";
   await page.evaluate(() => window.dispatchEvent(new Event("focus")));
   await expect(section.getByRole("heading", { level: 3 })).toHaveCount(3);
+});
 });

@@ -309,7 +309,7 @@ export default function HomePage() {
         </div>
       </Section>
 
-      <UpcomingClasses />
+      {SITE.openForBusiness && <UpcomingClasses />}
 
       {/* ---------------------------------------------------------------- Visit: the headstamp and the address */}
       <Section theme="black" id="visit" aria-labelledby="visit-title" className="overflow-hidden">
@@ -344,7 +344,9 @@ export default function HomePage() {
         </Container>
       </Section>
 
-      {/* ---------------------------------------------------------------- Tonight */}
+      {/* ---------------------------------------------------------------- Tonight and live availability: only once the club is open */}
+      {SITE.openForBusiness && (
+        <>
       <Section theme="light" padding="vast" id="tonight" aria-label="Lanes free tonight">
         <Container>
           <Tonight initial={status} />
@@ -359,6 +361,8 @@ export default function HomePage() {
           </div>
         </Container>
       </Section>
+        </>
+      )}
 
       <DeskLog />
     </>
