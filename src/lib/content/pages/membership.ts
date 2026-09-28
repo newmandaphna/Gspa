@@ -292,10 +292,11 @@ export const MEMBERSHIP_APPLY: SectionCopy = {
   eyebrow: "Application",
   headline: "Ten minutes now, then a member number in about ten business days.",
   subhead: "",
-  body: "Name, contact, tier, license status, two references. Until online payment goes live, we collect the screening fee at orientation.",
+  body: "Name, contact, tier, your NYC pistol license, two references. Membership requires a valid New York City pistol license in your name. Until online payment goes live, we collect the screening fee at orientation.",
 };
 
-export const LICENSE_OPTIONS = ["None", "Premises", "Carry"] as const;
+/** Membership requires a NYC pistol license (owner's model), so there is no "None". */
+export const LICENSE_OPTIONS = ["Premises", "Carry Business", "Carry Guard"] as const;
 export type LicenseOption = (typeof LICENSE_OPTIONS)[number];
 
 export const HEARD_OPTIONS = ["A member", "Instagram", "Search", "Press", "An event here", "Other"] as const;

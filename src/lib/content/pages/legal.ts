@@ -247,7 +247,7 @@ export const SCREENING: LegalSection = {
       paragraphs: ["Membership requires all of the following:"],
       bullets: [
         "Verified identity that matches the application.",
-        "A licensing status consistent with the activities you intend to reserve. See the requirements for what each activity asks for.",
+        "A valid New York City pistol license in your name.",
         "A report with no record that would make possession or handling of a firearm unlawful, and no record of violence the club considers disqualifying.", // Owner and counsel: set the look-back period (was "[N] years").
         "Two references who confirm they know you and would shoot beside you.",
         "Completion of the in-person orientation.",

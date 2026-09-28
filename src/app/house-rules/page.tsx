@@ -13,7 +13,7 @@ const HEAD = {
   headline: "Ten rules, each with a reason",
   subhead: "The decision first, then why. The way the desk says them.",
   requirements: { label: "Every requirement, in one list", href: "/visit#requirements" },
-  card: { eyebrow: "The card at the desk", headline: "The eighteen lines counsel reads." },
+  card: { eyebrow: "The card at the desk", headline: "Every line at the door." },
 } as const;
 
 export const metadata: Metadata = pageMeta("/house-rules", {
@@ -82,7 +82,7 @@ export default function HouseRulesPage() {
               <p className="t-eyebrow text-mist">{HEAD.card.eyebrow}</p>
               <h2 className="t-1 mt-4">{HEAD.card.headline}</h2>
               <p className="t-body-lg mt-6 max-w-[30em] text-mist">
-                Every line the desk checks at the door, the same list the reservation flow reads. The letters after a line say who it applies to. Brackets mean counsel is still on it.{" "}
+                Every line the desk checks at the door, the same list the reservation flow reads. The letters after a line say who it applies to.{" "}
                 <Link href="/legal#range-rules" className="underline underline-offset-2 hover:text-snow">
                   The legal page
                 </Link>{" "}
