@@ -5,7 +5,7 @@
  * one edit there changes the cards, the strips, the table and the copy together.
  * Square brackets are the owner's placeholders and stay until confirmed.
  */
-import { BOOKING, TIER_WINDOW_DAYS } from "@/lib/config/site";
+import { BOOKING, SITE, TIER_WINDOW_DAYS } from "@/lib/config/site";
 import {
   APPLICATION_STEPS,
   BENEFITS,
@@ -333,5 +333,58 @@ export const APPLY_FORM = {
   errors: {
     consent: "Please confirm you have read the screening notice and privacy policy.",
     generic: "Could not send your application. Please email the desk directly.",
+  },
+} as const;
+
+/* ------------------------------------------------------------------------
+   Before opening: the page as the owner's model defines membership today.
+   Membership is for holders of a NYC pistol license; tiers, benefits and
+   pricing are not published until the owner sets them. The tier, founders,
+   window and guest copy above stays for when they are.
+   --------------------------------------------------------------------- */
+export const MEMBERSHIP_PRELAUNCH = {
+  meta: {
+    title: "Membership",
+    description: `Membership at ${SITE.name} is for holders of a valid New York City pistol license. Join the list and the desk reaches out before opening.`,
+  },
+  hero: {
+    eyebrow: "Membership",
+    headline: "For New York City pistol licensees.",
+    body: "Membership is open to holders of a valid New York City pistol license in their own name. Tiers, benefits and pricing are announced before opening. Put your name down and you hear first.",
+    cta: { label: "Join the list", href: "#apply" },
+  },
+  expect: {
+    eyebrow: "What to expect",
+    headline: "Three things we can tell you now.",
+    rows: [
+      { title: "Your license, at the desk", body: "A valid NYC pistol license in your name, shown with matching photo ID. Only handguns listed on it come onto the line." },
+      { title: "An orientation first", body: "A short safety orientation in person before your first session on the line." },
+      { title: "Details before opening", body: "Membership tiers, benefits and pricing are published before the doors open, and the list hears first." },
+    ],
+  },
+  apply: {
+    eyebrow: "The list",
+    headline: "Put your name down.",
+    body: "Name, contact and your license type. The desk reaches out when membership opens. Nothing is charged and nothing is committed.",
+  },
+} as const;
+
+export const INTEREST_FORM = {
+  labels: {
+    name: "Full name",
+    email: "Email",
+    phone: "Phone",
+    license: "NYC pistol license",
+    heard: "How you heard about us",
+    consentPrefix: "I agree the club may contact me about membership, as set out in the",
+    consentPrivacy: "privacy policy",
+    submit: "Join the list",
+    sending: "Sending",
+  },
+  heardOptions: ["A friend", "Instagram", "Search", "Press", "Other"],
+  success: "Thank you. You are on the list, and the desk will be in touch before opening.",
+  errors: {
+    consent: "Please confirm we may contact you.",
+    generic: "Could not send that. Please email the desk directly.",
   },
 } as const;

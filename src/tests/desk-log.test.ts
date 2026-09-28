@@ -7,7 +7,7 @@ import { getDb } from "@/lib/db";
 import { ensureSchema } from "@/lib/db/migrate";
 import { addDeskLogEntry, deleteDeskLogEntry, listDeskLog } from "@/lib/desk-log";
 
-const SEED_TEXT = "Site is live. Reservations open.";
+const SEED_TEXT = "Site is live. Membership list open.";
 
 describe("desk log (in-memory Postgres)", () => {
   beforeAll(async () => {

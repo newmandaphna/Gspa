@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import Link from "next/link";
 import { pageMeta } from "@/lib/seo/meta";
 import { AvailabilityStrip } from "@/components/AvailabilityStrip";
 import { DeskLog } from "@/components/DeskLog";
@@ -17,14 +16,14 @@ import { LinkArrow } from "@/components/ui/LinkArrow";
 import { Section } from "@/components/ui/Section";
 import { Tonight } from "@/components/pages/home/Tonight";
 import { UpcomingClasses } from "@/components/pages/home/UpcomingClasses";
-import { cn } from "@/lib/cn";
-import { FACILITY, SITE, TIER_WINDOW_DAYS } from "@/lib/config/site";
+import { FACILITY, SITE } from "@/lib/config/site";
 import { computeOpenStatus } from "@/lib/hours";
 import { itemBySlug } from "@/lib/content/catalog";
-import { tierByKey } from "@/lib/content/membership";
 import { formatMoney } from "@/lib/time";
-import { AVAILABILITY, FIRST_SESSION, HERO, HOME_META, HOSPITALITY, LANES, MEMBERSHIP, QUIET, SIMULATOR, SUITES, VISIT, spell } from "@/lib/content/pages/home";
+import { AVAILABILITY, HERO, HOME_META, HOSPITALITY, LANES, QUIET, SUITES, VISIT, spell } from "@/lib/content/pages/home";
 import { PRICES_PUBLIC } from "@/lib/pricing";
+import { MEMBERSHIP_PRELAUNCH } from "@/lib/content/pages/membership";
+import { TRAINING_PRELAUNCH } from "@/lib/content/pages/training";
 
 export const metadata: Metadata = pageMeta("/", {
   title: { absolute: HOME_META.title },
@@ -61,7 +60,6 @@ const LOUNGE_MENU = [
   { item: "Tea", note: "Loose leaf" },
   { item: "Sparkling water", note: "Always cold" },
   { item: "A warm towel", note: "Off the line" },
-  { item: "Your locker", note: "Members" },
 ];
 
 export default function HomePage() {
@@ -192,45 +190,18 @@ export default function HomePage() {
 
       )}
 
-      {/* ---------------------------------------------------------------- Simulator */}
-      <Section theme="dark" id="simulator" aria-labelledby="simulator-title">
+      {/* ---------------------------------------------------------------- Training: the two systems in the owner's model */}
+      <Section theme="dark" id="training" aria-labelledby="training-title">
         <Container>
           <div className="grid gap-10 lg:grid-cols-12 lg:items-end">
-            <Head id="simulator-title" className="lg:col-span-7" head={SITE.facilityDetailsPublic ? `${FACILITY.simulatorBays} bays · no live ammunition · ID only` : "No live ammunition · ID only"} headline={SIMULATOR.headline} subhead={SIMULATOR.subhead} />
-            <p className="t-body-lg text-mist lg:col-span-5">{SIMULATOR.body}</p>
+            <Head id="training-title" className="lg:col-span-7" head={TRAINING_PRELAUNCH.range.eyebrow} headline={TRAINING_PRELAUNCH.range.headline} subhead={TRAINING_PRELAUNCH.room.headline} />
+            <p className="t-body-lg text-mist lg:col-span-5">{TRAINING_PRELAUNCH.range.body}</p>
           </div>
           <div className="mt-14 sm:mt-20">
-            <RangeTimer labels={SIMULATOR.cornerLabels} />
+            <RangeTimer labels={TRAINING_PRELAUNCH.range.timer} />
           </div>
-          <div className="mt-10 flex flex-wrap items-center justify-between gap-6">
-            <Button href={SIMULATOR.cta.href}>{SIMULATOR.cta.label}</Button>
-            <p className="font-mono text-[0.75rem] tracking-[0.04em] text-mist">{SIMULATOR.eligibility}.</p>
-          </div>
-        </Container>
-      </Section>
-
-      {/* ---------------------------------------------------------------- First Session */}
-      <Section theme="light" id="first-session" aria-labelledby="first-session-title">
-        <Container>
-          <div className="grid gap-10 lg:grid-cols-12 lg:items-end">
-            <Head id="first-session-title" className="lg:col-span-7" head={FIRST_SESSION.price} headline={FIRST_SESSION.headline} subhead={FIRST_SESSION.subhead} />
-            <div className="lg:col-span-5">
-              <p className="t-body-lg text-ink-muted">{FIRST_SESSION.body}</p>
-              <p className="mt-4 font-mono text-[0.75rem] tracking-[0.04em] text-ink-muted">{FIRST_SESSION.eligibility}.</p>
-            </div>
-          </div>
-          <ol className="mt-16 grid grid-cols-2 border-t border-ink sm:mt-20 sm:grid-cols-5">
-            {FIRST_SESSION.steps.map((s, i) => (
-              <li key={s} className={cn("border-b border-hairline py-6 pr-4 sm:border-b-0 sm:py-8", i > 0 && "sm:border-l sm:pl-6")}>
-                <span className="t-stencil block text-[3.5rem] leading-none text-accent-deep">{String(i + 1).padStart(2, "0")}</span>
-                <span className="t-label mt-3 block">{s}</span>
-              </li>
-            ))}
-          </ol>
-          <div className="mt-12">
-            <Button href={FIRST_SESSION.cta.href} size="lg">
-              {FIRST_SESSION.cta.label}
-            </Button>
+          <div className="mt-10">
+            <Button href="/training">See training</Button>
           </div>
         </Container>
       </Section>
@@ -249,7 +220,6 @@ export default function HomePage() {
             <div className="lg:col-span-5 lg:col-start-8">
               <div className="relative mx-auto max-w-[420px] bg-[#f8f4ec] px-6 pb-10 pt-9 sm:px-8 shadow-[0_30px_60px_-30px_rgba(20,18,16,0.45),0_1px_0_rgba(20,18,16,0.06)] lg:rotate-[0.6deg]">
                 <p className="text-center font-serif text-[1.9rem] italic leading-none">The Lounge</p>
-                <p className="mt-2 text-center font-mono text-[0.625rem] uppercase tracking-[0.2em] text-ink-muted">Included with every visit</p>
                 <div className="mx-auto my-6 h-px w-16 bg-accent" />
                 <ul className="space-y-4">
                   {LOUNGE_MENU.map((m) => (
@@ -270,48 +240,17 @@ export default function HomePage() {
       {/* ---------------------------------------------------------------- Membership: spent brass under the headline */}
       <Section theme="black" bleed id="membership" aria-labelledby="membership-title" className="overflow-hidden">
         <div className="relative">
-          <div className="relative h-[70vw] max-h-[760px] min-h-[420px]">
+          <div className="relative h-[60vw] max-h-[640px] min-h-[380px]">
             <Image src="/renders/casings.webp" alt="" fill sizes="100vw" className="object-cover" />
             <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,10,11,0.2)_0%,rgba(10,10,11,0)_35%,rgba(10,10,11,0.9)_85%,rgba(10,10,11,1)_100%)]" />
           </div>
-          <Container className="relative -mt-44 pb-20 sm:-mt-56 sm:pb-28">
-            <Head
-              id="membership-title"
-              head={`${spell(MEMBERSHIP.tiers.length)} tiers · ${TIER_WINDOW_DAYS.club}, ${TIER_WINDOW_DAYS.signature} or ${TIER_WINDOW_DAYS.founders} days ahead`}
-              headline={MEMBERSHIP.headline}
-              subhead={MEMBERSHIP.subhead}
-            />
-            <ul className="mt-16 grid border-t border-hairline-dark md:grid-cols-3">
-              {MEMBERSHIP.tiers.map((t, i) => {
-                const tier = tierByKey(t.key);
-                return (
-                  <li key={t.key} className={cn("border-b border-hairline-dark py-8 md:border-b-0 md:py-10", i > 0 && "md:border-l md:pl-8", i < 2 && "md:pr-8")}>
-                    <Link href="/membership#tiers" className="group/tier block">
-                      <span className="flex items-baseline justify-between">
-                        <span className="t-3 text-snow">{t.name}</span>
-                        <span className="font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-mist">{t.limited ? "50 only" : " "}</span>
-                      </span>
-                      <span className="mt-6 flex items-end gap-3">
-                        <span className="t-numeral text-[clamp(5rem,9vw,8rem)] text-accent transition-colors group-hover/tier:text-accent-2">{t.days}</span>
-                        <span className="t-label mb-3 text-mist">days
-                          <br />
-                          ahead
-                        </span>
-                      </span>
-                      <span className="t-body mt-6 block max-w-[24em] text-mist">{tier?.forWhom ?? t.tagline}</span>
-                      <span className="mt-6 block font-mono text-[0.8125rem] tracking-[0.04em] text-snow">
-                        {t.price} <span className="text-mist">{t.priceNote}</span>
-                      </span>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-            <div className="mt-12 flex flex-wrap items-center justify-between gap-6">
-              <Button href={MEMBERSHIP.cta.href} variant="accent" size="lg">
-                {MEMBERSHIP.cta.label}
+          <Container className="relative -mt-40 pb-20 sm:-mt-52 sm:pb-28">
+            <Head id="membership-title" head={MEMBERSHIP_PRELAUNCH.hero.eyebrow} headline={MEMBERSHIP_PRELAUNCH.hero.headline} subhead="Tiers, benefits and pricing are announced before opening." />
+            <p className="t-body-lg mt-8 max-w-[34em] text-mist">{MEMBERSHIP_PRELAUNCH.hero.body}</p>
+            <div className="mt-10">
+              <Button href="/membership#apply" variant="accent" size="lg">
+                {MEMBERSHIP_PRELAUNCH.hero.cta.label}
               </Button>
-              <p className="font-mono text-[0.75rem] tracking-[0.04em] text-mist">{MEMBERSHIP.publicWindowNote}</p>
             </div>
           </Container>
         </div>
@@ -340,7 +279,7 @@ export default function HomePage() {
               <p className="t-body-lg mt-8 max-w-[32em] text-mist">{VISIT.body}</p>
               <div className="mt-10 flex flex-wrap items-center gap-8">
                 <Button href={VISIT.cta.href}>{VISIT.cta.label}</Button>
-                <LinkArrow href={VISIT.hoursLink.href}>{VISIT.hoursLink.label}</LinkArrow>
+                {SITE.openForBusiness && <LinkArrow href={VISIT.hoursLink.href}>{VISIT.hoursLink.label}</LinkArrow>}
               </div>
             </div>
             <div className="lg:col-span-5">

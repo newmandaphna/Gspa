@@ -8,7 +8,8 @@ test("class links fit desktop and tablet and select only the schedule", async ({
     // The classes page sits under Training in the bar; it has no item of its own.
     await expect(nav.getByRole("link", { name: "Training", exact: true })).toHaveAttribute("aria-current", "page");
     await expect(nav.getByRole("link", { name: "Training Classes", exact: true })).toHaveCount(0);
-    await expect(nav.getByRole("link", { name: "Reserve", exact: true })).toHaveAttribute("href", "/reserve");
+    // The header button reads Join the list until opening, then Reserve.
+    await expect(nav.getByRole("link", { name: /^(Reserve|Join the list)$/ })).toHaveAttribute("href", /^\/(reserve|membership#apply)$/);
     await expect(page.getByRole("navigation", { name: "Footer", exact: true }).getByRole("link", { name: "Training Classes" })).toHaveCount(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     const links = nav.getByRole("link");
@@ -69,7 +70,7 @@ test("mobile keyboard navigation closes the menu and restores scrolling and focu
   await expect(page).toHaveURL(/\/membership$/);
   // App Router updates the URL before the destination commits and resets scroll.
   // Wait for both before testing wheel input on the new page.
-  await expect(page.getByRole("heading", { name: "Fifty Founders." })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
   await expect(page.locator("#mobile-menu")).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.style.overflow)).toBe("");

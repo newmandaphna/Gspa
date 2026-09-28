@@ -21,7 +21,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         <div>
           <p className="t-eyebrow text-accent-deep">Members</p>
           <h1 className="t-hero mt-3">Welcome back.</h1>
-          <p className="t-lead mt-4 max-w-[480px] text-ink-muted">Sign in to reserve at member rates, use the bench, and manage your locker and guests.</p>
+          <p className="t-lead mt-4 max-w-[480px] text-ink-muted">Sign in to reserve, sign in your guests and see your account.</p>
           <div className="mt-10 max-w-[480px]">
             <SignInForm next={next} />
           </div>

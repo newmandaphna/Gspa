@@ -275,3 +275,50 @@ export const UPCOMING_CLASSES = {
   link: { label: "See every date", href: "/training/classes" },
   error: { line: "The class list could not be read.", retry: "Try again" },
 } as const;
+
+/* ------------------------------------------------------------------------
+   Before opening: training as the owner's model defines it. Two systems:
+   a scenario-based live-fire system on the range, and a laser training
+   system in the multipurpose room, which doubles as the shoot house. No
+   stand-alone simulator product, no First Session, and no course dates
+   until the owner sets them. The copy above stays for later.
+   --------------------------------------------------------------------- */
+export const TRAINING_PRELAUNCH = {
+  meta: {
+    title: "Training",
+    description: `Training at ${SITE.name} in Queens, New York: scenario-based live fire on the range and laser training in the multipurpose room, run by the same instructors.`,
+  },
+  hero: {
+    eyebrow: "Training",
+    headline: "Two systems. One set of instructors.",
+    body: "Live fire on the range, with scenarios that react to what you do. Laser drills in the training room, where you can run it dry before you run it live.",
+  },
+  range: {
+    eyebrow: "The range · live fire",
+    headline: "Scenarios on the live-fire line.",
+    body: "The range runs a scenario-based training system over live fire. Targets and video scenarios respond to your decisions, and an instructor scores and debriefs every run.",
+    timer: { scenario: "Scenario 04", bay: "Lane 01", mode: "Live fire" },
+  },
+  room: {
+    eyebrow: "The training room · laser",
+    headline: "Drill it dry, then run it live.",
+    body: "The multipurpose room holds a laser training system for drills and decision-making, and doubles as the shoot house. No live ammunition in this room.",
+  },
+  instruction: {
+    eyebrow: "Instruction",
+    headline: "Courses and schedule, before opening.",
+    body: "Private instruction and group courses run on both systems. The courses, the schedule and the instructors are announced before the doors open, and the membership list hears first.",
+    cta: { label: "Join the membership list", href: "/membership#apply" },
+  },
+  license: {
+    eyebrow: "The NYC pistol license",
+    headline: "How the license works.",
+    body: "The NYPD License Division issues every New York City pistol license, on its own timeline. Nobody at a range can speed it up or promise an outcome.",
+    steps: [
+      { title: "Apply", body: "To the NYPD License Division, online." },
+      { title: "Train", body: "For a carry license, New York State requires 16 hours in the classroom and 2 hours of live fire." },
+      { title: "Interview", body: "With the License Division." },
+      { title: "Decision", body: "From the NYPD." },
+    ],
+  },
+} as const;

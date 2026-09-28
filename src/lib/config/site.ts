@@ -25,7 +25,7 @@ export const SITE = {
   taglineSecondary: "Precision, at ease.",
   description: FACILITY_DETAILS_PUBLIC
     ? "A shooting club in Queens, near JFK. Twelve 25-yard lanes, two private suites, a simulator for anyone with ID, and a lounge with the line behind glass."
-    : "A private shooting club in Queens, near JFK, opening soon. Instruction, a simulator, a quiet lounge, and membership by application.",
+    : "A private shooting club in Queens, opening soon. Live-fire and laser training systems, instruction, and membership for New York City pistol licensees.",
   facilityDetailsPublic: FACILITY_DETAILS_PUBLIC,
   timezone: "America/New_York",
   phone: "(718) 000-0000", // TODO(owner): real phone

@@ -11,14 +11,22 @@ function pick(title: string, label: string): NavItem | undefined {
   return FOOTER_COLUMNS.find((c) => c.title === title)?.links.find((l) => l.label === label);
 }
 
-const ROW: NavItem[] = [
-  { label: "Reserve", href: "/reserve" },
-  { label: "Manage a reservation", href: "/reserve/manage" },
-  pick("Members", "Sign in") ?? { label: "Sign in", href: "/members/login" },
-  pick("Members", "Apply") ?? { label: "Apply", href: "/membership#apply" },
-  HOUSE_RULES_LINK,
-  { label: "FAQ", href: "/visit#faq" },
-];
+const ROW: NavItem[] = SITE.openForBusiness
+  ? [
+      { label: "Reserve", href: "/reserve" },
+      { label: "Manage a reservation", href: "/reserve/manage" },
+      pick("Members", "Sign in") ?? { label: "Sign in", href: "/members/login" },
+      pick("Members", "Apply") ?? { label: "Apply", href: "/membership#apply" },
+      HOUSE_RULES_LINK,
+      { label: "FAQ", href: "/visit#faq" },
+    ]
+  : [
+      { label: "Training", href: "/training" },
+      pick("Members", "Join the list") ?? { label: "Join the list", href: "/membership#apply" },
+      { label: "Events", href: "/events" },
+      HOUSE_RULES_LINK,
+      { label: "FAQ", href: "/visit#faq" },
+    ];
 
 /** The rest of the Legal column, set small under the row. */
 const LEGAL: NavItem[] = (FOOTER_COLUMNS.find((c) => c.title === "Legal")?.links ?? []).filter((l) => l.href !== HOUSE_RULES_LINK.href);
@@ -46,8 +54,8 @@ export function Footer({ id }: { id?: string }) {
               <LiveStatus initial={status} variant="dot" field="short" className="gap-3" dotClassName="h-2 w-2" />
             </p>
             <p className="mt-2 font-mono text-[0.8125rem] text-mist">
-              <Link href="/visit#hours" className="underline-offset-4 hover:underline">
-                Hours
+              <Link href={SITE.openForBusiness ? "/visit#hours" : "/visit"} className="underline-offset-4 hover:underline">
+                {SITE.openForBusiness ? "Hours" : "Visit"}
               </Link>
             </p>
           </div>

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { pageMeta } from "@/lib/seo/meta";
 import { AvatarRow, Bracket, EventsFloorPlan } from "@/components/pages/events/Art";
-import { Render } from "@/components/ui/Render";
 import { mediaFor } from "@/lib/media/manifest";
 import { InquiryForm } from "@/components/pages/events/InquiryForm";
 import { InView } from "@/components/pages/events/InView";
@@ -19,11 +18,7 @@ import { ELIGIBILITY_LABELS } from "@/lib/content/catalog";
 import {
   CORPORATE,
   CORPORATE_MIN_GUESTS,
-  DATE_NIGHT,
-  DATE_NIGHT_CHIPS,
-  DATE_PHOTO_ALT,
   EVENTS_CORPORATE,
-  EVENTS_DATE_NIGHT,
   EVENTS_FORMATS,
   EVENTS_HERO,
   EVENTS_INQUIRE,
@@ -152,26 +147,6 @@ export default function EventsPage() {
         </>
       )}
 
-      {/* ---------------------------------------------------- date night */}
-      <Section theme="light" padding="tight" id="date-night" className="border-t border-hairline">
-        <Container>
-          <div className="grid items-center gap-10 lg:grid-cols-12 lg:gap-10">
-            <div className="lg:col-span-6">
-              <Headline head={`Coming · ${DATE_NIGHT_CHIPS.join(" · ")}`} headline={EVENTS_DATE_NIGHT.headline} subhead={EVENTS_DATE_NIGHT.subhead} body={EVENTS_DATE_NIGHT.body}>
-                <p className="mt-4 font-mono text-[0.8125rem] leading-[1.6] text-ink-muted">{ELIGIBILITY_LABELS[DATE_NIGHT.eligibility]}.</p>
-                {EVENTS_DATE_NIGHT.cta && (
-                  <LinkArrow href={EVENTS_DATE_NIGHT.cta.href} className="mt-6">
-                    {EVENTS_DATE_NIGHT.cta.label}
-                  </LinkArrow>
-                )}
-              </Headline>
-            </div>
-            <InView className="lg:col-span-6">
-              <ImageSlot slot="DATE_PHOTO_01" alt={DATE_PHOTO_ALT} className="aspect-[3/2] rounded-card ring-1 ring-ink/10" art={<Render name="duo" sizes="(min-width: 1024px) 560px, 100vw" />} sizes="(min-width: 1024px) 560px, 100vw" />
-            </InView>
-          </div>
-        </Container>
-      </Section>
 
       {/* ------------------------------------------------------- parties */}
       <Section theme="gray" id="parties">
