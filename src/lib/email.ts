@@ -4,7 +4,7 @@
  * the booking so the text and HTML versions never disagree.
  *
  * The header is a PNG of the wordmark (Gmail strips inline SVG). Headlines
- * fall back to Georgia where Instrument Serif is not installed. Gold is used
+ * fall back to Georgia where Bodoni Moda is not installed. Gold is used
  * for one rule only; small text stays ink on paper so it reads everywhere.
  * Reply-To is the desk, so a reply reaches a person.
  */
@@ -32,7 +32,7 @@ const MUTED = "#6e6e73";
 const PAPER = "#fbfbfd";
 const PAPER_2 = "#f5f5f7";
 const GOLD = "#c9a55a";
-const SERIF = "'Instrument Serif',Georgia,'Times New Roman',serif";
+const SERIF = "'Bodoni Moda',Didot,Georgia,'Times New Roman',serif";
 const SANS = "-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',Helvetica,Arial,sans-serif";
 const MONO = "ui-monospace,SFMono-Regular,Menlo,Consolas,monospace";
 

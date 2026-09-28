@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { pageMeta } from "@/lib/seo/meta";
-import { AvatarRow, Bracket, DateNightArt, EventsFloorPlan, LogoStripArt } from "@/components/pages/events/Art";
+import { AvatarRow, Bracket, EventsFloorPlan } from "@/components/pages/events/Art";
+import { Render } from "@/components/ui/Render";
+import { mediaFor } from "@/lib/media/manifest";
 import { InquiryForm } from "@/components/pages/events/InquiryForm";
 import { InView } from "@/components/pages/events/InView";
 import { Button } from "@/components/ui/Button";
@@ -159,7 +161,7 @@ export default function EventsPage() {
               </Headline>
             </div>
             <InView className="lg:col-span-6">
-              <ImageSlot slot="DATE_PHOTO_01" alt={DATE_PHOTO_ALT} className="aspect-[3/2] rounded-card ring-1 ring-ink/10" art={<DateNightArt />} sizes="(min-width: 1024px) 560px, 100vw" />
+              <ImageSlot slot="DATE_PHOTO_01" alt={DATE_PHOTO_ALT} className="aspect-[3/2] rounded-card ring-1 ring-ink/10" art={<Render name="duo" sizes="(min-width: 1024px) 560px, 100vw" />} sizes="(min-width: 1024px) 560px, 100vw" />
             </InView>
           </div>
         </Container>
@@ -201,10 +203,13 @@ export default function EventsPage() {
           <InView as="figure" className="m-0 mt-14 rounded-card bg-white/[0.03] p-5 ring-1 ring-white/10 sm:mt-20 sm:p-8 lg:ml-[41.667%]">
             <Bracket />
           </InView>
-          <div className="mt-14 sm:mt-20">
-            <p className="mb-4 font-mono text-[0.75rem] uppercase tracking-[0.12em] text-mist">{LOGO_STRIP_CAPTION}</p>
-            <ImageSlot slot="CLIENT_LOGOS_01" alt={LOGO_STRIP_ALT} className="aspect-[3/1] sm:aspect-[8/1]" art={<LogoStripArt />} />
-          </div>
+          {/* Client logos show only once real ones are in the media manifest; no stand-in marks. */}
+          {mediaFor("CLIENT_LOGOS_01") && (
+            <div className="mt-14 sm:mt-20">
+              <p className="mb-4 font-mono text-[0.75rem] uppercase tracking-[0.12em] text-mist">{LOGO_STRIP_CAPTION}</p>
+              <ImageSlot slot="CLIENT_LOGOS_01" alt={LOGO_STRIP_ALT} className="aspect-[3/1] sm:aspect-[8/1]" />
+            </div>
+          )}
         </Container>
       </Section>
     </>

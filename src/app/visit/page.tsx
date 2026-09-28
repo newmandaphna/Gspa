@@ -7,7 +7,8 @@ import { DeskLog } from "@/components/DeskLog";
 import { LiveStatus } from "@/components/LiveStatus";
 import { MapEmbed } from "@/components/MapEmbed";
 import { RulesCard } from "@/components/RulesCard";
-import { BringIcon, ExteriorArt, MapPin, MapPlaceholderArt } from "@/components/pages/visit/Art";
+import { BringIcon, MapPin, MapPlaceholderArt } from "@/components/pages/visit/Art";
+import { Render } from "@/components/ui/Render";
 import { Faq } from "@/components/pages/visit/Faq";
 import { HoursTable } from "@/components/pages/visit/HoursTable";
 import { Button } from "@/components/ui/Button";
@@ -64,8 +65,9 @@ export default function VisitPage() {
       <JsonLd data={faqJsonLd(FAQ)} />
       {/* Hero: full-bleed exterior with a street grid and the pin, copy at the foot */}
       <Section theme="black" padded={false} className="flex min-h-[100dvh] items-end overflow-hidden pt-[var(--nav-h)]">
-        <ImageSlot slot="EXTERIOR_PHOTO_01" alt={EXTERIOR_PHOTO_ALT} fill priority art={<ExteriorArt />} />
+        <ImageSlot slot="EXTERIOR_PHOTO_01" alt={EXTERIOR_PHOTO_ALT} fill priority art={<Render name="lineup" priority sizes="(max-aspect-ratio: 1/1) 260vh, 100vw" className="-scale-x-100" position="0% 60%" />} />
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.55)_0%,rgba(0,0,0,0.15)_40%,rgba(0,0,0,0.75)_100%)]" />
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(10,10,11,0.92)_0%,rgba(10,10,11,0.7)_38%,rgba(10,10,11,0)_70%)]" />
         <Container className="relative pb-16 pt-16 sm:pb-24">
           <div className="enter max-w-[820px]">
             <MapPin className="mb-6 h-10 w-8" />

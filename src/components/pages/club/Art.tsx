@@ -40,31 +40,6 @@ export function AirFlow({ className, tone = "light" }: { className?: string; ton
 
 /* ------------------------------------------------------------- suites */
 
-/** Fallback art for SUITE_PHOTO_02: a dark suite, two lanes behind glass and a sofa. */
-export function SuitePhotoArt() {
-  return (
-    <div className="absolute inset-0 overflow-hidden bg-[linear-gradient(160deg,#2c2c2e_0%,#151516_60%,#0a0a0b_100%)]">
-      {/* the lane downlight, a static gradient (no Glow outside the simulator band) */}
-      <div aria-hidden="true" className="absolute left-1/2 top-[30%] h-[70%] w-[46%] -translate-x-1/2 rounded-full" style={{ background: "radial-gradient(closest-side, rgba(226,201,138,0.2), transparent 70%)" }} />
-      <svg viewBox="0 0 800 342" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 h-full w-full" aria-hidden="true">
-        <g fill="none" stroke={DARK_LINE} strokeWidth="1">
-          <rect x="220.5" y="50.5" width="140" height="190" rx="2" />
-          <rect x="440.5" y="50.5" width="140" height="190" rx="2" />
-          <path d="M80 270h640" />
-          <path d="M120 300h560" />
-          <rect x="300.5" y="278.5" width="200" height="34" rx="10" />
-        </g>
-        <g fill="none" stroke={DARK_LINE_STRONG} strokeWidth="1">
-          <circle cx="290" cy="130" r="14" />
-          <circle cx="290" cy="130" r="5" />
-          <circle cx="510" cy="130" r="14" />
-          <circle cx="510" cy="130" r="5" />
-        </g>
-        <circle cx="290" cy="130" r="2" fill={GOLD} />
-      </svg>
-    </div>
-  );
-}
 
 /* ---------------------------------------------------------- simulator */
 
@@ -107,33 +82,6 @@ export function Scanline({ className, label }: { className?: string; label?: str
 
 /* ------------------------------------------------------------- lounge */
 
-/** Fallback art for LOUNGE_PHOTO_02: a light room, the window to the line, a table and a cup. */
-export function LoungePhotoArt() {
-  return (
-    <div className="absolute inset-0 overflow-hidden bg-[linear-gradient(180deg,#f5f5f7_0%,#fbfbfd_100%)]">
-      <svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 h-full w-full" aria-hidden="true">
-        <g fill="none" stroke={LIGHT_LINE} strokeWidth="1">
-          {/* window to the line */}
-          <rect x="120.5" y="80.5" width="560" height="250" rx="2" />
-          <path d="M400.5 80.5v250" />
-          <path d="M120 420h560" />
-          {/* far targets */}
-          <circle cx="260" cy="200" r="16" />
-          <circle cx="260" cy="200" r="6" />
-          <circle cx="540" cy="200" r="16" />
-          <circle cx="540" cy="200" r="6" />
-          {/* table and cups */}
-          <ellipse cx="400" cy="470" rx="150" ry="26" />
-          <path d="M400 496v60" />
-          <path d="M340 556h120" />
-          <path d="M360 450h22v9a6 6 0 0 1-6 6h-10a6 6 0 0 1-6-6v-9z" />
-          <path d="M382 452h4a3 3 0 0 1 0 6h-4" />
-        </g>
-        <circle cx="260" cy="200" r="2" fill={GOLD} />
-      </svg>
-    </div>
-  );
-}
 
 /* ------------------------------------------------------------ lockers */
 

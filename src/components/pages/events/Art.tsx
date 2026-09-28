@@ -166,60 +166,35 @@ function EventsFloorPlanSvg({ W, H, pad, count, suites, per, laneW, laneTop, lan
    intersection filled gold at 12%, an espresso cup at the center.
    Sits inside the DATE_PHOTO_01 slot at 3:2.
    --------------------------------------------------------------------- */
-export function DateNightArt({ className }: { className?: string }) {
-  const r = 128;
-  const cy = 200;
-  const c1 = 236;
-  const c2 = 364;
-  const cx = (c1 + c2) / 2;
-  return (
-    <div className={cn("absolute inset-0 bg-[linear-gradient(160deg,#1d1d1f_0%,#0a0a0b_60%,#000_100%)]", className)}>
-      <svg viewBox="0 0 600 400" className="h-full w-full" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-        <defs>
-          <clipPath id="dn-left">
-            <circle cx={c1} cy={cy} r={r} />
-          </clipPath>
-        </defs>
-        {/* intersection: the one gold element */}
-        <circle cx={c2} cy={cy} r={r} fill={GOLD} fillOpacity={0.12} clipPath="url(#dn-left)" />
-        {/* rings */}
-        {[c1, c2].map((c) => (
-          <g key={c}>
-            <circle cx={c} cy={cy} r={r} fill="none" stroke="rgba(245,245,247,0.32)" strokeWidth={1} pathLength={1} className="draw" />
-            <circle cx={c} cy={cy} r={r * 0.66} fill="none" stroke={HAIR_DARK} strokeWidth={1} pathLength={1} className="draw" style={{ transitionDelay: "0.2s" }} />
-            <circle cx={c} cy={cy} r={r * 0.33} fill="none" stroke={HAIR_DARK} strokeWidth={1} pathLength={1} className="draw" style={{ transitionDelay: "0.35s" }} />
-          </g>
-        ))}
-        {/* espresso cup at the center of the intersection */}
-        <g fill="none" stroke="rgba(245,245,247,0.75)" strokeWidth={1.2} strokeLinecap="round">
-          <path d={`M${cx - 15} ${cy - 4}h30v13a10 10 0 0 1-10 10h-10a10 10 0 0 1-10-10z`} />
-          <path d={`M${cx + 15} ${cy}h5a6 6 0 0 1 0 12h-5`} />
-          <path d={`M${cx - 21} ${cy + 26}h42`} />
-          <path d={`M${cx - 5} ${cy - 20}c0 -4 3 -4 3 -8M${cx + 3} ${cy - 20}c0 -4 3 -4 3 -8`} strokeOpacity={0.5} />
-        </g>
-        {/* mono captions */}
-        <text x={c1 - r} y={cy + r + 28} fill="rgba(161,161,166,0.8)" style={{ fontFamily: MONO, fontSize: 11, letterSpacing: "0.08em" }}>
-          SIMULATOR
-        </text>
-        <text x={c2 + r} y={cy + r + 28} fill="rgba(161,161,166,0.8)" textAnchor="end" style={{ fontFamily: MONO, fontSize: 11, letterSpacing: "0.08em" }}>
-          RIFLE
-        </text>
-        <text x={cx} y={cy - r - 14} fill="rgba(161,161,166,0.8)" textAnchor="middle" style={{ fontFamily: MONO, fontSize: 11, letterSpacing: "0.08em" }}>
-          LOUNGE
-        </text>
-      </svg>
-    </div>
-  );
-}
 
 /* ------------------------------------------------------------------------
    Parties: twelve hairline avatar outlines, the first six in gold.
    --------------------------------------------------------------------- */
-function Avatar({ gold }: { gold: boolean }) {
+/** One guest as a standing round: loaded brass for the shooters one officer covers, an outline for the rest. */
+function Guest({ loaded, id }: { loaded: boolean; id: string }) {
+  const stroke = loaded ? "none" : HAIR_LIGHT;
   return (
-    <svg viewBox="0 0 40 44" className="h-auto w-full" aria-hidden="true">
-      <circle cx="20" cy="13" r="9" fill="none" stroke={gold ? GOLD : HAIR_LIGHT} strokeWidth={gold ? 1.4 : 1} />
-      <path d="M5 43a15 15 0 0 1 30 0" fill="none" stroke={gold ? GOLD : HAIR_LIGHT} strokeWidth={gold ? 1.4 : 1} strokeLinecap="round" />
+    <svg viewBox="0 0 20 64" className="h-auto w-full" aria-hidden="true">
+      {loaded && (
+        <defs>
+          <linearGradient id={`${id}-b`} x1="0" x2="1">
+            <stop offset="0" stopColor="#7a5a24" />
+            <stop offset="0.35" stopColor="#e6c77e" />
+            <stop offset="0.6" stopColor="#c99a45" />
+            <stop offset="1" stopColor="#5e451b" />
+          </linearGradient>
+          <linearGradient id={`${id}-c`} x1="0" x2="1">
+            <stop offset="0" stopColor="#6b3418" />
+            <stop offset="0.35" stopColor="#e39a6c" />
+            <stop offset="0.6" stopColor="#b5673b" />
+            <stop offset="1" stopColor="#4a2410" />
+          </linearGradient>
+        </defs>
+      )}
+      <path d="M4.2 24V15C4.2 6 7.5 1.5 10 1.5S15.8 6 15.8 15V24Z" fill={loaded ? `url(#${id}-c)` : "none"} stroke={stroke} strokeWidth="1" />
+      <path d="M3 24H17V55H3Z" fill={loaded ? `url(#${id}-b)` : "none"} stroke={stroke} strokeWidth="1" />
+      <path d="M4 55H16L16.5 57H3.5Z" fill={loaded ? "#8a6a2c" : "none"} stroke={stroke} strokeWidth="1" />
+      <path d="M2.5 57H17.5V62H2.5Z" fill={loaded ? `url(#${id}-b)` : "none"} stroke={stroke} strokeWidth="1" />
     </svg>
   );
 }
@@ -227,9 +202,9 @@ function Avatar({ gold }: { gold: boolean }) {
 export function AvatarRow({ className }: { className?: string }) {
   return (
     <figure className={cn("w-full", className)}>
-      <div className="grid grid-cols-6 gap-3 sm:gap-4" role="img" aria-label={`${AVATARS.total} guests, ${AVATARS.caption}`}>
+      <div className="grid grid-cols-12 items-end gap-2 sm:gap-3" role="img" aria-label={`${AVATARS.total} guests, ${AVATARS.caption}`}>
         {Array.from({ length: AVATARS.total }).map((_, i) => (
-          <Avatar key={i} gold={i < AVATARS.gold} />
+          <Guest key={i} id={`guest-${i}`} loaded={i < AVATARS.gold} />
         ))}
       </div>
       <figcaption className="mt-5 flex items-center justify-between font-mono text-[0.75rem] uppercase tracking-[0.08em] text-ink-muted">
@@ -304,25 +279,3 @@ export function Bracket({ className }: { className?: string }) {
 /* ------------------------------------------------------------------------
    Client logo strip placeholder: six muted marks in hairline frames.
    --------------------------------------------------------------------- */
-export function LogoStripArt() {
-  const marks = [
-    <circle key="a" cx="20" cy="20" r="9" />,
-    <rect key="b" x="11" y="11" width="18" height="18" rx="3" />,
-    <path key="c" d="M20 9l11 20H9z" strokeLinejoin="round" />,
-    <path key="d" d="M10 20h20M20 10v20" />,
-    <path key="e" d="M11 20a9 9 0 0 1 18 0M11 20a9 9 0 0 0 18 0" />,
-    <rect key="f" x="10" y="14" width="20" height="12" rx="6" />,
-  ];
-  return (
-    <div className="absolute inset-0 grid grid-cols-3 gap-3 sm:grid-cols-6">
-      {marks.map((m, i) => (
-        <div key={i} className="flex items-center justify-center gap-2 rounded-xl ring-1 ring-inset ring-white/10">
-          <svg viewBox="0 0 40 40" className="h-7 w-7 shrink-0" fill="none" stroke="rgba(161,161,166,0.6)" strokeWidth="1.2" aria-hidden="true">
-            {m}
-          </svg>
-          <span aria-hidden="true" className="hidden h-1.5 w-10 rounded-full bg-white/10 sm:block" />
-        </div>
-      ))}
-    </div>
-  );
-}

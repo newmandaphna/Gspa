@@ -5,53 +5,63 @@
    Change --color-accent here to re-skin the whole site.
    --------------------------------------------------------------------- */
 @theme {
-  --color-ink: #1d1d1f;
-  --color-ink-muted: #6e6e73;
-  --color-ink-faint: #86868b;
-  --color-paper: #fbfbfd;
-  --color-paper-2: #f5f5f7;
-  --color-paper-3: #e8e8ed;
-  --color-night: #000000;
-  --color-night-2: #1d1d1f;
-  --color-night-3: #2c2c2e;
-  --color-night-4: #3a3a3c;
-  --color-snow: #f5f5f7;
-  --color-mist: #a1a1a6;
-  /* Brand gold from the logo: the one accent. Use --color-accent for display type, rules, buttons
-     with dark labels and anything on near-black; use --color-accent-deep for small text and small
-     marks on light backgrounds (the pure gold is about 2.3:1 on white and fails AA and the 3:1
-     non-text minimum). --color-charcoal is the logo's "GUN". */
+  /* Warm neutrals: bone paper, lamp black, one brass accent. Nothing here is Apple gray.
+     Contrast (text on its usual ground): ink on paper about 17:1, ink-muted about 6:1,
+     ink-faint about 4.6:1, mist on night about 7:1, accent-deep on paper about 5:1. */
+  --color-ink: #141210;
+  --color-ink-muted: #5f5a52;
+  --color-ink-faint: #736c62;
+  --color-paper: #f1ede6;
+  --color-paper-2: #e8e3da;
+  --color-paper-3: #dcd5c9;
+  --color-night: #0a0a0b;
+  --color-night-2: #131211;
+  --color-night-3: #1d1b19;
+  --color-night-4: #2a2724;
+  --color-snow: #f2efe9;
+  --color-mist: #a39d92;
+  /* Brass from the logo. --color-accent for display type, rules and anything on night;
+     --color-accent-deep for small text and marks on paper. --color-copper is the jacket of
+     the round in the hero, used for one-off highlights only. */
   --color-accent: #c9a55a;
-  --color-accent-2: #e0c98a;
-  --color-accent-deep: #7f6430;
+  --color-accent-2: #e3c98c;
+  --color-accent-deep: #76592a;
+  --color-copper: #b5673b;
   --color-charcoal: #2f3b41;
-  --color-link: #e0c98a;
-  --color-link-ink: #7f6430;
-  --color-danger: #d0342c;
-  --color-success: #2f7d5a;
-  --color-hairline: #d2d2d7;
-  --color-hairline-dark: #2c2c30;
+  --color-link: #e3c98c;
+  --color-link-ink: #76592a;
+  --color-danger: #b8322a;
+  --color-success: #2f6f4f;
+  --color-hairline: #cfc7b9;
+  --color-hairline-dark: #2c2926;
 
-  /* Editorial pairing: a serif with character for headlines, a humanist sans for reading,
-     Plex Mono for codes and times. The families are self-hosted through next/font/local
-     (src/app/fonts.ts), which sets --font-instrument-serif, --font-instrument-sans and
-     --font-plex-mono on <html> with size-adjusted fallbacks already in each stack.
-     The wordmark is outlined path data, so no brand face is loaded. */
-  --font-sans: var(--font-instrument-sans), -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
-  --font-display: var(--font-instrument-serif), "Iowan Old Style", "Palatino Linotype", Georgia, "Times New Roman", serif;
-  --font-mono: var(--font-plex-mono), ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  /* Type. Archivo across widths is the voice (expanded capitals for headlines, normal width
+     for reading, condensed for data). Bodoni Moda italic is the spa. Big Shoulders Stencil is
+     for numerals only. Martian Mono for running heads, times and codes. Families are
+     self-hosted in src/app/fonts.ts. The wordmark is outlined path data. */
+  --font-sans: var(--font-archivo), "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-display: var(--font-archivo), "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-serif: var(--font-bodoni), Didot, Georgia, serif;
+  --font-stencil: var(--font-stencil-face), Impact, "Arial Narrow", sans-serif;
+  --font-mono: var(--font-martian), ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
-  --radius-pill: 980px;
-  --radius-card: 28px;
-  --radius-card-sm: 18px;
+  /* Machined, not bubbly: square-ish corners everywhere. */
+  --radius-pill: 3px;
+  --radius-card: 6px;
+  --radius-card-sm: 4px;
+  --radius-md: 3px;
+  --radius-lg: 3px;
+  --radius-xl: 4px;
+  --radius-2xl: 6px;
 
-  --tracking-display: -0.028em;
-  --tracking-tight: -0.02em;
-  --tracking-snug: -0.012em;
+  --tracking-display: -0.01em;
+  --tracking-tight: -0.01em;
+  --tracking-snug: -0.005em;
 
-  --ease-apple: cubic-bezier(0.28, 0.11, 0.32, 1);
-  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.06), 0 18px 40px rgba(0, 0, 0, 0.08);
-  --shadow-card-dark: 0 2px 12px rgba(0, 0, 0, 0.4), 0 24px 60px rgba(0, 0, 0, 0.5);
+  --ease-apple: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-snap: cubic-bezier(0.2, 0.9, 0.1, 1);
+  --shadow-card: 0 1px 0 rgba(20, 18, 16, 0.06), 0 18px 40px -18px rgba(20, 18, 16, 0.25);
+  --shadow-card-dark: 0 1px 0 rgba(255, 255, 255, 0.04), 0 24px 60px -20px rgba(0, 0, 0, 0.7);
 }
 
 :root {
@@ -76,33 +86,66 @@ body {
 }
 
 ::selection {
-  background: rgba(201, 165, 90, 0.35);
+  background: rgba(201, 165, 90, 0.4);
+  color: inherit;
 }
 
-/* Display type: Instrument Serif at its single weight, gentle tracking. Figures are proportional
-   here, so 14, 21 and 30 sit as words do rather than in spreadsheet columns; .tabular and mono
-   keep tabular figures for times, codes and anything that lines up. */
+@layer components {
+/* Display type: Archivo pushed wide and heavy, in capitals. Figures are lining and proportional;
+   .tabular and mono keep tabular figures for times, codes and anything that lines up. */
 .t-display,
 .t-hero,
 .t-1,
-.t-2,
-.t-3,
-.t-numeral {
+.t-2 {
   font-family: var(--font-display);
-  font-weight: 400;
-  font-variant-numeric: proportional-nums;
-  text-rendering: geometricPrecision;
+  font-weight: 820;
+  font-stretch: 118%;
+  text-transform: uppercase;
+  font-variant-numeric: lining-nums proportional-nums;
+  font-kerning: normal;
 }
-.t-italic {
+.t-3,
+.t-4 {
+  font-family: var(--font-display);
+  font-stretch: 108%;
+  font-variant-numeric: lining-nums;
+}
+/* The spa half: Bodoni italic, never in capitals, a touch larger than the capitals around it. */
+.t-italic,
+.t-accent {
+  font-family: var(--font-serif);
   font-style: italic;
+  font-weight: 400;
+  font-stretch: 100%;
+  text-transform: none;
+  letter-spacing: -0.01em;
+}
+.t-accent {
+  font-size: 1.12em;
+  line-height: 0.8;
+  color: var(--color-accent);
+}
+[data-theme="light"] .t-accent {
+  color: var(--color-accent-deep);
+}
+/* Stencil numerals: lane numbers, windows, counts. */
+.t-numeral,
+.t-stencil {
+  font-family: var(--font-stencil);
+  font-weight: 800;
+  font-stretch: 100%;
+  text-transform: none;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
 }
 .font-mono,
 .tabular {
   font-variant-numeric: tabular-nums;
 }
-/* Prices in display type are proportional too; hang the currency sign into the margin where supported. */
 .t-price {
-  font-variant-numeric: proportional-nums;
+  font-variant-numeric: lining-nums proportional-nums;
+}
+
 }
 
 /* Editorial type. Opening quotes and full stops hang into the margin on the three largest sizes;
@@ -127,17 +170,7 @@ body {
 .t-footnote {
   text-wrap: pretty;
 }
-/* Above 80 px the serif needs almost no tracking; the tight value below is for the smaller sizes. */
-@media (min-width: 842px) {
-  .t-display {
-    letter-spacing: -0.005em;
-  }
-}
-@media (min-width: 1143px) {
-  .t-hero {
-    letter-spacing: -0.005em;
-  }
-}
+
 
 /* CSS-only entrance for hero type: it is in the server HTML and paints before any
    script runs, then rises 12 px into place. Stagger siblings with --enter-delay.
@@ -179,66 +212,68 @@ body {
    --------------------------------------------------------------------- */
 @layer components {
   .t-display {
-    font-size: clamp(3.5rem, 9.5vw, 7.25rem);
-    line-height: 1;
-    letter-spacing: -0.02em;
-  }
-  .t-hero {
-    font-size: clamp(3rem, 7vw, 5.5rem);
-    line-height: 1.02;
-    letter-spacing: -0.018em;
-  }
-  .t-1 {
-    font-size: clamp(2.5rem, 5vw, 3.9rem);
-    line-height: 1.05;
-    letter-spacing: -0.015em;
-  }
-  .t-2 {
-    font-size: clamp(1.95rem, 3.5vw, 2.8rem);
-    line-height: 1.1;
+    font-size: clamp(3rem, 8.4vw, 8rem);
+    line-height: 0.88;
     letter-spacing: -0.012em;
   }
-  /* Numerals as art: 7 / 14 / 21 / 30 */
-  .t-numeral {
-    font-size: clamp(5.5rem, 13vw, 11rem);
+  .t-hero {
+    font-size: clamp(2.5rem, 6.2vw, 6rem);
+    line-height: 0.9;
+    letter-spacing: -0.01em;
+  }
+  .t-1 {
+    font-stretch: 110%;
+    font-size: clamp(1.95rem, 3.9vw, 3.5rem);
     line-height: 0.92;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.008em;
+  }
+  .t-2 {
+    font-stretch: 108%;
+    font-size: clamp(1.5rem, 2.6vw, 2.35rem);
+    line-height: 0.96;
+    letter-spacing: -0.006em;
+  }
+  /* Numerals as art: 7 / 14 / 21 / 30, stenciled. */
+  .t-numeral {
+    font-size: clamp(6rem, 15vw, 13rem);
+    line-height: 0.8;
   }
   .t-3 {
-    font-size: clamp(1.5rem, 2.4vw, 1.95rem);
-    line-height: 1.15;
-    letter-spacing: -0.008em;
+    font-size: clamp(1.2rem, 1.7vw, 1.45rem);
+    line-height: 1.12;
+    font-weight: 700;
+    letter-spacing: -0.004em;
   }
   .t-4 {
-    font-size: 1.1875rem;
+    font-size: 1.0625rem;
     line-height: 1.3;
-    font-weight: 600;
-    letter-spacing: var(--tracking-snug);
+    font-weight: 650;
+    letter-spacing: 0;
   }
   .t-lead {
-    font-size: clamp(1.25rem, 1.9vw, 1.75rem);
-    line-height: 1.32;
+    font-size: clamp(1.125rem, 1.55vw, 1.375rem);
+    line-height: 1.45;
     font-weight: 400;
-    letter-spacing: -0.008em;
+    letter-spacing: -0.003em;
   }
-  /* Subheads: the serif in italic at t-lead size. */
+  /* Subheads: Bodoni italic. */
   .t-subhead {
-    font-family: var(--font-display);
+    font-family: var(--font-serif);
     font-style: italic;
     font-weight: 400;
-    font-size: clamp(1.375rem, 2vw, 1.875rem);
-    line-height: 1.28;
-    letter-spacing: -0.004em;
-    font-variant-numeric: proportional-nums;
+    font-size: clamp(1.45rem, 2.3vw, 2.2rem);
+    line-height: 1.1;
+    letter-spacing: -0.012em;
+    font-variant-numeric: lining-nums proportional-nums;
   }
   .t-body-lg {
     font-size: 1.1875rem;
-    line-height: 1.45;
-    letter-spacing: -0.004em;
+    line-height: 1.5;
+    letter-spacing: -0.003em;
   }
   .t-body {
     font-size: 1.0625rem;
-    line-height: 1.5;
+    line-height: 1.55;
     letter-spacing: -0.002em;
   }
   .t-caption {
@@ -249,47 +284,59 @@ body {
     font-size: 0.75rem;
     line-height: 1.45;
   }
+  /* Eyebrows and running heads: Martian Mono, wide tracking. */
   .t-eyebrow {
-    font-size: 0.75rem;
-    line-height: 1.2;
-    font-weight: 600;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    line-height: 1.3;
+    font-weight: 400;
     letter-spacing: 0.16em;
     text-transform: uppercase;
   }
+  /* Small capitals labels in Archivo condensed: specs, table heads, button text. */
+  .t-label {
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    line-height: 1.2;
+    font-weight: 650;
+    font-stretch: 112%;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
 
-  /* Apple-style "Learn more >" link */
+  /* The ruled-arrow link: small capitals, the arrow lengthens on hover (see LinkArrow). */
   .link-arrow {
     display: inline-flex;
     align-items: center;
-    gap: 0.25rem;
-    font-size: 1.0625rem;
-    font-weight: 400;
+    gap: 0.75rem;
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 650;
+    font-stretch: 115%;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
     color: var(--color-link-ink);
     text-decoration: none;
     transition: color 0.2s var(--ease-apple);
   }
   .link-arrow:hover {
-    text-decoration: underline;
-    text-underline-offset: 3px;
-  }
-  .link-arrow svg {
-    transition: transform 0.25s var(--ease-apple);
-  }
-  .link-arrow:hover svg {
-    transform: translateX(2px);
+    color: var(--color-ink);
   }
   [data-theme="dark"] .link-arrow {
     color: var(--color-link);
   }
+  [data-theme="dark"] .link-arrow:hover {
+    color: var(--color-snow);
+  }
 
   /* Translucent chrome */
   .glass {
-    background: rgba(255, 255, 255, 0.62);
+    background: rgba(241, 237, 230, 0.78);
     -webkit-backdrop-filter: saturate(180%) blur(20px);
     backdrop-filter: saturate(180%) blur(20px);
   }
   .glass-dark {
-    background: rgba(22, 22, 23, 0.72);
+    background: rgba(10, 10, 11, 0.74);
     -webkit-backdrop-filter: saturate(180%) blur(20px);
     backdrop-filter: saturate(180%) blur(20px);
   }
@@ -305,17 +352,12 @@ body {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
+  /* Gradient text is retired; the classes remain as plain colors so old markup still reads. */
   .gradient-text {
-    background: linear-gradient(92deg, #f5f5f7 0%, #d9d9de 45%, var(--color-accent-2) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    color: var(--color-snow);
   }
   .gradient-text-ink {
-    background: linear-gradient(92deg, #1d1d1f 0%, #3a3a3c 55%, var(--color-accent-deep) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    color: var(--color-ink);
   }
 
   /* Hairline dividers that adapt to the section theme */
@@ -376,10 +418,67 @@ body {
 :focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 3px;
-  border-radius: 6px;
+  border-radius: 2px;
 }
 
 /* Native date input polish */
 input[type="date"]::-webkit-calendar-picker-indicator {
   opacity: 0.6;
+}
+
+/* Target practice: the paper jumps back on its clips, spent brass arcs out to the right. */
+@keyframes tp-recoil {
+  0% { transform: none; }
+  18% { transform: translateY(-3px) rotate(-0.35deg) scale(0.996); }
+  55% { transform: translateY(1px) rotate(0.15deg); }
+  100% { transform: none; }
+}
+@keyframes tp-eject {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+  8% { opacity: 1; }
+  45% { transform: translate(90px, -120px) rotate(320deg); }
+  100% { transform: translate(170px, 260px) rotate(760deg); opacity: 0; }
+}
+.tp-hole {
+  animation: tp-hole 260ms var(--ease-snap) both;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+@keyframes tp-hole {
+  from { transform: scale(1.6); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+/* Ticker band */
+.marquee-track {
+  animation: marquee var(--marquee-speed, 38s) linear infinite;
+}
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* Phones: pull the capitals in from expanded to normal width so a long word ("METAPHOR.")
+   still fits a 360 px column, and never let a headline push the page sideways. */
+@layer components {
+  .t-display,
+  .t-hero,
+  .t-1,
+  .t-2 {
+    overflow-wrap: break-word;
+  }
+  @media (max-width: 479px) {
+    .t-display,
+    .t-hero {
+      font-stretch: 104%;
+    }
+    .t-1,
+    .t-2 {
+      font-stretch: 100%;
+      font-size: clamp(1.75rem, 8.2vw, 2.2rem);
+    }
+  }
 }

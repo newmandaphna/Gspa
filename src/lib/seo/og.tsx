@@ -8,8 +8,8 @@ import { mediaFor } from "@/lib/media/manifest";
 /**
  * The share card, one builder for every opengraph-image.tsx route.
  *
- * Type is the site's own: Instrument Serif for the headline, IBM Plex Mono
- * for the fact line, read from the WOFF files beside this module (Satori,
+ * Type is the site's own: Archivo Black capitals for the headline, Bodoni
+ * Moda italic for the one gold word, Martian Mono for the fact line, read from the WOFF files beside this module (Satori,
  * which draws the card, reads TTF, OTF and WOFF, not WOFF2, so these are the
  * WOFF builds of the same @fontsource releases that next/font serves). The
  * wordmark is the outlined path data from wordmark-paths.ts, so no brand
@@ -23,12 +23,12 @@ export const OG_SIZE = { width: 1200, height: 630 } as const;
 export const OG_CONTENT_TYPE = "image/png";
 
 const GOLD = "#c9a55a";
-const SNOW = "#f5f5f7";
-const MIST = "#a1a1a6";
+const SNOW = "#f2efe9";
+const MIST = "#a39d92";
 
 const FONT_DIR = path.join(process.cwd(), "src/lib/seo/fonts");
 
-type OgFont = { name: string; data: ArrayBuffer; weight: 400; style: "normal" | "italic" };
+type OgFont = { name: string; data: ArrayBuffer; weight: 400 | 900; style: "normal" | "italic" };
 
 let fontsPromise: Promise<OgFont[]> | null = null;
 
@@ -40,9 +40,9 @@ async function readFont(file: string): Promise<ArrayBuffer> {
 /** The three faces, read once per server process. */
 export function loadOgFonts(): Promise<OgFont[]> {
   fontsPromise ??= Promise.all([
-    readFont("instrument-serif-latin-400-normal.woff").then((data) => ({ name: "Instrument Serif", data, weight: 400 as const, style: "normal" as const })),
-    readFont("instrument-serif-latin-400-italic.woff").then((data) => ({ name: "Instrument Serif", data, weight: 400 as const, style: "italic" as const })),
-    readFont("ibm-plex-mono-latin-400-normal.woff").then((data) => ({ name: "IBM Plex Mono", data, weight: 400 as const, style: "normal" as const })),
+    readFont("archivo-latin-900-normal.woff").then((data) => ({ name: "Archivo", data, weight: 900 as const, style: "normal" as const })),
+    readFont("bodoni-moda-latin-400-italic.woff").then((data) => ({ name: "Bodoni Moda", data, weight: 400 as const, style: "italic" as const })),
+    readFont("martian-mono-latin-400-normal.woff").then((data) => ({ name: "Martian Mono", data, weight: 400 as const, style: "normal" as const })),
   ]);
   return fontsPromise;
 }
@@ -95,7 +95,7 @@ function WordmarkArt({ height }: { height: number }) {
 }
 
 export type OgCardOptions = {
-  /** The page's headline, set in Instrument Serif. A segment wrapped in *asterisks* is set in gold italic. */
+  /** The page's headline, set in Archivo Black capitals. A segment wrapped in *asterisks* is set in gold Bodoni italic. */
   headline: string;
   /** One mono line of fact under the headline. */
   fact: string;
@@ -113,9 +113,11 @@ function Headline({ text, size }: { text: string; size: number }) {
       style={{
         display: "flex",
         flexWrap: "wrap",
-        fontFamily: "Instrument Serif",
+        fontFamily: "Archivo",
+        fontWeight: 900,
+        textTransform: "uppercase",
         fontSize: size,
-        lineHeight: 1.02,
+        lineHeight: 0.98,
         letterSpacing: "-0.01em",
         color: SNOW,
         maxWidth: 1040,
@@ -123,7 +125,7 @@ function Headline({ text, size }: { text: string; size: number }) {
     >
       {parts.map((part, i) =>
         i % 2 === 1 ? (
-          <span key={i} style={{ color: GOLD, fontStyle: "italic", whiteSpace: "pre" }}>
+          <span key={i} style={{ color: GOLD, fontFamily: "Bodoni Moda", fontWeight: 400, fontStyle: "italic", textTransform: "none", fontSize: size * 1.18, lineHeight: 0.85, whiteSpace: "pre" }}>
             {part}
           </span>
         ) : (
@@ -140,7 +142,7 @@ function Headline({ text, size }: { text: string; size: number }) {
 export async function ogCard(options: OgCardOptions): Promise<ImageResponse> {
   const [fonts, photo] = await Promise.all([loadOgFonts(), heroPhoto(options.slot)]);
   const head = options.head ?? `${SITE.address.line1} · ${SITE.address.neighborhood}`;
-  const size = options.headline.length > 34 ? 84 : 104;
+  const size = options.headline.length > 34 ? 64 : options.headline.length > 22 ? 80 : 96;
   return new ImageResponse(
     (
       <div
@@ -151,7 +153,7 @@ export async function ogCard(options: OgCardOptions): Promise<ImageResponse> {
           flexDirection: "column",
           justifyContent: "space-between",
           position: "relative",
-          background: "linear-gradient(180deg, #000 0%, #141416 100%)",
+          background: "linear-gradient(180deg, #0a0a0b 0%, #141312 100%)",
           color: SNOW,
           padding: "56px 64px 60px",
         }}
@@ -180,12 +182,12 @@ export async function ogCard(options: OgCardOptions): Promise<ImageResponse> {
         <div style={{ position: "absolute", left: 64, right: 64, top: 128, height: 1, background: "rgba(255,255,255,0.08)" }} />
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", position: "relative" }}>
           <WordmarkArt height={44} />
-          <div style={{ fontFamily: "IBM Plex Mono", fontSize: 20, letterSpacing: "0.12em", textTransform: "uppercase", color: MIST }}>{head}</div>
+          <div style={{ fontFamily: "Martian Mono", fontSize: 16, letterSpacing: "0.14em", textTransform: "uppercase", color: MIST }}>{head}</div>
         </div>
         <div style={{ display: "flex", flexDirection: "column", position: "relative" }}>
           <Headline text={options.headline} size={size} />
           <div style={{ width: 96, height: 4, background: GOLD, marginTop: 30 }} />
-          <div style={{ fontFamily: "IBM Plex Mono", fontSize: 22, letterSpacing: "0.02em", color: MIST, marginTop: 22, maxWidth: 1040 }}>{options.fact}</div>
+          <div style={{ fontFamily: "Martian Mono", fontSize: 18, letterSpacing: "0.04em", color: MIST, marginTop: 22, maxWidth: 1040 }}>{options.fact}</div>
         </div>
       </div>
     ),
