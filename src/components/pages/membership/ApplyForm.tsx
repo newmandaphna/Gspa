@@ -60,7 +60,7 @@ export function ApplyForm({ tiers, initialTier, className }: { tiers: TierOption
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [tier, setTier] = useState<string>(initialTier ?? tiers[0]?.key ?? "");
-  const [license, setLicense] = useState<LicenseOption>("None");
+  const [license, setLicense] = useState<LicenseOption>("Premises");
   const [ref1, setRef1] = useState("");
   const [ref2, setRef2] = useState("");
   const [heard, setHeard] = useState<string>("");

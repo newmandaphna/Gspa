@@ -157,7 +157,7 @@ export const VISIT_REQUIREMENTS: SectionCopy = {
   eyebrow: "Requirements",
   headline: "Read this once.",
   subhead: `${cap(numberWord(REQUIREMENTS.length))} lines, the same card the desk keeps.`,
-  body: "When you reserve, the flow shows only the lines that apply to that session. Nothing else on the site restates them. Brackets mean counsel is still on it, and the date at the foot of the card is the last review.",
+  body: "When you reserve, the flow shows only the lines that apply to that session. Nothing else on the site restates them.",
 };
 
 export const LAST_REVIEWED_LABEL = "Last reviewed";
