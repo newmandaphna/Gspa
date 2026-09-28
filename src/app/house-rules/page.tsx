@@ -6,7 +6,7 @@ import { Container } from "@/components/ui/Container";
 import { LinkArrow } from "@/components/ui/LinkArrow";
 import { Section } from "@/components/ui/Section";
 import { SITE } from "@/lib/config/site";
-import { HOUSE_RULES, HOUSE_RULES_DRAFT_LINE, RANGE_OFFICER_LINE, RANGE_RULES, RANGE_RULES_LABEL } from "@/lib/content/requirements";
+import { HOUSE_RULES, RANGE_OFFICER_LINE, RANGE_RULES, RANGE_RULES_LABEL, REVIEWED_LINE } from "@/lib/content/requirements";
 
 const HEAD = {
   eyebrow: "House rules",
@@ -26,7 +26,7 @@ export default function HouseRulesPage() {
     <>
       <Section theme="black" className="pt-[calc(var(--nav-h)+3rem)] sm:pt-[calc(var(--nav-h)+4.5rem)]">
         <Container size="md">
-          <p className="font-mono text-[0.75rem] uppercase tracking-[0.12em] text-mist">{HOUSE_RULES_DRAFT_LINE}</p>
+          {REVIEWED_LINE && <p className="font-mono text-[0.75rem] uppercase tracking-[0.12em] text-mist">{REVIEWED_LINE}</p>}
           <p className="t-eyebrow mt-10 text-accent">{HEAD.eyebrow}</p>
           <h1 className="t-hero mt-4 max-w-[12em]">{HEAD.headline}</h1>
           <p className="t-lead mt-4 max-w-[30em] text-mist">{HEAD.subhead}</p>

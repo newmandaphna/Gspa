@@ -1,10 +1,15 @@
 import { BOOKING, SITE } from "@/lib/config/site";
 import { COURSE_CANCEL_WINDOW, COURSE_NAME } from "@/lib/content/requirements";
 import { ifPriced } from "@/lib/pricing";
+import { publicCopy } from "@/lib/seo/placeholders";
 
 export type Faq = { id: string; q: string; a: string };
 
-export const FAQ: Faq[] = [
+/**
+ * Written answers. Entries in HELD_BACK stay out of the site until they can be
+ * answered without a licence the club does not hold yet, or a counsel note.
+ */
+const ALL_FAQ: Faq[] = [
   {
     id: "rent-handgun",
     q: "Can I rent a handgun?",
@@ -38,7 +43,7 @@ export const FAQ: Faq[] = [
   {
     id: "own-ammo",
     q: "Can I bring my own ammunition?",
-    a: "Yes, within the rules: brass or nickel cases, nothing magnetic, nothing armor-piercing. No steel core, no tracer, no reloads. The desk sells house ammunition in common calibers for use on the premises.",
+    a: "Yes, within the rules: brass or nickel cases, nothing magnetic, nothing armor-piercing. No steel core, no tracer, no reloads.",
   },
   {
     id: "own-protection",
@@ -68,7 +73,7 @@ export const FAQ: Faq[] = [
   {
     id: "non-shooters",
     q: "Can non-shooters come and watch?",
-    a: "Yes. The lounge looks straight onto the line through ballistic glass and each suite has a lounge of its own. Watchers still show ID and sign the acknowledgement at the desk, same as everyone.",
+    a: "Yes. Watchers show ID and sign the acknowledgement at the desk, same as everyone.",
   },
   {
     id: "lounge-noise",
@@ -103,7 +108,7 @@ export const FAQ: Faq[] = [
   {
     id: "layover",
     q: "I'm on a layover at JFK. Can I come shoot?",
-    a: "Yes, if the layover is long enough. Plan on three hours door to door: five minutes each way by car, fifteen at the desk for ID and the briefing, an hour in the bay, and whatever your terminal takes to clear security again. Watch the Van Wyck after 4 PM. Without a NYC pistol license that hour is the simulator, which is open to anyone 18 and over with a passport. Reserve before you land.",
+    a: "The simulator, possibly, if the layover is long. Plan on three hours door to door. Live fire depends on your license and your visa status, so ask the desk first.",
   },
   {
     id: "luggage",
@@ -128,7 +133,7 @@ export const FAQ: Faq[] = [
   {
     id: "lead",
     q: "Is there a lead exposure risk?",
-    a: "Every lane has its own downrange airflow and its own filtration, and house ammunition uses lead-free primers where we can get them. Wash your hands and face before you eat. If you are pregnant or nursing, talk to your doctor first; the simulator has none of this to think about.",
+    a: "Lead is part of any live-fire range. Wash your hands and face before you eat. If you are pregnant or nursing, talk to your doctor first; the simulator has none of this to think about.",
   },
   {
     id: "parking",
@@ -140,7 +145,7 @@ export const FAQ: Faq[] = [
   {
     id: "events",
     q: "Can I host an event?",
-    a: "Yes. A Private Suite takes six and the Founders' Suite takes ten, and both reserve online. Anything larger, up to a forty-person buyout, goes through the Events inquiry and a planner replies within one business day.",
+    a: "Yes. Private and group events start with the Events inquiry, and a planner replies within one business day.",
   },
   {
     id: "alcohol",
@@ -153,3 +158,8 @@ export const FAQ: Faq[] = [
     a: "Espresso, tea and sparkling water for certain. [Owner to confirm anything to eat beyond that.] Nothing is served on the firing line, and wash your hands before you eat; the lead question above says why.",
   },
 ];
+
+/** Held back before launch: ammunition sales, construction detail, and the answer still with counsel. */
+const HELD_BACK = new Set(["calibers", "lounge-noise", "out-of-city-permit"]);
+
+export const FAQ: Faq[] = ALL_FAQ.filter((f) => !HELD_BACK.has(f.id)).map((f) => ({ ...f, a: publicCopy(f.a) }));

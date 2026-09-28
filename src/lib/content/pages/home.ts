@@ -112,9 +112,9 @@ export const HOSPITALITY = {
     { key: "towel", label: "Towels", note: "Every visit" },
     { key: "espresso", label: "Espresso", note: "The lounge" },
     { key: "locker", label: "Lockers", note: "Members" },
-    { key: "brush", label: "Detailing", note: "Members" },
+    ...(SITE.licensedServicesPublic ? [{ key: "brush" as const, label: "Detailing", note: "Members" }] : []),
   ] as ReadonlyArray<{ key: HospitalityIconKey; label: string; note: string }>,
-  footnote: "Lockers and firearm detailing are members' services.",
+  footnote: SITE.licensedServicesPublic ? "Lockers and firearm detailing are members' services." : "Lockers are a members' service.",
   link: SITE.clubPageLive ? { label: "See the lounge", href: "/club#lounge" } : { label: "Plan your visit", href: "/visit" },
   membersLink: { label: "Explore membership", href: "/membership" },
   imageSlot: "LOUNGE_PHOTO_01",
@@ -144,7 +144,7 @@ export const MEMBERSHIP = {
 export const VISIT = {
   eyebrow: "Visit",
   headline: `${FACILITY.transit.driveFromJfkMin} minutes from JFK.`,
-  subhead: SITE.address.public ? `${SITE.address.line1}, at the north fence of JFK, on the boulevard the cargo trucks use.` : "Close enough to JFK that a layover shoots.",
+  subhead: SITE.address.public ? `${SITE.address.line1}, at the north fence of JFK, on the boulevard the cargo trucks use.` : "A short ride from every terminal.",
   body: SITE.address.public
     ? `Come off the ${FACILITY.transit.expressway.split(" (")[0]} at ${FACILITY.transit.exit}, or take a car from any terminal. From Manhattan, plan on ${FACILITY.transit.driveFromManhattanMin} minutes. Hours and parking are on the Visit page.`
     : "The address goes out with your confirmation. Hours and what to bring are on the Visit page.",

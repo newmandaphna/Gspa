@@ -150,7 +150,7 @@ export const CATALOG: CatalogItem[] = [
     maxUnitsPerBooking: 4,
     tagline: "Sixteen hours in the classroom, two on the line.",
     description:
-      "The course New York State requires before you apply for a concealed carry license, taught here over two consecutive days by DCJS-approved instructors. You leave with a certificate. Twelve seats per course, and dates post monthly. Price [owner to confirm].",
+      "The course New York State requires before you apply for a concealed carry license, taught here over two consecutive days by DCJS-approved instructors. You leave with a certificate. Twelve seats per course, and dates post monthly.", // Owner: confirm the price.
     includes: ["16 hours in the classroom", "2 hours of live fire with an instructor", "Course materials", "Certificate of completion", "Lunch both days"],
     eligibility: "anyone",
     bookable: false,

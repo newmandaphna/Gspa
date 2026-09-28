@@ -73,7 +73,9 @@ export function priceLabel(c: CatalogItem): string {
 
 export const EVENTS_META = {
   title: "Events",
-  description: `Events at ${SITE.name} in Queens, New York: a Private Suite for ${numberWord(PRIVATE_SUITE.maxGuestsPerUnit)}, the Founders' Suite for ${numberWord(FOUNDERS_SUITE.maxGuestsPerUnit)}, or the whole floor for ${CORPORATE.maxGuestsPerUnit}. Suites reserve online. Buyouts are quoted within one business day.`,
+  description: SITE.facilityDetailsPublic
+    ? `Events at ${SITE.name} in Queens, New York: a Private Suite for ${numberWord(PRIVATE_SUITE.maxGuestsPerUnit)}, the Founders' Suite for ${numberWord(FOUNDERS_SUITE.maxGuestsPerUnit)}, or the whole floor for ${CORPORATE.maxGuestsPerUnit}. Suites reserve online. Buyouts are quoted within one business day.`
+    : `Private parties, client evenings and offsites at ${SITE.name} in Queens, New York. Tell us about the group and a planner replies within one business day.`,
 };
 
 /* ------------------------------------------------------------------ hero */
@@ -81,7 +83,9 @@ export const EVENTS_META = {
 export const EVENTS_HERO: SectionCopy = {
   eyebrow: "Events",
   headline: "Room for the whole group.",
-  subhead: `A Private Suite for ${numberWord(PRIVATE_SUITE.maxGuestsPerUnit)}, the Founders' Suite for ${numberWord(FOUNDERS_SUITE.maxGuestsPerUnit)}, or the whole floor for ${numberWord(CORPORATE.maxGuestsPerUnit)}.`,
+  subhead: SITE.facilityDetailsPublic
+    ? `A Private Suite for ${numberWord(PRIVATE_SUITE.maxGuestsPerUnit)}, the Founders' Suite for ${numberWord(FOUNDERS_SUITE.maxGuestsPerUnit)}, or the whole floor for ${numberWord(CORPORATE.maxGuestsPerUnit)}.`
+    : "Private parties, client evenings and offsites, planned with you.",
   body: "Simulator bays for every guest, lanes for the ones who qualify. The desk checks eligibility. You handle the invitations.",
   cta: { label: "Plan an event", href: "#inquire" },
   secondary: REQUIREMENTS_LINK,
@@ -158,7 +162,7 @@ export const EVENTS_DATE_NIGHT: SectionCopy = {
   eyebrow: "Coming",
   headline: `${DATE_NIGHT.name}.`,
   subhead: DATE_NIGHT.tagline,
-  body: "Forty minutes in the simulator, forty on a house rifle with an instructor beside you, and the last forty at a lounge table with dessert and espresso. Priced for two. [Opening date to be confirmed.]",
+  body: "Forty minutes in the simulator, forty on a house rifle with an instructor beside you, and the last forty at a lounge table with dessert and espresso. Priced for two.",
   cta: { label: "Join the list", href: "#inquire" },
   secondary: REQUIREMENTS_LINK,
 };
@@ -172,9 +176,11 @@ export const DATE_PHOTO_ALT = "A lounge table set for two with espresso and dess
 export const EVENTS_PARTIES: SectionCopy = {
   eyebrow: "Parties",
   headline: "Throw the party here.",
-  subhead: `${cap(numberWord(PRIVATE_SUITE.maxGuestsPerUnit))} in a Private Suite or ${numberWord(FOUNDERS_SUITE.maxGuestsPerUnit)} in the Founders' Suite, with one range officer for every ${numberWord(SHOOTERS_PER_OFFICER)} shooters.`,
+  subhead: SITE.facilityDetailsPublic
+    ? `${cap(numberWord(PRIVATE_SUITE.maxGuestsPerUnit))} in a Private Suite or ${numberWord(FOUNDERS_SUITE.maxGuestsPerUnit)} in the Founders' Suite, with one range officer for every ${numberWord(SHOOTERS_PER_OFFICER)} shooters.`
+    : `A host on every party, and one range officer for every ${numberWord(SHOOTERS_PER_OFFICER)} shooters.`,
   body: "The simulator takes everyone; the lanes take guests who qualify. A member host or a club host is required. No alcohol.",
-  cta: { label: "Check suite dates", href: "/reserve?category=suite" },
+  cta: SITE.facilityDetailsPublic ? { label: "Check suite dates", href: "/reserve?category=suite" } : { label: "Tell us about the party", href: "#inquire" },
   secondary: REQUIREMENTS_LINK,
 };
 
@@ -189,7 +195,9 @@ export const AVATARS = {
 export const EVENTS_CORPORATE: SectionCopy = {
   eyebrow: "Corporate",
   headline: "Offsites with a point.",
-  subhead: `${cap(numberWord(CORPORATE_MIN_GUESTS))} to ${numberWord(CORPORATE.maxGuestsPerUnit)} guests. An eight-team bracket in the simulator, and a host who writes the run of show.`,
+  subhead: SITE.facilityDetailsPublic
+    ? `${cap(numberWord(CORPORATE_MIN_GUESTS))} to ${numberWord(CORPORATE.maxGuestsPerUnit)} guests. An eight-team bracket in the simulator, and a host who writes the run of show.`
+    : "An eight-team bracket in the simulator, and a host who writes the run of show.",
   body: "Teams shoot the bracket in the simulator, guests who qualify get guided lanes, and the lounge is bought out. Quoted per group.",
   cta: { label: "Request a quote", href: "#inquire" },
 };

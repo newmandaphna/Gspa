@@ -16,6 +16,7 @@ import { Render } from "@/components/ui/Render";
 import { InView } from "@/components/pages/training/InView";
 import { FACILITY } from "@/lib/config/site";
 import { COURSES, FIRST_SESSION, HERO, LADDER, LICENSE, PRIVATE, SIMULATOR, TRAINING_META, UPCOMING_CLASSES } from "@/lib/content/pages/training";
+import { isPlaceholder } from "@/lib/seo/placeholders";
 
 export const metadata: Metadata = pageMeta("/training", {
   title: TRAINING_META.title,
@@ -130,7 +131,9 @@ export default function TrainingPage() {
           <figure className="m-0 mt-14 sm:mt-20">
             <ImageSlot slot={HERO.imageSlot} alt={HERO.imageAlt} className="aspect-[16/9] rounded-card ring-1 ring-ink/10" art={<GroupingTarget />} sizes="(min-width: 1180px) 1180px, 100vw" />
           </figure>
-          {/* The instructors, one row each, with a 4:5 slot for the portrait sitting. */}
+          {/* The instructors, one row each, with a 4:5 slot for the portrait sitting. Shown once every name and credential is real. */}
+          {PRIVATE.instructors.every((p) => !isPlaceholder(p.name) && !isPlaceholder(p.credential)) && (
+            <>
           <h3 className="t-3 mt-14 sm:mt-20">{PRIVATE.instructorsHeadline}</h3>
           <ul className="mt-6 border-t border-hairline" aria-label="Instructors">
             {PRIVATE.instructors.map((p, i) => (
@@ -143,6 +146,8 @@ export default function TrainingPage() {
               </li>
             ))}
           </ul>
+            </>
+          )}
         </Container>
       </Section>
 

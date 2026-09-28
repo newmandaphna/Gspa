@@ -19,6 +19,7 @@ import {
 } from "@/lib/content/membership";
 import { formatMoney } from "@/lib/time";
 import { PRICE_PENDING, ifPriced } from "@/lib/pricing";
+import { SCREENING_BY } from "@/lib/content/pages/legal";
 
 export type Cta = { label: string; href: string };
 
@@ -190,7 +191,8 @@ export const MEMBERSHIP_VETTING: SectionCopy = {
 };
 
 export const VETTING_STEPS = APPLICATION_STEPS;
-export const VETTING_VENDOR_LINE = "Screening by [Vendor].";
+/** Names the screening vendor once the owner sets it in legal.ts; empty until then. */
+export const VETTING_VENDOR_LINE = SCREENING_BY ? `${SCREENING_BY}.` : "";
 export const VETTING_LINK: Cta = { label: "How screening works", href: "/legal#screening" };
 
 export const PORTAL_UNLOCKS = {

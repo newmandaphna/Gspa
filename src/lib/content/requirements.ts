@@ -6,6 +6,7 @@
 
 import { BOOKING } from "@/lib/config/site";
 import { itemBySlug } from "@/lib/content/catalog";
+import { isPlaceholder, publicCopy } from "@/lib/seo/placeholders";
 
 export type RequirementTag = "handgun" | "longgun" | "simulator" | "training" | "guests" | "members" | "all";
 
@@ -19,7 +20,7 @@ export const STATE_SUPERVISED_AGE = 12;
 /** Minutes after the start time at which a reservation becomes a no-show (matches the terms in legal.ts). */
 export const LATE_NO_SHOW_MIN = 20;
 
-export const REQUIREMENTS: Requirement[] = [
+const ALL_REQUIREMENTS: Requirement[] = [
   {
     text: "Every guest presents a valid government-issued photo ID at the desk. Passports are accepted.",
     tags: ["all"],
@@ -69,7 +70,7 @@ export const REQUIREMENTS: Requirement[] = [
     tags: ["handgun", "longgun"],
   },
   {
-    text: "Ammunition: brass- or nickel-cased, non-magnetic, non-armor-piercing rounds only. No steel core, tracer or reloads. House ammunition is sold at the desk for use on the premises. [Counsel to confirm NYS ammunition background-check compliance.]",
+    text: "Ammunition: brass- or nickel-cased, non-magnetic, non-armor-piercing rounds only. No steel core, tracer or reloads. [Counsel to confirm NYS ammunition background-check compliance.]",
     tags: ["handgun", "longgun", "training"],
   },
   {
@@ -89,10 +90,16 @@ export const REQUIREMENTS: Requirement[] = [
     tags: ["all"],
   },
   {
-    text: `These lines reflect New York State and New York City law as of ${REQUIREMENTS_LAST_REVIEWED}. For current permit rules, consult the NYPD License Division.`,
+    text: `These lines reflect New York State and New York City law${isPlaceholder(REQUIREMENTS_LAST_REVIEWED) ? "" : ` as of ${REQUIREMENTS_LAST_REVIEWED}`}. For current permit rules, consult the NYPD License Division.`,
     tags: ["all"],
   },
 ];
+
+/** The list a visitor reads: counsel notes stay in the source above and never reach a page. */
+export const REQUIREMENTS: Requirement[] = ALL_REQUIREMENTS.map((r) => ({ ...r, text: publicCopy(r.text) }));
+
+/** "Reviewed <date>", or nothing until the owner sets a real date. */
+export const REVIEWED_LINE = isPlaceholder(REQUIREMENTS_LAST_REVIEWED) ? "" : `Reviewed ${REQUIREMENTS_LAST_REVIEWED}`;
 
 /** Lines relevant to a catalog item's eligibility, for the booking step. */
 export function requirementsFor(eligibility: "handgun" | "longgun" | "simulator" | "anyone", isMember = false): Requirement[] {
@@ -144,8 +151,6 @@ export const RANGE_RULES_LABEL = "The four everyone posts";
  * the constants above and from BOOKING so they cannot drift from the terms.
  */
 export type HouseRule = { decision: string; reason: string };
-
-export const HOUSE_RULES_DRAFT_LINE = `Draft for the owner. Reviewed ${REQUIREMENTS_LAST_REVIEWED}.`;
 
 export const HOUSE_RULES: HouseRule[] = [
   {

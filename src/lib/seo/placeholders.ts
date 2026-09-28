@@ -45,6 +45,20 @@ export function findPlaceholder(value: string): string | null {
  * should still prefer a field that never had a placeholder; this is a last
  * resort for long descriptions.
  */
+/**
+ * What a visitor reads: the same text with every note to counsel or the owner
+ * removed ("[Counsel to confirm.]", "[Owner to list ...]", "[Answer pending
+ * counsel: ...]", "[Notice per ...]"). The notes stay in the source as the
+ * working list; they never reach a page. Value blanks such as "[date]" are
+ * left for the caller to handle, since dropping them can change a sentence.
+ */
+export function publicCopy(value: string): string {
+  return value
+    .replace(/\s*\[(?:Counsel|counsel|Owner|owner|Answer pending|Notice per)[^\]]*\]/g, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
+
 export function stripPlaceholders(value: string): string {
   return value
     .split(/(?<=[.!?])\s+/)

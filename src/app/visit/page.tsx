@@ -21,7 +21,7 @@ import { Section } from "@/components/ui/Section";
 import { cn } from "@/lib/cn";
 import { FACILITY, SITE } from "@/lib/config/site";
 import { FAQ } from "@/lib/content/faq";
-import { REQUIREMENTS, REQUIREMENTS_LAST_REVIEWED } from "@/lib/content/requirements";
+import { REQUIREMENTS, REVIEWED_LINE } from "@/lib/content/requirements";
 import { computeOpenStatus } from "@/lib/hours";
 import {
   BRING_ITEMS,
@@ -169,7 +169,7 @@ export default function VisitPage() {
         <Container className="relative">
           <div className="grid gap-12 lg:grid-cols-12 lg:items-start lg:gap-10">
             <div className="lg:col-span-5">
-              <Headline head={`${REQUIREMENTS.length} lines · reviewed ${REQUIREMENTS_LAST_REVIEWED}`} headline={VISIT_REQUIREMENTS.headline} subhead={VISIT_REQUIREMENTS.subhead} body={VISIT_REQUIREMENTS.body}>
+              <Headline head={`${REQUIREMENTS.length} lines${REVIEWED_LINE ? ` · ${REVIEWED_LINE.toLowerCase()}` : ""}`} headline={VISIT_REQUIREMENTS.headline} subhead={VISIT_REQUIREMENTS.subhead} body={VISIT_REQUIREMENTS.body}>
                 <LinkArrow href={HOUSE_RULES_LINK.href} className="mt-6">
                   {HOUSE_RULES_LINK.label}
                 </LinkArrow>

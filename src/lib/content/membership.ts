@@ -1,4 +1,4 @@
-import { TIER_WINDOW_DAYS, type TierKey } from "@/lib/config/site";
+import { SITE, TIER_WINDOW_DAYS, type TierKey } from "@/lib/config/site";
 import { PRICE_PENDING, ifPriced } from "@/lib/pricing";
 
 export type Tier = {
@@ -44,7 +44,7 @@ export const MEMBERSHIP_TIERS: Tier[] = [
       "One guest per visit at the member rate",
       "Gear locker, half size",
       "Lounge and espresso bar on every visit, with towel service",
-      "Gunsmith bench time included",
+      ...(SITE.licensedServicesPublic ? ["Gunsmith bench time included"] : ["More member services at opening"]),
       "10% off training and the simulator",
       "Member evenings and competitions",
     ],
@@ -58,8 +58,10 @@ export const MEMBERSHIP_TIERS: Tier[] = [
     priceNote: ifPriced("per year", ""),
     billing: "annual",
     tagline: "Two dozen hours and a suite a month.",
-    forWhom: "For the member who brings people. A suite every month, two guests every visit, and somebody else cleans the gun.",
-    differs: ["One Private Suite session each month", "Two guests per visit", "Firearm detailing included"],
+    forWhom: SITE.licensedServicesPublic
+      ? "For the member who brings people. A suite every month, two guests every visit, and somebody else cleans the gun."
+      : "For the member who brings people. A suite every month and two guests every visit.",
+    differs: ["One Private Suite session each month", "Two guests per visit", SITE.licensedServicesPublic ? "Firearm detailing included" : "Full-size biometric locker"],
     perks: [
       `Reserve ${TIER_WINDOW_DAYS.signature} days ahead`,
       ifPriced("24 lane hours a year included, then $45", "24 lane hours a year included, then the member rate"),
@@ -67,7 +69,7 @@ export const MEMBERSHIP_TIERS: Tier[] = [
       "Two guests per visit at the member rate",
       "Priority instructor scheduling",
       "Full-size biometric locker",
-      "Firearm detailing included",
+      ...(SITE.licensedServicesPublic ? ["Firearm detailing included"] : ["More member services at opening"]),
       "Training and the simulator at 20% off, events too",
     ],
     guestsPerVisit: 2,
@@ -131,8 +133,12 @@ export const BENEFITS: BenefitRow[] = [
   { label: "Private Suite sessions", club: "Member rate", signature: "1 a month", founders: "1 a month" },
   { label: "Founders' Suite", club: "Public rate", signature: "Public rate", founders: "Member rate" },
   { label: "Locker", club: "Half size", signature: "Full size, biometric", founders: "Full size, biometric" },
-  { label: "Gunsmith bench time", club: true, signature: true, founders: true },
-  { label: "Firearm detailing", club: false, signature: true, founders: true },
+  ...(SITE.licensedServicesPublic
+    ? [
+        { label: "Gunsmith bench time", club: true, signature: true, founders: true },
+        { label: "Firearm detailing", club: false, signature: true, founders: true },
+      ]
+    : [{ label: "More member services", club: "At opening", signature: "At opening", founders: "At opening" }]),
   { label: "Training and simulator", club: "10% off", signature: "20% off", founders: "20% off, 4 hrs instruction included" },
   { label: "Private event", club: false, signature: false, founders: "1 a year" },
   { label: "Founders wall", club: false, signature: false, founders: true },
@@ -150,12 +156,16 @@ export type MemberService = {
 export const MEMBER_SERVICES: MemberService[] = [
   { title: "Reserve a lane", description: "Member rate, your window.", href: "/reserve?category=lane", kind: "book" },
   { title: "Reserve a suite", description: "Two lanes behind a closed door.", href: "/reserve?category=suite", kind: "book" },
-  { title: "Gunsmith bench", description: "Thirty minutes with the smith.", href: "/reserve?experience=gunsmith-bench", kind: "book" },
-  { title: "Firearm detailing", description: "Cleaned, back the same day.", href: "/reserve?experience=firearm-detailing", kind: "book", minTier: "signature" },
+  ...(SITE.licensedServicesPublic
+    ? ([
+        { title: "Gunsmith bench", description: "Thirty minutes with the smith.", href: "/reserve?experience=gunsmith-bench", kind: "book" },
+        { title: "Firearm detailing", description: "Cleaned, back the same day.", href: "/reserve?experience=firearm-detailing", kind: "book", minTier: "signature" },
+      ] satisfies MemberService[])
+    : []),
   { title: "Training", description: "Instruction, or the course.", href: "/reserve?category=training", kind: "book" },
   { title: "Request a locker", description: "Gear only. Fingerprint or PIN.", href: "/members/requests/new?kind=locker", kind: "request" },
   { title: "Guest passes", description: "Bring someone new.", href: "/members/requests/new?kind=guest_pass", kind: "request" },
-  { title: "Concierge", description: "Ammunition, gear, anything else.", href: "/members/requests/new?kind=general", kind: "request" },
+  { title: "Concierge", description: SITE.licensedServicesPublic ? "Ammunition, gear, anything else." : "Anything you need, by request.", href: "/members/requests/new?kind=general", kind: "request" },
 ];
 
 export const APPLICATION_STEPS: { title: string; body: string; when: string }[] = [
