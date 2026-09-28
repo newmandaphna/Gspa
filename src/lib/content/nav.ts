@@ -1,3 +1,5 @@
+import { SITE } from "@/lib/config/site";
+
 export type NavItem = { label: string; href: string };
 export const TRAINING_CLASSES_LINK: NavItem = { label: "Training Classes", href: "/training/classes" };
 
@@ -13,7 +15,7 @@ export const HOUSE_RULES_LINK: NavItem = { label: "House rules", href: "/house-r
 
 /** Primary navigation (order matters). Edit here to rename or reorder. Five items; the classes page is reached from /training and the footer columns. */
 export const NAV: NavItem[] = [
-  { label: "The Club", href: "/club" },
+  ...(SITE.clubPageLive ? [{ label: "The Club", href: "/club" }] : []),
   { label: "Training", href: "/training" },
   { label: "Membership", href: "/membership" },
   { label: "Events", href: "/events" },
@@ -24,9 +26,13 @@ export const FOOTER_COLUMNS: { title: string; links: NavItem[] }[] = [
   {
     title: "Explore",
     links: [
-      { label: "The Club", href: "/club" },
-      { label: "Private Suites", href: "/club#suites" },
-      { label: "Simulator", href: "/club#simulator" },
+      ...(SITE.clubPageLive
+        ? [
+            { label: "The Club", href: "/club" },
+            { label: "Private Suites", href: "/club#suites" },
+            { label: "Simulator", href: "/club#simulator" },
+          ]
+        : []),
       { label: "Training", href: "/training" },
       TRAINING_CLASSES_LINK,
       { label: "Membership", href: "/membership" },

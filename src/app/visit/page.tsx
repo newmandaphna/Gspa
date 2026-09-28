@@ -71,7 +71,7 @@ export default function VisitPage() {
         <Container className="relative pb-16 pt-16 sm:pb-24">
           <div className="enter max-w-[820px]">
             <MapPin className="mb-6 h-10 w-8" />
-            <Headline as="h1" size="hero" head={`${SITE.address.line1} · ${FACILITY.transit.driveFromJfkMin} min from the terminals`} headline={VISIT_HERO.headline} subhead={VISIT_HERO.subhead} body={VISIT_HERO.body} />
+            <Headline as="h1" size="hero" head={SITE.address.public ? `${SITE.address.line1} · ${FACILITY.transit.driveFromJfkMin} min from the terminals` : `${FACILITY.transit.driveFromJfkMin} min from the JFK terminals`} headline={VISIT_HERO.headline} subhead={VISIT_HERO.subhead} body={VISIT_HERO.body} />
           </div>
           {VISIT_HERO.cta && (
             <div className="enter mt-8" style={{ "--enter-delay": "250ms" } as React.CSSProperties}>
@@ -83,6 +83,8 @@ export default function VisitPage() {
         </Container>
       </Section>
 
+      {SITE.address.public && (
+        <>
       {/* Why a runway and not a high street */}
       <Section theme="light" id="why-here" className={SCROLL_MT}>
         <Container>
@@ -122,6 +124,9 @@ export default function VisitPage() {
           </div>
         </Container>
       </Section>
+
+        </>
+      )}
 
       {/* Hours */}
       <Section theme="dark" id="hours" className={SCROLL_MT}>
@@ -185,6 +190,7 @@ export default function VisitPage() {
       </Section>
 
       {/* Silent: the address alone, with the pin */}
+      {SITE.address.public && (
       <Section theme="dark" padding="vast" id="address" aria-label="Address">
         <Container>
           <address className="not-italic">
@@ -196,6 +202,7 @@ export default function VisitPage() {
           </address>
         </Container>
       </Section>
+      )}
 
       {/* Contact: the page ends on the phone number. Same dark as the band above. */}
       <Section theme="dark" id="contact" className={cn("overflow-hidden border-t border-white/10", SCROLL_MT)}>

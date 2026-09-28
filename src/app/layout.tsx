@@ -13,7 +13,7 @@ import { localBusinessJsonLd } from "@/lib/seo/jsonld";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: {
-    default: `${SITE.name}: Private Shooting Club, Jamaica, Queens`,
+    default: `${SITE.name}: Private Shooting Club, Queens, New York`,
     template: `%s · ${SITE.name}`,
   },
   description: SITE.description,
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: SITE.name,
-    title: `${SITE.name}: Private Shooting Club, Jamaica, Queens`,
+    title: `${SITE.name}: Private Shooting Club, Queens, New York`,
     description: SITE.description,
     locale: "en_US",
   },

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
+import { SITE } from "@/lib/config/site";
 
 /**
  * Five shots at a paper target. The sight picture breathes (a slow figure-eight
@@ -307,7 +308,7 @@ export function TargetPractice({ ctaHref = "/reserve?type=lane", className }: { 
                 GUN SPA · 25 YD PISTOL · NO. 07
               </text>
               <text x={PAPER / 2 - 0.5} y={PAPER / 2 - 0.45} fontSize={0.26} fontFamily="var(--font-mono)" fill="#6b6358" textAnchor="end">
-                158-12 ROCKAWAY BLVD
+                {SITE.address.public ? SITE.address.line1.toUpperCase() : "QUEENS, NY"}
               </text>
               {/* Holes */}
               {shots.map((s) => (

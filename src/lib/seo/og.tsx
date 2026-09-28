@@ -141,7 +141,7 @@ function Headline({ text, size }: { text: string; size: number }) {
 /** Build the card. Each route's default export returns this. */
 export async function ogCard(options: OgCardOptions): Promise<ImageResponse> {
   const [fonts, photo] = await Promise.all([loadOgFonts(), heroPhoto(options.slot)]);
-  const head = options.head ?? `${SITE.address.line1} · ${SITE.address.neighborhood}`;
+  const head = options.head ?? (SITE.address.public ? `${SITE.address.line1} · ${SITE.address.neighborhood}` : SITE.area);
   const size = options.headline.length > 34 ? 64 : options.headline.length > 22 ? 80 : 96;
   return new ImageResponse(
     (

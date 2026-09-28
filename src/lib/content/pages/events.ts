@@ -73,7 +73,7 @@ export function priceLabel(c: CatalogItem): string {
 
 export const EVENTS_META = {
   title: "Events",
-  description: `Events at ${SITE.name} in Jamaica, Queens: a Private Suite for ${numberWord(PRIVATE_SUITE.maxGuestsPerUnit)}, the Founders' Suite for ${numberWord(FOUNDERS_SUITE.maxGuestsPerUnit)}, or the whole floor for ${CORPORATE.maxGuestsPerUnit}. Suites reserve online. Buyouts are quoted within one business day.`,
+  description: `Events at ${SITE.name} in Queens, New York: a Private Suite for ${numberWord(PRIVATE_SUITE.maxGuestsPerUnit)}, the Founders' Suite for ${numberWord(FOUNDERS_SUITE.maxGuestsPerUnit)}, or the whole floor for ${CORPORATE.maxGuestsPerUnit}. Suites reserve online. Buyouts are quoted within one business day.`,
 };
 
 /* ------------------------------------------------------------------ hero */

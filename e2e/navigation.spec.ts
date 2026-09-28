@@ -47,7 +47,8 @@ test("mobile keyboard navigation closes the menu and restores scrolling and focu
   await expect(page.locator("#main")).toHaveAttribute("inert", "");
   await expect(page.locator("#site-footer")).toHaveAttribute("inert", "");
   expect(await page.evaluate(() => document.documentElement.style.overflow)).toBe("hidden");
-  await expect(page.locator("#mobile-menu").getByRole("link", { name: "The Club", exact: true })).toBeFocused();
+  // The first menu link takes focus (The Club is hidden while its page is coming soon).
+  await expect(page.locator("#mobile-menu").getByRole("link").first()).toBeFocused();
   await page.keyboard.press("Escape");
   await expect(page.locator("#mobile-menu")).toHaveCount(0);
   await expect(toggle).toBeFocused();
@@ -60,8 +61,6 @@ test("mobile keyboard navigation closes the menu and restores scrolling and focu
   await page.mouse.wheel(0, 200);
   await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(initialScroll);
   await page.keyboard.press("Enter");
-  await expect(page.locator("#mobile-menu").getByRole("link", { name: "The Club", exact: true })).toBeFocused();
-  await page.keyboard.press("Tab");
   await expect(page.locator("#mobile-menu").getByRole("link", { name: "Training", exact: true })).toBeFocused();
   await page.keyboard.press("Tab");
   const membership = page.locator("#mobile-menu").getByRole("link", { name: "Membership", exact: true });

@@ -100,15 +100,19 @@ export function localBusinessJsonLd(): JsonLd {
     image: `${base}/opengraph-image`,
     logo: `${base}/icon.png`,
     email: SITE.email,
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: SITE.address.line1,
-      addressLocality: SITE.address.city,
-      addressRegion: SITE.address.state,
-      postalCode: SITE.address.zip,
-      addressCountry: "US",
-    },
-    hasMap: SITE.address.googleMapsUrl,
+    ...(SITE.address.public
+      ? {
+          address: {
+            "@type": "PostalAddress",
+            streetAddress: SITE.address.line1,
+            addressLocality: SITE.address.city,
+            addressRegion: SITE.address.state,
+            postalCode: SITE.address.zip,
+            addressCountry: "US",
+          },
+          hasMap: SITE.address.googleMapsUrl,
+        }
+      : { areaServed: SITE.area }),
     openingHoursSpecification: openingHoursSpecification(),
     sameAs: Object.values(SITE.social),
     currenciesAccepted: "USD",

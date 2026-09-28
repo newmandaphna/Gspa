@@ -297,7 +297,7 @@ export function Nav({ memberName, initialStatus }: Props) {
               {status.short}
             </p>
             <p className="px-8 pt-2 text-[0.8125rem] text-mist">
-              {SITE.address.neighborhood}
+              {SITE.address.public ? SITE.address.neighborhood : SITE.area}
               <Owner value={SITE.phone}> · {SITE.phone}</Owner>
             </p>
           </motion.div>

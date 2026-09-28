@@ -28,7 +28,7 @@ function minutesLabel(min: number): string {
 
 export const TRAINING_META = {
   title: "Training",
-  description: `Certified instruction at ${SITE.name} in Jamaica, Queens: the simulator, First Session, private instruction, plus the New York State 18-hour course, all taught on site.`,
+  description: `Certified instruction at ${SITE.name} in Queens, New York: the simulator, First Session, private instruction, plus the New York State 18-hour course, all taught on site.`,
 } as const;
 
 export const HERO = {
@@ -158,7 +158,7 @@ export const SIMULATOR = {
   subhead: "For civilians and security professionals, four to a bay.",
   body: "Each scenario branches on what you do, and an instructor debriefs it after. No live ammunition.",
   cta: { label: "Reserve the simulator", href: "/reserve?experience=simulator-bay" },
-  link: { label: "See the simulator", href: "/club#simulator" },
+  link: SITE.clubPageLive ? { label: "See the simulator", href: "/club#simulator" } : { label: "Reserve the simulator", href: "/reserve?experience=simulator-bay" },
   price: simulatorBay ? `${formatMoney(simulatorBay.priceCents)} · ${simulatorBay.durationMin} minutes · up to ${spell(simulatorBay.maxGuestsPerUnit)}` : "",
   eligibility: ELIGIBILITY_LABELS[simulatorBay?.eligibility ?? "simulator"],
   tree: {
@@ -198,7 +198,7 @@ const seatsWord = spell(FACILITY.classroomSeats);
 export const CLASSES = {
   meta: {
     title: "Classes",
-    description: `Scheduled classes at ${SITE.name} in Jamaica, Queens: the dates the desk has posted, ${seatsWord} seats to a date, reserved online and held in the order they come in.`,
+    description: `Scheduled classes at ${SITE.name} in Queens, New York: the dates the desk has posted, ${seatsWord} seats to a date, reserved online and held in the order they come in.`,
   },
   /** Running head while the list loads, and the stem once it has. */
   head: {
