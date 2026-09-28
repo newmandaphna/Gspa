@@ -21,7 +21,7 @@ const LAST_MODIFIED: Record<string, string> = {
 
 type Route = [path: string, changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"], priority: number];
 
-const ROUTES: Route[] = [
+const FULL_ROUTES: Route[] = [
   ["/", "weekly", 1],
   ...(SITE.clubPageLive ? ([["/club", "monthly", 0.9]] as Route[]) : []),
   ["/training", "monthly", 0.8],
@@ -32,6 +32,9 @@ const ROUTES: Route[] = [
   ["/house-rules", "yearly", 0.5],
   ["/legal", "yearly", 0.2],
 ];
+
+/** Landing-only mode lists just the pages the public can reach. */
+const ROUTES: Route[] = SITE.landingOnly ? FULL_ROUTES.filter(([path]) => path === "/" || path === "/legal") : FULL_ROUTES;
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = SITE.url.replace(/\/$/, "");

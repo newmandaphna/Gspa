@@ -10,6 +10,8 @@ import { createHmac, scryptSync, timingSafeEqual } from "node:crypto";
  */
 
 export const ADMIN_SESSION_TTL_SEC = 60 * 60 * 12;
+/** The front-desk session cookie. Read by src/lib/auth.ts and by the landing-mode proxy. */
+export const ADMIN_COOKIE = "gs_admin";
 
 let derived: { password: string; key: Buffer } | null = null;
 

@@ -1,9 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { ADMIN_SESSION_TTL_SEC, signAdminSession, verifyAdminSession } from "@/lib/admin-session";
-
-const COOKIE = "gs_admin";
+import { ADMIN_COOKIE as COOKIE, ADMIN_SESSION_TTL_SEC, signAdminSession, verifyAdminSession } from "@/lib/admin-session";
 
 function safeEqual(a: string, b: string): boolean {
   const ba = Buffer.from(a);

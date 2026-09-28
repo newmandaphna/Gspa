@@ -23,6 +23,7 @@ import {
   SCREENING_BY,
   SEE_REQUIREMENTS,
   SHOW_ACKNOWLEDGEMENT,
+  SHOW_RANGE_RULES,
   TAG_LABELS,
   type LegalSection,
 } from "@/lib/content/pages/legal";
@@ -216,7 +217,7 @@ export default function LegalPage() {
             {LONG_FORM_SECTIONS.map((s) => (
               <LongForm key={s.id} section={s} />
             ))}
-            <RangeRules />
+            {SHOW_RANGE_RULES && <RangeRules />}
             {SHOW_ACKNOWLEDGEMENT && <Acknowledgement />}
             <div className="mt-16 border-t border-hairline pt-8 sm:mt-20">
               <LinkArrow href={BACK_TO_RESERVE.href}>{BACK_TO_RESERVE.label}</LinkArrow>

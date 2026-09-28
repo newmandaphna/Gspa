@@ -6,6 +6,8 @@ import { Footer } from "@/components/Footer";
 import { MotionProvider } from "@/components/MotionProvider";
 import { SITE } from "@/lib/config/site";
 import { computeOpenStatus } from "@/lib/hours";
+import { LandingFooter, LandingHeader, PreviewPill } from "@/components/landing/LandingChrome";
+import { isAdmin } from "@/lib/auth";
 import { getCurrentMember } from "@/lib/members/auth";
 import { JsonLd } from "@/lib/seo/JsonLd";
 import { localBusinessJsonLd } from "@/lib/seo/jsonld";
@@ -43,6 +45,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const member = await getCurrentMember().catch(() => null);
   const memberName = member?.firstName ?? null;
   const initialStatus = computeOpenStatus(new Date());
+  // Landing-only mode: the public gets the bare landing chrome; a signed-in admin previews the full site.
+  const admin = SITE.landingOnly ? await isAdmin().catch(() => false) : false;
+  const landing = SITE.landingOnly && !admin;
   return (
     <html lang="en" className={fontClassName} suppressHydrationWarning>
       <body suppressHydrationWarning className="min-h-dvh flex flex-col bg-paper text-ink antialiased">
@@ -53,11 +58,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           Skip to content
         </a>
         <MotionProvider>
-          <Nav memberName={memberName} initialStatus={initialStatus} />
+          {landing ? <LandingHeader /> : <Nav memberName={memberName} initialStatus={initialStatus} />}
           <main id="main" className="flex-1">
             {children}
           </main>
-          <Footer id="site-footer" />
+          {landing ? <LandingFooter /> : <Footer id="site-footer" />}
+          {SITE.landingOnly && admin && <PreviewPill />}
         </MotionProvider>
         {/* LocalBusiness record for search engines, built from site.ts and the catalog (src/lib/seo/jsonld.ts). */}
         <JsonLd data={localBusinessJsonLd()} />

@@ -369,12 +369,19 @@ export const MEMBERSHIP_PRELAUNCH = {
   },
 } as const;
 
+/** The list takes anyone on the way to a license; membership itself still requires one. */
+export const LIST_LICENSE_OPTIONS = [...LICENSE_OPTIONS, "Application pending", "Not yet applied"] as const;
+export type ListLicenseOption = (typeof LIST_LICENSE_OPTIONS)[number];
+
 export const INTEREST_FORM = {
   labels: {
     name: "Full name",
     email: "Email",
     phone: "Phone",
+    zip: "ZIP code",
     license: "NYC pistol license",
+    licensePlaceholder: "Choose one",
+    licenseNote: "Membership will require a valid NYC pistol license in your name. Pending, or not applied yet? Sign up anyway.",
     heard: "How you heard about us",
     consentPrefix: "I agree the club may contact me about membership, as set out in the",
     consentPrivacy: "privacy policy",
@@ -385,6 +392,23 @@ export const INTEREST_FORM = {
   success: "Thank you. You are on the list, and the desk will be in touch before opening.",
   errors: {
     consent: "Please confirm we may contact you.",
+    zip: "Enter a five-digit ZIP code.",
+    license: "Choose your license status.",
     generic: "Could not send that. Please email the desk directly.",
   },
+} as const;
+
+/* ---------------------------------------------------------------------
+   Landing-only mode (SITE.landingOnly): the one page the public sees.
+   --------------------------------------------------------------------- */
+export const LANDING = {
+  meta: {
+    title: `${SITE.name}: Private Shooting Club, Queens, New York`,
+    description: `${SITE.name} is a private shooting club opening in Queens for New York City pistol licensees. Join the list to hear first when membership opens.`,
+  },
+  eyebrow: `${SITE.area} · ${SITE.openingLine}`,
+  headline: "A private shooting club for New York City pistol licensees.",
+  body: "Membership opens before the doors do. Leave your details and you hear first: tiers, pricing and the opening date.",
+  formHeadline: "Join the list.",
+  formBody: "Nothing is charged and nothing is committed. The club writes when membership opens.",
 } as const;

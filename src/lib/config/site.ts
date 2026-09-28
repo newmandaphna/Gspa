@@ -36,6 +36,15 @@ export const SITE = {
    */
   clubPageLive: false,
   /**
+   * Owner's call: landing-only mode. The public sees one page, the membership
+   * list sign-up at "/", plus the privacy page; every other page redirects to
+   * "/" (src/proxy.ts). A signed-in admin sees the whole site as a preview.
+   * To switch back: set LANDING_ONLY=false in the environment, or change the
+   * default here, and republish. Server-side only: never read it in a client
+   * component.
+   */
+  landingOnly: process.env.LANDING_ONLY !== "false",
+  /**
    * Owner's call: the club is not open yet. While false, no reservations or
    * class seats are taken (the pages say so and the APIs refuse), the live
    * open/closed line reads `openingLine`, and the live availability bands are
