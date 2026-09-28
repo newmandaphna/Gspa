@@ -6,6 +6,13 @@
 
 import { isPlaceholder } from "@/lib/seo/placeholders";
 
+/**
+ * Owner's call: lane counts, yardage, suites, simulator bays, square footage and
+ * construction details stay off the home page and the site description until
+ * they match the approved plans. Set true to show them again.
+ */
+const FACILITY_DETAILS_PUBLIC = false;
+
 /** The production origin. Every absolute link, the sitemap, share tags, emails and Stripe redirects use it. */
 const CANONICAL_URL = "https://gunspa.com";
 
@@ -16,8 +23,10 @@ export const SITE = {
   canonicalUrl: CANONICAL_URL,
   tagline: "Ready? Aim. Relax!",
   taglineSecondary: "Precision, at ease.",
-  description:
-    "A shooting club in Queens, near JFK. Twelve 25-yard lanes, two private suites, a simulator for anyone with ID, and a lounge with the line behind glass.",
+  description: FACILITY_DETAILS_PUBLIC
+    ? "A shooting club in Queens, near JFK. Twelve 25-yard lanes, two private suites, a simulator for anyone with ID, and a lounge with the line behind glass."
+    : "A private shooting club in Queens, near JFK, opening soon. Instruction, a simulator, a quiet lounge, and membership by application.",
+  facilityDetailsPublic: FACILITY_DETAILS_PUBLIC,
   timezone: "America/New_York",
   phone: "(718) 000-0000", // TODO(owner): real phone
   email: "desk@gunspa.com", // TODO(owner): real email

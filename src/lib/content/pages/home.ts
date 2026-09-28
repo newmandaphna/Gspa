@@ -35,8 +35,9 @@ export const HERO = {
   headline: SITE.tagline,
   subhead: "A private shooting club in Queens, New York.",
   body: `${FACILITY.laneCount} acoustic lanes, ${spell(FACILITY.suites)} private suites off the line, ${spell(FACILITY.simulatorBays)} simulator bays. ${FACILITY.transit.driveFromJfkMin} minutes from JFK.`,
-  cta: { label: "Reserve a lane", href: "/reserve?category=lane" },
-  link: { label: "Explore membership", href: "/membership" },
+  // Before opening day the first button applies for membership; there is nothing to reserve yet.
+  cta: SITE.openForBusiness ? { label: "Reserve a lane", href: "/reserve?category=lane" } : { label: "Apply for membership", href: "/membership#apply" },
+  link: SITE.openForBusiness ? { label: "Explore membership", href: "/membership" } : { label: "See training", href: "/training" },
   imageSlot: "HERO_PHOTO_01",
   imageAlt: "The firing line at The Gun Spa, lit lanes receding toward the targets",
 } as const;
@@ -78,8 +79,8 @@ export const SUITES = {
 export const SIMULATOR = {
   eyebrow: "Simulator",
   headline: "Nobody needs a license for this room.",
-  subhead: `${cap(spell(FACILITY.simulatorBays))} simulator bays with no live ammunition.`,
-  body: `Scenarios branch on what you do; an instructor debriefs you after. Up to ${spell(simulatorBay?.maxGuestsPerUnit ?? 4)} people share a bay for an hour.`,
+  subhead: SITE.facilityDetailsPublic ? `${cap(spell(FACILITY.simulatorBays))} simulator bays with no live ammunition.` : "A simulator with no live ammunition.",
+  body: `Scenarios branch on what you do; an instructor debriefs you after. ${SITE.facilityDetailsPublic ? `Up to ${spell(simulatorBay?.maxGuestsPerUnit ?? 4)} people share a bay for an hour.` : "Bring a friend."}`,
   cta: { label: "Reserve the simulator", href: "/reserve?experience=simulator-bay" },
   requirements: { label: "See requirements", href: "/visit#requirements" },
   eligibility: ELIGIBILITY_LABELS[simulatorBay?.eligibility ?? "simulator"],

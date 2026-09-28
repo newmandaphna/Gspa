@@ -116,21 +116,31 @@ export function localBusinessJsonLd(): JsonLd {
           hasMap: SITE.address.googleMapsUrl,
         }
       : { areaServed: SITE.area }),
-    openingHoursSpecification: openingHoursSpecification(),
+    // Hours, payment and a Reserve action only once the club is open (SITE.openForBusiness);
+    // facility specs only with SITE.facilityDetailsPublic. Search engines read this block.
+    ...(SITE.openForBusiness
+      ? {
+          openingHoursSpecification: openingHoursSpecification(),
+          currenciesAccepted: "USD",
+          paymentAccepted: "Credit card",
+          potentialAction: {
+            "@type": "ReserveAction",
+            target: { "@type": "EntryPoint", urlTemplate: `${base}/reserve`, actionPlatform: ["https://schema.org/DesktopWebPlatform", "https://schema.org/MobileWebPlatform"] },
+            result: { "@type": "Reservation", name: "Lane, suite, simulator or instructor reservation" },
+          },
+        }
+      : {}),
     sameAs: Object.values(SITE.social),
-    currenciesAccepted: "USD",
-    paymentAccepted: "Credit card",
-    amenityFeature: [
-      { "@type": "LocationFeatureSpecification", name: "Lounge behind ballistic glass", value: true },
-      { "@type": "LocationFeatureSpecification", name: `${FACILITY.simulatorBays} simulator bays`, value: true },
-      { "@type": "LocationFeatureSpecification", name: `${FACILITY.suites} private suites`, value: true },
-      { "@type": "LocationFeatureSpecification", name: `${FACILITY.laneCount} lanes at ${FACILITY.laneYards} yards`, value: true },
-    ],
-    potentialAction: {
-      "@type": "ReserveAction",
-      target: { "@type": "EntryPoint", urlTemplate: `${base}/reserve`, actionPlatform: ["https://schema.org/DesktopWebPlatform", "https://schema.org/MobileWebPlatform"] },
-      result: { "@type": "Reservation", name: "Lane, suite, simulator or instructor reservation" },
-    },
+    ...(SITE.facilityDetailsPublic
+      ? {
+          amenityFeature: [
+            { "@type": "LocationFeatureSpecification", name: "Lounge behind ballistic glass", value: true },
+            { "@type": "LocationFeatureSpecification", name: `${FACILITY.simulatorBays} simulator bays`, value: true },
+            { "@type": "LocationFeatureSpecification", name: `${FACILITY.suites} private suites`, value: true },
+            { "@type": "LocationFeatureSpecification", name: `${FACILITY.laneCount} lanes at ${FACILITY.laneYards} yards`, value: true },
+          ],
+        }
+      : {}),
     makesOffer: offers(),
   };
   if (!isPlaceholder(SITE.phone)) record.telephone = SITE.phone;
