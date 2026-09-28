@@ -14,6 +14,7 @@ import { googleCalendarUrlFor, requestedLane } from "@/lib/email";
 import { checkAmountCollected, getStripe, paymentIntentIdOf, stripeEnabled } from "@/lib/stripe";
 import { formatInstant, formatMoney, labelForHHMM, toHHMMInTz } from "@/lib/time";
 import { cn } from "@/lib/cn";
+import { ifPriced } from "@/lib/pricing";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Your reservation", robots: { index: false, follow: false } };
@@ -103,7 +104,7 @@ export default async function ConfirmationPage({
                 value={
                   booking.amountCents === 0
                     ? "Included with membership"
-                    : `${formatMoney(booking.amountCents)} · ${booking.paymentStatus === "paid" ? "paid" : booking.paymentStatus === "pay_on_arrival" ? "due on arrival" : booking.paymentStatus}`
+                    : `${ifPriced(`${formatMoney(booking.amountCents)} · `, "")}${booking.paymentStatus === "paid" ? "paid" : booking.paymentStatus === "pay_on_arrival" ? "due on arrival" : booking.paymentStatus}`
                 }
               />
               {booking.memberNumber && <Item label="Member" value={booking.memberNumber} />}

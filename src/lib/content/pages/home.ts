@@ -9,6 +9,7 @@ import { BOOKING, FACILITY, SITE } from "@/lib/config/site";
 import { ELIGIBILITY_LABELS, itemBySlug } from "@/lib/content/catalog";
 import { MEMBERSHIP_TIERS } from "@/lib/content/membership";
 import { formatMoney } from "@/lib/time";
+import { PRICE_PENDING, ifPriced } from "@/lib/pricing";
 
 /** Voice rule: numerals when the number is the point; otherwise spell out one through nine. */
 export function spell(n: number): string {
@@ -58,7 +59,7 @@ export const LANES = {
   cta: { label: "Reserve a lane", href: "/reserve?category=lane" },
   requirements: { label: "See requirements", href: "/visit#requirements" },
   eligibility: ELIGIBILITY_LABELS[laneSession?.eligibility ?? "handgun"],
-  priceFrom: laneSession ? `${formatMoney(laneSession.priceCents)} per lane, ${laneSession.durationMin} minutes` : "",
+  priceFrom: laneSession ? ifPriced(`${formatMoney(laneSession.priceCents)} per lane, ${laneSession.durationMin} minutes`, `${laneSession.durationMin} minutes a lane. ${PRICE_PENDING}`) : "",
   laneLabel: (n: number) => `Lane ${String(n).padStart(2, "0")} / ${FACILITY.laneYards} yd`,
 } as const;
 
@@ -71,7 +72,7 @@ export const SUITES = {
   link: SITE.clubPageLive ? { label: "See the suites", href: "/club#suites" } : { label: "Suites and events", href: "/events" },
   imageSlot: "SUITE_PHOTO_01",
   imageAlt: "A private suite: two lanes behind frosted glass with a sofa and a screen in the attached lounge",
-  caption: privateSuite ? `${privateSuite.name} · ${privateSuite.durationMin} min · ${formatMoney(privateSuite.priceCents)}` : "Private Suite",
+  caption: privateSuite ? `${privateSuite.name} · ${privateSuite.durationMin} min${ifPriced(` · ${formatMoney(privateSuite.priceCents)}`, "")}` : "Private Suite",
 } as const;
 
 export const SIMULATOR = {
@@ -96,7 +97,7 @@ export const FIRST_SESSION = {
   cta: { label: "Reserve First Session", href: "/reserve?experience=first-session" },
   requirements: { label: "See requirements", href: "/visit#requirements" },
   eligibility: ELIGIBILITY_LABELS[firstSession?.eligibility ?? "longgun"],
-  price: firstSession ? `${formatMoney(firstSession.priceCents)} · ${firstSession.durationMin} minutes` : "",
+  price: firstSession ? ifPriced(`${formatMoney(firstSession.priceCents)} · ${firstSession.durationMin} minutes`, `${firstSession.durationMin} minutes`) : "",
 } as const;
 
 export type HospitalityIconKey = "towel" | "espresso" | "locker" | "brush";

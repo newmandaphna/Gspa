@@ -8,6 +8,7 @@
 import { FACILITY, SITE } from "@/lib/config/site";
 import { ELIGIBILITY_LABELS, itemBySlug, type CatalogItem } from "@/lib/content/catalog";
 import { formatMoney } from "@/lib/time";
+import { ifPriced, shownMoney } from "@/lib/pricing";
 
 const simulatorBay = itemBySlug("simulator-bay");
 const firstSession = itemBySlug("first-session");
@@ -57,7 +58,7 @@ export type Rung = {
 
 function rungFrom(item: CatalogItem | undefined, label: string, fallbackSlug: string): Rung {
   if (!item) return { slug: fallbackSlug, label, duration: "", price: "", chip: "Coming" };
-  const base = { slug: item.slug, label, duration: minutesLabel(item.durationMin), price: formatMoney(item.priceCents) };
+  const base = { slug: item.slug, label, duration: minutesLabel(item.durationMin), price: ifPriced(formatMoney(item.priceCents), "") };
   if (item.bookable) return { ...base, href: `/reserve?experience=${item.slug}` };
   if (item.unavailableMode === "inquire") return { ...base, href: "/visit#contact", chip: "Inquire" };
   return { ...base, chip: "Coming" };
@@ -93,9 +94,9 @@ export const FIRST_SESSION = {
   card: {
     name: firstSession?.name ?? "First Session",
     duration: firstSession ? `${firstSession.durationMin} min` : "90 min",
-    price: firstSession ? formatMoney(firstSession.priceCents) : "",
-    priceNote: "per student",
-    secondStudent: firstSession?.extraGuestCents ? `Second student ${formatMoney(firstSession.extraGuestCents)}` : "",
+    price: firstSession ? shownMoney(firstSession.priceCents) : "",
+    priceNote: ifPriced("per student", ""),
+    secondStudent: firstSession?.extraGuestCents ? ifPriced(`Second student ${formatMoney(firstSession.extraGuestCents)}`, "") : "",
     includes: firstSession?.includes ?? [],
     eligibility: ELIGIBILITY_LABELS[firstSession?.eligibility ?? "longgun"],
   },
@@ -113,8 +114,8 @@ export const PRIVATE = {
   body: "Built around whatever you came to fix. Bring your own firearm where the law allows, or work on a house long gun. For a longer session, reserve consecutive hours.",
   cta: { label: "Reserve private instruction", href: "/reserve?experience=private-instruction" },
   requirements: { label: "See requirements", href: "/visit#requirements" },
-  price: privateInstruction ? `${formatMoney(privateInstruction.priceCents)} · ${privateInstruction.durationMin} minutes · lane fee included` : "",
-  secondStudent: privateInstruction?.extraGuestCents ? `Second student ${formatMoney(privateInstruction.extraGuestCents)}` : "",
+  price: privateInstruction ? ifPriced(`${formatMoney(privateInstruction.priceCents)} · ${privateInstruction.durationMin} minutes · lane fee included`, `${privateInstruction.durationMin} minutes · lane fee included`) : "",
+  secondStudent: privateInstruction?.extraGuestCents ? ifPriced(`Second student ${formatMoney(privateInstruction.extraGuestCents)}`, "") : "",
   eligibility: ELIGIBILITY_LABELS[privateInstruction?.eligibility ?? "longgun"],
   diagram: { left: "Instructor", right: "You" },
   instructorsHeadline: `${cap(spell(FACILITY.instructors))} instructors, every one certified.`,
@@ -143,7 +144,7 @@ export const COURSES = {
   /** Day numbers ringed in the month grid. Placeholder until dates post. */
   ringedDays: [13, 14],
   cta: { label: "Ask about dates", href: "/visit#contact" },
-  priceLine: ccwCourse ? `${formatMoney(ccwCourse.priceCents)} per seat [owner to confirm]` : "",
+  priceLine: ccwCourse ? ifPriced(`${formatMoney(ccwCourse.priceCents)} per seat [owner to confirm]`, "") : "",
   note: `Cancel free up to ${spell(cancelDays)} days before.`,
   eligibility: ELIGIBILITY_LABELS[ccwCourse?.eligibility ?? "anyone"],
   requirements: { label: "See requirements", href: "/visit#requirements" },
@@ -159,7 +160,7 @@ export const SIMULATOR = {
   body: "Each scenario branches on what you do, and an instructor debriefs it after. No live ammunition.",
   cta: { label: "Reserve the simulator", href: "/reserve?experience=simulator-bay" },
   link: SITE.clubPageLive ? { label: "See the simulator", href: "/club#simulator" } : { label: "Reserve the simulator", href: "/reserve?experience=simulator-bay" },
-  price: simulatorBay ? `${formatMoney(simulatorBay.priceCents)} · ${simulatorBay.durationMin} minutes · up to ${spell(simulatorBay.maxGuestsPerUnit)}` : "",
+  price: simulatorBay ? `${ifPriced(`${formatMoney(simulatorBay.priceCents)} · `, "")}${simulatorBay.durationMin} minutes · up to ${spell(simulatorBay.maxGuestsPerUnit)}` : "",
   eligibility: ELIGIBILITY_LABELS[simulatorBay?.eligibility ?? "simulator"],
   tree: {
     root: "Contact",

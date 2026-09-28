@@ -14,6 +14,7 @@ import { cancelWindowHours } from "@/lib/availability";
 import { LATE_NO_SHOW_MIN, requirementsFor } from "@/lib/content/requirements";
 import { buildIcs, googleCalendarUrl, type CalendarEvent } from "@/lib/ics";
 import { formatInstant, formatMoney, labelForHHMM, toHHMMInTz } from "@/lib/time";
+import { PRICES_PUBLIC } from "@/lib/pricing";
 
 export type EmailMessage = {
   subject: string;
@@ -86,6 +87,8 @@ function deskContact(capital = false): string {
 function paymentLine(booking: Booking): string {
   if (booking.amountCents === 0) return "Included with membership";
   const state = booking.paymentStatus === "paid" ? "paid" : booking.paymentStatus === "pay_on_arrival" ? "due on arrival" : booking.paymentStatus === "refunded" ? "refunded" : "pending";
+  // While prices are held back, an unpaid booking names no figure; money already taken is always stated.
+  if (!PRICES_PUBLIC && booking.paymentStatus !== "paid" && booking.paymentStatus !== "refunded") return state[0].toUpperCase() + state.slice(1);
   return `${formatMoney(booking.amountCents)}, ${state}`;
 }
 

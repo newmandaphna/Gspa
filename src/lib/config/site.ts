@@ -26,6 +26,13 @@ export const SITE = {
    * until its content matches the approved plans. Set true to bring it back.
    */
   clubPageLive: false,
+  /**
+   * Owner's call: prices stay off the public site until they are final. When
+   * false every price reads `pricePending` (or drops out of a sentence); the
+   * catalog keeps the real figures. Set true to publish them all at once.
+   */
+  pricesPublic: false,
+  pricePending: "Pricing announced soon",
   /** Shown wherever the site names its location while the street address is held back. */
   area: "Queens, New York",
   address: {

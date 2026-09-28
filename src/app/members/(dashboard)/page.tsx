@@ -13,6 +13,7 @@ import { getCurrentMember } from "@/lib/members/auth";
 import { listMemberBookings, listMemberRequests, REQUEST_KINDS } from "@/lib/members/service";
 import { formatInstant, formatMoney } from "@/lib/time";
 import { cn } from "@/lib/cn";
+import { PRICES_PUBLIC } from "@/lib/pricing";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Your membership", robots: { index: false } };
@@ -155,7 +156,7 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
                   >
                     <span className="t-4 block">{experience.name}</span>
                     <span className="t-caption block text-ink-muted">
-                      {formatInstant(booking.startsAt)} · {booking.guests} guest{booking.guests === 1 ? "" : "s"} · {formatMoney(booking.amountCents)}
+                      {formatInstant(booking.startsAt)} · {booking.guests} guest{booking.guests === 1 ? "" : "s"}{PRICES_PUBLIC && <> · {formatMoney(booking.amountCents)}</>}
                     </span>
                   </ListRow>
                 ))}

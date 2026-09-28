@@ -24,6 +24,7 @@ import { itemBySlug } from "@/lib/content/catalog";
 import { tierByKey } from "@/lib/content/membership";
 import { formatMoney } from "@/lib/time";
 import { AVAILABILITY, FIRST_SESSION, HERO, HOME_META, HOSPITALITY, LANES, MEMBERSHIP, QUIET, SIMULATOR, SUITES, VISIT, spell } from "@/lib/content/pages/home";
+import { PRICES_PUBLIC } from "@/lib/pricing";
 
 export const metadata: Metadata = pageMeta("/", {
   title: { absolute: HOME_META.title },
@@ -167,7 +168,7 @@ export default function HomePage() {
                   { k: "Lanes", v: String(FACILITY.lanesPerSuite) },
                   { k: "Guests", v: String(SUITE?.maxGuestsPerUnit ?? "") },
                   { k: "Minutes", v: String(SUITE?.durationMin ?? "") },
-                  { k: "From", v: SUITE ? formatMoney(SUITE.priceCents) : "" },
+                  ...(PRICES_PUBLIC ? [{ k: "From", v: SUITE ? formatMoney(SUITE.priceCents) : "" }] : []),
                 ].map((d) => (
                   <div key={d.k} className="border-b border-hairline-dark py-5 pr-4">
                     <dt className="t-label text-mist">{d.k}</dt>

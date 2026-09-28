@@ -18,6 +18,7 @@ import {
   type Tier,
 } from "@/lib/content/membership";
 import { formatMoney } from "@/lib/time";
+import { PRICE_PENDING, ifPriced } from "@/lib/pricing";
 
 export type Cta = { label: string; href: string };
 
@@ -108,7 +109,7 @@ export const SCREENING_FEE_SENTENCE = (() => {
   const paying = MEMBERSHIP_TIERS.filter((t) => !t.screeningFeeWaived).map((t) => t.name);
   const waived = MEMBERSHIP_TIERS.filter((t) => t.screeningFeeWaived).map((t) => t.name);
   // No timing here: the Apply section says when it is collected, and that changes when online payment goes live.
-  const first = `${joinNames(paying)} pay a ${formatMoney(SCREENING_FEE_CENTS)} screening fee, refunded if we decline you.`;
+  const first = `${joinNames(paying)} pay a ${ifPriced(`${formatMoney(SCREENING_FEE_CENTS)} `, "")}screening fee, refunded if we decline you.`;
   return waived.length ? `${first} ${joinNames(waived)} skip it.` : first;
 })();
 
@@ -116,7 +117,7 @@ export const MEMBERSHIP_TIERS_COPY: SectionCopy = {
   eyebrow: "Tiers",
   headline: `${TIER_NAMES.join(". ")}.`,
   subhead: `${TIER_WINDOW_DAYS.club}, ${TIER_WINDOW_DAYS.signature} or ${TIER_WINDOW_DAYS.founders} days ahead, one screening standard for all of them.`,
-  body: `Prices are per year. Club can be billed monthly if you prefer. ${SCREENING_FEE_SENTENCE}`,
+  body: ifPriced(`Prices are per year. Club can be billed monthly if you prefer. ${SCREENING_FEE_SENTENCE}`, `${PRICE_PENDING}. ${SCREENING_FEE_SENTENCE}`),
 };
 
 export const TIER_CARD = {
@@ -130,14 +131,16 @@ export const TIER_CARD = {
 /** The full grid sits inside a closed <details>; this is its summary line. */
 export const COMPARE_DETAILS = { summary: "Every line", hint: `${BENEFITS.length + 1} rows, all three tiers` };
 
+const FEE_CELL = ifPriced(`${formatMoney(SCREENING_FEE_CENTS)}, refundable`, "Refundable");
+
 /** Compare table: the benefits list plus the fee row, then a requirements link. */
 export const COMPARE_ROWS: BenefitRow[] = [
   ...BENEFITS,
   {
     label: "Screening fee",
-    club: tier("club").screeningFeeWaived ? "Waived" : `${formatMoney(SCREENING_FEE_CENTS)}, refundable`,
-    signature: tier("signature").screeningFeeWaived ? "Waived" : `${formatMoney(SCREENING_FEE_CENTS)}, refundable`,
-    founders: tier("founders").screeningFeeWaived ? "Waived" : `${formatMoney(SCREENING_FEE_CENTS)}, refundable`,
+    club: tier("club").screeningFeeWaived ? "Waived" : FEE_CELL,
+    signature: tier("signature").screeningFeeWaived ? "Waived" : FEE_CELL,
+    founders: tier("founders").screeningFeeWaived ? "Waived" : FEE_CELL,
   },
 ];
 
@@ -318,7 +321,7 @@ export const APPLY_FORM = {
   stripe: {
     label: "Screening fee",
     waived: (tierName: string) => `No screening fee for ${tierName}.`,
-    due: `${formatMoney(SCREENING_FEE_CENTS)} screening fee, collected at orientation. Refunded if declined.`,
+    due: `${ifPriced(`${formatMoney(SCREENING_FEE_CENTS)} screening fee`, "Screening fee")}, collected at orientation. Refunded if declined.`,
   },
   success: {
     line: "Thank you. Your application is with the desk.",
