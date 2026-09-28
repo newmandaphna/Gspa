@@ -52,11 +52,15 @@ export function Footer({ id }: { id?: string }) {
             </p>
           </div>
           <address className="not-italic md:text-right">
-            <a href={SITE.address.googleMapsUrl} target="_blank" rel="noreferrer" className="t-body-lg block text-snow underline-offset-4 hover:underline">
-              {SITE.address.line1}
-              <br />
-              {SITE.address.city}, {SITE.address.state} {SITE.address.zip}
-            </a>
+            {SITE.address.public ? (
+              <a href={SITE.address.googleMapsUrl} target="_blank" rel="noreferrer" className="t-body-lg block text-snow underline-offset-4 hover:underline">
+                {SITE.address.line1}
+                <br />
+                {SITE.address.city}, {SITE.address.state} {SITE.address.zip}
+              </a>
+            ) : (
+              <span className="t-body-lg block text-snow">{SITE.area}</span>
+            )}
             <Owner as="a" value={SITE.phone} href={PHONE_HREF} className="t-body-lg tabular mt-4 block text-snow underline-offset-4 hover:underline" />
             <a href={SITE.social.instagram} target="_blank" rel="noreferrer" className="t-body mt-4 inline-block text-mist underline-offset-4 hover:text-snow hover:underline">
               Instagram

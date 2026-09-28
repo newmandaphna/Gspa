@@ -53,7 +53,7 @@ const TICKER = [
   "Espresso, never alcohol",
   `${FACILITY.transit.driveFromJfkMin} minutes from JFK`,
   "Warm towels off the line",
-  `${SITE.address.line1}`,
+  ...(SITE.address.public ? [SITE.address.line1] : []),
 ];
 
 const LOUNGE_MENU = [
@@ -74,7 +74,7 @@ export default function HomePage() {
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(10,10,11,0.85)_0%,rgba(10,10,11,0.2)_45%,rgba(10,10,11,0)_60%)] max-md:bg-[linear-gradient(0deg,rgba(10,10,11,0.95)_0%,rgba(10,10,11,0.7)_38%,rgba(10,10,11,0)_62%)]" />
         <Container className="pointer-events-none relative flex min-h-[100svh] flex-col justify-end pb-12 pt-[calc(var(--nav-h)+2rem)] sm:pb-20">
           <div className="enter pointer-events-auto">
-            <p className="t-eyebrow text-mist">{SITE.address.line1} · {SITE.address.neighborhood}</p>
+            <p className="t-eyebrow text-mist">{SITE.address.public ? `${SITE.address.line1} · ${SITE.address.neighborhood}` : SITE.area}</p>
             <h1 id="hero-title" className="mt-6 text-snow">
               <span className="t-display block lg:text-[clamp(5rem,6.8vw,6.6rem)]">Ready? Aim.</span>
               <span className="t-accent -mt-[0.05em] block pl-[0.04em] text-[clamp(4.5rem,12.5vw,11.5rem)] leading-[0.82]">Relax!</span>
@@ -315,11 +315,18 @@ export default function HomePage() {
         <Container>
           <div className="grid items-center gap-12 lg:grid-cols-12">
             <div className="lg:col-span-7">
-              <Eyebrow>{`${FACILITY.transit.driveFromJfkMin} min from the terminals · ${FACILITY.transit.expressway.split(" (")[0]}`}</Eyebrow>
-              <h2 id="visit-title" className="t-display mt-8 text-snow">
-                <span className="t-stencil block text-[1.15em] leading-[0.85] text-accent">{SITE.address.line1.split(" ")[0]}</span>
-                <span className="block whitespace-nowrap text-[0.5em] leading-[1.05]">{SITE.address.line1.split(" ").slice(1).join(" ")}</span>
-              </h2>
+              <Eyebrow>{SITE.address.public ? `${FACILITY.transit.driveFromJfkMin} min from the terminals · ${FACILITY.transit.expressway.split(" (")[0]}` : `${FACILITY.transit.driveFromJfkMin} min from the terminals`}</Eyebrow>
+              {SITE.address.public ? (
+                <h2 id="visit-title" className="t-display mt-8 text-snow">
+                  <span className="t-stencil block text-[1.15em] leading-[0.85] text-accent">{SITE.address.line1.split(" ")[0]}</span>
+                  <span className="block whitespace-nowrap text-[0.5em] leading-[1.05]">{SITE.address.line1.split(" ").slice(1).join(" ")}</span>
+                </h2>
+              ) : (
+                <h2 id="visit-title" className="t-display mt-8 text-snow">
+                  <span className="block">Queens,</span>
+                  <span className="t-accent block">New York.</span>
+                </h2>
+              )}
               <p className="t-subhead mt-6 max-w-[22em] text-mist">{VISIT.subhead}</p>
               <p className="t-body-lg mt-8 max-w-[32em] text-mist">{VISIT.body}</p>
               <div className="mt-10 flex flex-wrap items-center gap-8">

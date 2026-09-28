@@ -26,13 +26,13 @@ const simulatorBay = itemBySlug("simulator-bay");
 const firstSession = itemBySlug("first-session");
 
 export const HOME_META = {
-  title: `${SITE.name} | Private Shooting Club, Jamaica, Queens`,
+  title: `${SITE.name} | Private Shooting Club, Queens, New York`,
   description: SITE.description,
 } as const;
 
 export const HERO = {
   headline: SITE.tagline,
-  subhead: "A private shooting club in Jamaica, Queens.",
+  subhead: "A private shooting club in Queens, New York.",
   body: `${FACILITY.laneCount} acoustic lanes, ${spell(FACILITY.suites)} private suites off the line, ${spell(FACILITY.simulatorBays)} simulator bays. ${FACILITY.transit.driveFromJfkMin} minutes from JFK.`,
   cta: { label: "Reserve a lane", href: "/reserve?category=lane" },
   link: { label: "Explore membership", href: "/membership" },
@@ -46,7 +46,7 @@ export const QUIET = {
   subhead: "Baffled walls and filtered air, with lights you set from the lane.",
   body: "Baffling swallows the echo before it reaches the next lane. Dim the lights from where you stand. You leave calmer than you arrived.",
   captions: ["Baffled", "Ventilated", "Dimmable"],
-  link: { label: "See the lanes", href: "/club" },
+  link: SITE.clubPageLive ? { label: "See the lanes", href: "/club" } : { label: "Reserve a lane", href: "/reserve?category=lane" },
 } as const;
 
 export const LANES = {
@@ -68,7 +68,7 @@ export const SUITES = {
   subhead: `${cap(spell(FACILITY.suites))} private suites with ${spell(FACILITY.lanesPerSuite)} lanes each and their own lounge.`,
   body: `Frosted glass, a sofa, a screen, a host outside the door. Room for ${spell(privateSuite?.maxGuestsPerUnit ?? 6)} people who would rather have the place to themselves.`,
   cta: { label: "Reserve a suite", href: "/reserve?category=suite" },
-  link: { label: "See the suites", href: "/club#suites" },
+  link: SITE.clubPageLive ? { label: "See the suites", href: "/club#suites" } : { label: "Suites and events", href: "/events" },
   imageSlot: "SUITE_PHOTO_01",
   imageAlt: "A private suite: two lanes behind frosted glass with a sofa and a screen in the attached lounge",
   caption: privateSuite ? `${privateSuite.name} · ${privateSuite.durationMin} min · ${formatMoney(privateSuite.priceCents)}` : "Private Suite",
@@ -113,7 +113,7 @@ export const HOSPITALITY = {
     { key: "brush", label: "Detailing", note: "Members" },
   ] as ReadonlyArray<{ key: HospitalityIconKey; label: string; note: string }>,
   footnote: "Lockers and firearm detailing are members' services.",
-  link: { label: "See the lounge", href: "/club#lounge" },
+  link: SITE.clubPageLive ? { label: "See the lounge", href: "/club#lounge" } : { label: "Plan your visit", href: "/visit" },
   membersLink: { label: "Explore membership", href: "/membership" },
   imageSlot: "LOUNGE_PHOTO_01",
   imageAlt: "The lounge: an espresso on a low table, warm towels folded, the firing line behind ballistic glass",
@@ -142,8 +142,10 @@ export const MEMBERSHIP = {
 export const VISIT = {
   eyebrow: "Visit",
   headline: `${FACILITY.transit.driveFromJfkMin} minutes from JFK.`,
-  subhead: `${SITE.address.line1}, at the north fence of JFK, on the boulevard the cargo trucks use.`,
-  body: `Come off the ${FACILITY.transit.expressway.split(" (")[0]} at ${FACILITY.transit.exit}, or take a car from any terminal. From Manhattan, plan on ${FACILITY.transit.driveFromManhattanMin} minutes. Hours and parking are on the Visit page.`,
+  subhead: SITE.address.public ? `${SITE.address.line1}, at the north fence of JFK, on the boulevard the cargo trucks use.` : "Close enough to JFK that a layover shoots.",
+  body: SITE.address.public
+    ? `Come off the ${FACILITY.transit.expressway.split(" (")[0]} at ${FACILITY.transit.exit}, or take a car from any terminal. From Manhattan, plan on ${FACILITY.transit.driveFromManhattanMin} minutes. Hours and parking are on the Visit page.`
+    : "The address goes out with your confirmation. Hours and what to bring are on the Visit page.",
   cta: { label: "Plan your visit", href: "/visit" },
   hoursLink: { label: "See hours", href: "/visit#hours" },
   stations: ["JFK terminals", "Van Wyck Expwy", `${FACILITY.transit.busLine} bus, Rockaway Blvd`],

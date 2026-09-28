@@ -48,7 +48,7 @@ function closeHour(dow: number): string {
 
 export const VISIT_META = {
   title: "Visit & FAQ",
-  description: `How to reach ${SITE.name} at ${SITE.address.line1} in ${SITE.address.neighborhood}, ${FACILITY.transit.driveFromJfkMin} minutes from JFK. Hours, parking, what to bring, every requirement in one list, plus short answers to the usual questions.`,
+  description: `${SITE.name} in ${SITE.address.public ? `${SITE.address.line1}, ${SITE.address.neighborhood}` : SITE.area}. Hours, what to bring, every requirement in one list, plus short answers to the usual questions.`,
 };
 
 /* ------------------------------------------------------------------ hero */
@@ -57,13 +57,13 @@ export const ADDRESS_LINE = `${SITE.address.line1}, ${SITE.address.city}, ${SITE
 
 export const VISIT_HERO: SectionCopy = {
   eyebrow: "Visit",
-  headline: "Jamaica, Queens.",
-  subhead: `On Rockaway Blvd, ${FACILITY.transit.driveFromJfkMin} minutes north of the JFK terminals.`,
-  body: `${ADDRESS_LINE}. Come in through the doors under the sign.`,
-  cta: { label: "Open in Maps", href: SITE.address.mapsUrl, external: true },
+  headline: SITE.address.public ? "Jamaica, Queens." : "Queens, New York.",
+  subhead: SITE.address.public ? `On Rockaway Blvd, ${FACILITY.transit.driveFromJfkMin} minutes north of the JFK terminals.` : "The address goes out with your confirmation.",
+  body: SITE.address.public ? `${ADDRESS_LINE}. Come in through the doors under the sign.` : "Hours, what to bring and every requirement are below. Questions go to the desk.",
+  cta: SITE.address.public ? { label: "Open in Maps", href: SITE.address.mapsUrl, external: true } : undefined,
 };
 
-export const EXTERIOR_PHOTO_ALT = `The street entrance of ${SITE.name} in ${SITE.address.neighborhood}, at dusk, sign lit`;
+export const EXTERIOR_PHOTO_ALT = `The street entrance of ${SITE.name}, at dusk, sign lit`;
 
 /* ------------------------------------------------------------- why here */
 

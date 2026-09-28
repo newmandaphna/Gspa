@@ -23,7 +23,7 @@ type Route = [path: string, changeFrequency: MetadataRoute.Sitemap[number]["chan
 
 const ROUTES: Route[] = [
   ["/", "weekly", 1],
-  ["/club", "monthly", 0.9],
+  ...(SITE.clubPageLive ? ([["/club", "monthly", 0.9]] as Route[]) : []),
   ["/training", "monthly", 0.8],
   ["/membership", "monthly", 0.9],
   ["/events", "monthly", 0.7],

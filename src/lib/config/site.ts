@@ -17,11 +17,24 @@ export const SITE = {
   tagline: "Ready? Aim. Relax!",
   taglineSecondary: "Precision, at ease.",
   description:
-    "A shooting club on Rockaway Blvd, five minutes from the JFK terminals. Twelve 25-yard lanes, two private suites, a simulator for anyone with ID, and a lounge with the line behind glass.",
+    "A shooting club in Queens, near JFK. Twelve 25-yard lanes, two private suites, a simulator for anyone with ID, and a lounge with the line behind glass.",
   timezone: "America/New_York",
   phone: "(718) 000-0000", // TODO(owner): real phone
   email: "desk@gunspa.com", // TODO(owner): real email
+  /**
+   * Owner's call: /club shows a coming-soon page, and nothing links to it,
+   * until its content matches the approved plans. Set true to bring it back.
+   */
+  clubPageLive: false,
+  /** Shown wherever the site names its location while the street address is held back. */
+  area: "Queens, New York",
   address: {
+    /**
+     * Owner's call: the street address stays off the public site until they say
+     * otherwise. When false, pages, share cards and structured data show only
+     * `area`; set to true to bring the address, map and directions back.
+     */
+    public: false,
     line1: "158-12 Rockaway Blvd",
     city: "Jamaica",
     state: "NY",

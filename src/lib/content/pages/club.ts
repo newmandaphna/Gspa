@@ -47,7 +47,7 @@ export const REQUIREMENTS_LINK: Cta = { label: "See requirements", href: "/visit
 
 export const CLUB_META = {
   title: "The Club",
-  description: `${FACILITY.sqft} square feet on one level in Jamaica, Queens: ${numberWord(FACILITY.laneCount)} acoustic lanes, ${numberWord(FACILITY.suites)} private suites, ${numberWord(FACILITY.simulatorBays)} simulator bays, a lounge behind ballistic glass and a classroom for ${numberWord(FACILITY.classroomSeats)}.`,
+  description: `${FACILITY.sqft} square feet on one level in Queens, New York: ${numberWord(FACILITY.laneCount)} acoustic lanes, ${numberWord(FACILITY.suites)} private suites, ${numberWord(FACILITY.simulatorBays)} simulator bays, a lounge behind ballistic glass and a classroom for ${numberWord(FACILITY.classroomSeats)}.`,
 };
 
 /* ------------------------------------------------------------------ hero */
@@ -55,7 +55,7 @@ export const CLUB_META = {
 export const CLUB_HERO: SectionCopy = {
   eyebrow: "The Club",
   headline: "Built like a studio, run like a range.",
-  subhead: `${FACILITY.sqft} square feet on one level in Jamaica, Queens.`,
+  subhead: `${FACILITY.sqft} square feet on one level in Queens, New York.`,
   body: "Lanes, suites, simulator bays, a lounge, lockers, a classroom, all on one floor with a host at the desk.",
 };
 
