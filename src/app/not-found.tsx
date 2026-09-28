@@ -1,13 +1,13 @@
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
-import { TargetRings } from "@/components/art";
+import { Render } from "@/components/ui/Render";
 
 export default function NotFound() {
   return (
     <Section theme="black" className="grain min-h-dvh overflow-hidden pt-[var(--nav-h)]">
-      <div className="pointer-events-none absolute left-1/2 top-1/2 h-[80vmin] w-[80vmin] -translate-x-1/2 -translate-y-1/2 opacity-60">
-        <TargetRings tone="dark" />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-35">
+        <Render name="casings" />
       </div>
       <Container className="relative flex min-h-[70vh] flex-col items-center justify-center text-center">
         <p className="t-eyebrow text-accent">404</p>

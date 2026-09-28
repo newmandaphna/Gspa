@@ -9,7 +9,7 @@ type Size = "sm" | "md" | "lg";
  * Hover fills with brass; press sinks a pixel. No pills, no bounce.
  */
 const base =
-  "group/btn relative inline-flex items-center justify-center gap-3 rounded-[2px] font-sans font-[680] uppercase [font-stretch:115%] tracking-[0.14em] whitespace-nowrap select-none transition-[background-color,color,box-shadow,transform] duration-200 ease-[var(--ease-snap)] disabled:opacity-40 disabled:pointer-events-none active:translate-y-px";
+  "group/btn relative inline-flex items-center justify-center gap-3 rounded-[2px] font-display font-[680] uppercase [font-stretch:115%] tracking-[0.14em] whitespace-nowrap select-none transition-[background-color,color,box-shadow,transform] duration-200 ease-[var(--ease-snap)] disabled:opacity-40 disabled:pointer-events-none active:translate-y-px";
 
 const sizes: Record<Size, string> = {
   sm: "h-10 px-5 text-[0.6875rem]",

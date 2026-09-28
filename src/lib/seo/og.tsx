@@ -9,7 +9,7 @@ import { mediaFor } from "@/lib/media/manifest";
  * The share card, one builder for every opengraph-image.tsx route.
  *
  * Type is the site's own: Archivo Black capitals for the headline, Bodoni
- * Moda italic for the one gold word, Martian Mono for the fact line, read from the WOFF files beside this module (Satori,
+ * Moda italic for the one gold word, Libre Caslon Text for the fact line, read from the WOFF files beside this module (Satori,
  * which draws the card, reads TTF, OTF and WOFF, not WOFF2, so these are the
  * WOFF builds of the same @fontsource releases that next/font serves). The
  * wordmark is the outlined path data from wordmark-paths.ts, so no brand
@@ -42,7 +42,7 @@ export function loadOgFonts(): Promise<OgFont[]> {
   fontsPromise ??= Promise.all([
     readFont("archivo-latin-900-normal.woff").then((data) => ({ name: "Archivo", data, weight: 900 as const, style: "normal" as const })),
     readFont("bodoni-moda-latin-400-italic.woff").then((data) => ({ name: "Bodoni Moda", data, weight: 400 as const, style: "italic" as const })),
-    readFont("martian-mono-latin-400-normal.woff").then((data) => ({ name: "Martian Mono", data, weight: 400 as const, style: "normal" as const })),
+    readFont("libre-caslon-text-latin-400-normal.woff").then((data) => ({ name: "Libre Caslon Text", data, weight: 400 as const, style: "normal" as const })),
   ]);
   return fontsPromise;
 }
@@ -182,12 +182,12 @@ export async function ogCard(options: OgCardOptions): Promise<ImageResponse> {
         <div style={{ position: "absolute", left: 64, right: 64, top: 128, height: 1, background: "rgba(255,255,255,0.08)" }} />
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", position: "relative" }}>
           <WordmarkArt height={44} />
-          <div style={{ fontFamily: "Martian Mono", fontSize: 16, letterSpacing: "0.14em", textTransform: "uppercase", color: MIST }}>{head}</div>
+          <div style={{ fontFamily: "Archivo", fontWeight: 900, fontSize: 15, letterSpacing: "0.22em", textTransform: "uppercase", color: MIST }}>{head}</div>
         </div>
         <div style={{ display: "flex", flexDirection: "column", position: "relative" }}>
           <Headline text={options.headline} size={size} />
           <div style={{ width: 96, height: 4, background: GOLD, marginTop: 30 }} />
-          <div style={{ fontFamily: "Martian Mono", fontSize: 18, letterSpacing: "0.04em", color: MIST, marginTop: 22, maxWidth: 1040 }}>{options.fact}</div>
+          <div style={{ fontFamily: "Libre Caslon Text", fontSize: 22, color: MIST, marginTop: 22, maxWidth: 1040 }}>{options.fact}</div>
         </div>
       </div>
     ),

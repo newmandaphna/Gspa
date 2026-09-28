@@ -78,7 +78,7 @@ export function RulesCard({ className, print = true }: { className?: string; pri
             <p id="rules-card-title" className="text-[19px] leading-none">
               {SITE.name}
             </p>
-            <p className="mt-1 font-sans text-[11px] uppercase tracking-[0.14em] text-[#6e6e73]">Requirements</p>
+            <p className="mt-1 font-display text-[11px] uppercase tracking-[0.14em] text-[#6e6e73]">Requirements</p>
           </div>
           <p className="text-right font-mono text-[10px] leading-[1.4] text-[#6e6e73]">
             {SITE.address.public ? (

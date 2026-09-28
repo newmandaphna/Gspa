@@ -251,38 +251,27 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
       )}
 
       {/* Progress */}
-      <ol className="mb-10 flex items-center gap-2 sm:gap-4" aria-label="Reservation steps">
+      <ol className="mb-10 grid grid-cols-3 border-t border-ink/15" aria-label="Reservation steps">
         {STEPS.map((label, i) => {
           const done = i < step;
           const active = i === step;
           return (
-            <li key={label} className="flex items-center gap-2 sm:gap-4">
+            <li key={label} className="min-w-0">
               <button
                 type="button"
                 disabled={i > step || (i === 1 && !experience)}
                 aria-current={active ? "step" : undefined}
                 onClick={() => goTo(i as 0 | 1 | 2)}
-                className={cn("relative flex items-center gap-2 rounded-full text-[0.9375rem] transition-opacity", active ? "opacity-100" : "opacity-60 hover:opacity-100 disabled:hover:opacity-60")}
+                className={cn(
+                  "-mt-px flex w-full items-baseline gap-3 border-t-2 pt-3 text-left transition-[color,border-color] duration-200",
+                  active ? "border-accent-deep text-ink" : done ? "border-ink/40 text-ink-muted hover:text-ink" : "border-transparent text-ink-faint",
+                )}
               >
-                <span
-                  className={cn(
-                    "flex h-7 w-7 items-center justify-center rounded-full text-[0.8125rem] font-semibold ring-1 ring-inset",
-                    active ? "bg-ink text-snow ring-ink" : done ? "bg-ink/10 text-ink ring-transparent" : "text-ink-faint ring-ink/20",
-                  )}
-                >
-                  {done ? (
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                      <path d="M2 6.5l2.5 2.5L10 3.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  ) : (
-                    i + 1
-                  )}
-                </span>
+                <span className="t-stencil text-[1.5rem] leading-none">{String(i + 1).padStart(2, "0")}</span>
                 {/* Visually hidden below sm, but always part of the accessible name. */}
-                <span className={cn("sr-only sm:not-sr-only", active && "font-semibold")}>{label}</span>
+                <span className="t-label sr-only sm:not-sr-only">{label}</span>
                 {done && <span className="sr-only">, completed</span>}
               </button>
-              {i < STEPS.length - 1 && <span className="h-px w-6 bg-ink/15 sm:w-10" aria-hidden="true" />}
             </li>
           );
         })}
@@ -297,7 +286,7 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
                   What would you like to do?
                 </h2>
                 {/* Filters the card grid rather than swapping a panel, so toggle buttons in a group, not a tablist. */}
-                <div className="no-scrollbar mt-6 flex gap-1 overflow-x-auto rounded-pill bg-paper-2 p-1" role="group" aria-label="Experience type">
+                <div className="no-scrollbar mt-6 flex gap-7 overflow-x-auto border-b border-ink/15" role="group" aria-label="Experience type">
                   {categories.map((c) => (
                     <button
                       key={c}
@@ -305,8 +294,8 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
                       type="button"
                       onClick={() => setCategory(c)}
                       className={cn(
-                        "shrink-0 rounded-pill px-4 py-2 text-[0.9375rem] font-medium transition-[background-color,box-shadow,color] duration-200",
-                        category === c ? "bg-white text-ink shadow-[0_1px_4px_rgba(0,0,0,.12)]" : "text-ink-muted hover:text-ink",
+                        "t-label -mb-px shrink-0 border-b-2 py-3 transition-[border-color,color] duration-200",
+                        category === c ? "border-accent-deep text-ink" : "border-transparent text-ink-muted hover:text-ink",
                       )}
                     >
                       {CATEGORY_LABELS[c]}
@@ -341,17 +330,17 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
                             type="button"
                             onClick={() => chooseExperience(e)}
                             className={cn(
-                              "group flex h-full w-full flex-col rounded-card bg-white p-6 text-left ring-1 ring-ink/8 shadow-[var(--shadow-card)] transition-[transform,box-shadow] duration-300 ease-[var(--ease-apple)] hover:-translate-y-0.5 hover:shadow-[0_4px_16px_rgba(0,0,0,.08),0_24px_48px_rgba(0,0,0,.10)]",
+                              "group flex h-full w-full flex-col rounded-card bg-[#f8f4ec] p-6 text-left ring-1 ring-ink/12 transition-[box-shadow] duration-200 hover:ring-ink/60",
                               experience?.slug === e.slug && "ring-2 ring-ink",
                             )}
                           >
                             <span className="flex items-center gap-2">
-                              <span className="t-caption font-semibold text-accent-deep">{durationLabel(e.durationMin)}</span>
+                              <span className="t-label text-accent-deep">{durationLabel(e.durationMin)}</span>
                               {e.memberOnly && <span className="t-footnote rounded-pill bg-night px-2 py-0.5 font-semibold text-snow">Members</span>}
                             </span>
                             <span className="t-3 mt-1">{e.name}</span>
                             <span className="t-body mt-2 text-ink-muted">{e.tagline}</span>
-                            <span className="t-footnote mt-3 inline-flex w-fit rounded-pill bg-paper-2 px-2 py-0.5 text-ink-muted">{ELIGIBILITY_LABELS[e.eligibility]}</span>
+                            <span className="t-footnote mt-3 italic text-ink-muted">{ELIGIBILITY_LABELS[e.eligibility]}</span>
                             <span className="mt-auto flex items-end justify-between gap-3 pt-6">
                               <span className="t-4">
                                 {price === 0 ? "Included" : formatMoney(price)}
