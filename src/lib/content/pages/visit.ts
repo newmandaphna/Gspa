@@ -58,7 +58,7 @@ export const ADDRESS_LINE = `${SITE.address.line1}, ${SITE.address.city}, ${SITE
 export const VISIT_HERO: SectionCopy = {
   eyebrow: "Visit",
   headline: SITE.address.public ? "Jamaica, Queens." : "Queens, New York.",
-  subhead: SITE.address.public ? `On Rockaway Blvd, ${FACILITY.transit.driveFromJfkMin} minutes north of the JFK terminals.` : "The address goes out with your confirmation.",
+  subhead: SITE.address.public ? `On [street], ${FACILITY.transit.driveFromJfkMin} minutes north of the JFK terminals.` : "The address goes out with your confirmation.",
   body: SITE.address.public ? `${ADDRESS_LINE}. Come in through the doors under the sign.` : "Hours, what to bring and every requirement are below. Questions go to the desk.",
   cta: SITE.address.public ? { label: "Open in Maps", href: SITE.address.mapsUrl, external: true } : undefined,
 };
@@ -69,7 +69,7 @@ export const EXTERIOR_PHOTO_ALT = `The street entrance of ${SITE.name}, at dusk,
 
 /**
  * Why a runway and not a high street. Only what FACILITY and the address
- * say, plus what anyone who has driven Rockaway Blvd knows. What the
+ * say, plus what anyone who has driven [street] knows. What the
  * building was before is the owner's to supply, so it is not here.
  */
 export const VISIT_WHY = {
@@ -78,8 +78,8 @@ export const VISIT_WHY = {
   subhead: `You cannot put a ${FACILITY.laneYards}-yard live-fire range under apartments.`,
   paragraphs: [
     `So the club sits where south Queens meets the airport fence: ${SITE.address.line1}, off the ${FACILITY.transit.expressway.split(" (")[0]}, at the north fence of JFK, on the boulevard the cargo trucks use. The neighbors are freight and a runway, which is what ${numberWord(FACILITY.laneCount)} lanes with their own air need.`,
-    `The airport is the point. ${cap(numberWord(FACILITY.transit.driveFromJfkMin))} minutes from any terminal means a layover shoots: land, take a car up Rockaway Blvd, an hour in the simulator or on a lane, and back through security. Members from Manhattan come the other way, ${FACILITY.transit.driveFromManhattanMin} minutes down the Van Wyck.`,
-    "One honest line about traffic. Rockaway Blvd carries the cargo traffic all day and the Van Wyck slows after 4 PM, so give the trip back more room than the map says.",
+    `The airport is the point. ${cap(numberWord(FACILITY.transit.driveFromJfkMin))} minutes from any terminal means a layover shoots: land, take a car up [street], an hour in the simulator or on a lane, and back through security. Members from Manhattan come the other way, ${FACILITY.transit.driveFromManhattanMin} minutes down the Van Wyck.`,
+    "One honest line about traffic. [street] carries the cargo traffic all day and the Van Wyck slows after 4 PM, so give the trip back more room than the map says.",
   ],
 } as const;
 
@@ -89,16 +89,16 @@ export const VISIT_TRANSIT: SectionCopy = {
   eyebrow: "Getting here",
   headline: "Come by car, or the bus.",
   subhead: `${FACILITY.transit.driveFromJfkMin} minutes from any JFK terminal, ${FACILITY.transit.driveFromManhattanMin} from Manhattan.`,
-  body: `Leave the ${FACILITY.transit.expressway} at the ${FACILITY.transit.exit} exit. The ${FACILITY.transit.busLine} bus runs the length of Rockaway Blvd, and ${FACILITY.transit.nearestLirr} on the LIRR is a ${FACILITY.transit.lirrDriveMin}-minute cab ride. ${FACILITY.transit.parking}.`,
+  body: `Leave the ${FACILITY.transit.expressway} at the ${FACILITY.transit.exit} exit. The ${FACILITY.transit.busLine} bus runs the length of [street], and ${FACILITY.transit.nearestLirr} on the LIRR is a ${FACILITY.transit.lirrDriveMin}-minute cab ride. ${FACILITY.transit.parking}.`,
 };
 
 export type TransitLine = { id: "lirr" | "subway" | "airtrain"; label: string; stops: string[] };
 
 /** The three ways in, drawn as converging lines. Labels are set in mono. */
 export const TRANSIT_LINES: TransitLine[] = [
-  { id: "lirr", label: "From Manhattan, Van Wyck Expwy", stops: ["Midtown", "Kew Gardens", "Rockaway Blvd exit"] },
-  { id: "subway", label: `${FACILITY.transit.busLine} bus, Rockaway Blvd`, stops: ["Ozone Park", "150th St", "158th St"] },
-  { id: "airtrain", label: "JFK terminals", stops: ["Terminals", "JFK Expwy", "Rockaway Blvd"] },
+  { id: "lirr", label: "From Manhattan, Van Wyck Expwy", stops: ["Midtown", "Kew Gardens", "[street] exit"] },
+  { id: "subway", label: `${FACILITY.transit.busLine} bus, [street]`, stops: ["Ozone Park", "150th St", "158th St"] },
+  { id: "airtrain", label: "JFK terminals", stops: ["Terminals", "JFK Expwy", "[street]"] },
 ];
 
 /** Mono chips. Bracketed minutes stay bracketed until the owner confirms them in FACILITY. */
@@ -115,9 +115,11 @@ export const MAP_EMBED_ALT = `Map of the streets around ${SITE.name}, ${SITE.add
 
 export const VISIT_HOURS: SectionCopy = {
   eyebrow: "Hours",
-  headline: `Open until ${closeHour(1)} most nights, ${closeHour(0)} on Sundays.`,
-  subhead: `Weekends open at ${openHour(6)}, weekdays at ${openHour(1)}.`,
-  body: "This table is the one the calendar reads. The last start of the day is closing time minus the length of your session.",
+  headline: SITE.openForBusiness ? `Open until ${closeHour(1)} most nights, ${closeHour(0)} on Sundays.` : `Planned hours: until ${closeHour(1)} most nights, ${closeHour(0)} on Sundays.`,
+  subhead: `Weekends ${SITE.openForBusiness ? "open" : "from"} ${openHour(6)}, weekdays ${SITE.openForBusiness ? "at" : "from"} ${openHour(1)}.`,
+  body: SITE.openForBusiness
+    ? "This table is the one the calendar reads. The last start of the day is closing time minus the length of your session."
+    : "These are the hours we plan to keep once the doors open. The opening date goes up here first.",
 };
 
 /** Mono line beneath the table. Matches the FAQ answer on lateness. */

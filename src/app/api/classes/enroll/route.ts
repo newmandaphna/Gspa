@@ -6,10 +6,12 @@ import { sendBookingConfirmation } from "@/lib/email";
 import { createCheckoutSession, expireCheckoutSession, stripeEnabled } from "@/lib/stripe";
 import { DOCUMENT_TOTAL_BYTES, documentUploadsEnabled, normalizeClassDocument, purgeExpiredClassDocuments, storeClassDocuments } from "@/lib/class-documents";
 import { boundedBody, errorResponse, guard, json, RequestError } from "../_shared";
+import { SITE } from "@/lib/config/site";
 
 export const runtime = "nodejs";
 export async function POST(req: Request) {
   try {
+    if (!SITE.openForBusiness) throw new RequestError("We are not taking class enrollments yet.", 403);
     await guard(req);
     // A refused confirmation from an earlier enrollment is retried after this response, not on the next hourly run.
     scheduleOpportunisticClassMailDrain();

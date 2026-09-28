@@ -149,7 +149,7 @@ export const VISIT = {
     : "The address goes out with your confirmation. Hours and what to bring are on the Visit page.",
   cta: { label: "Plan your visit", href: "/visit" },
   hoursLink: { label: "See hours", href: "/visit#hours" },
-  stations: ["JFK terminals", "Van Wyck Expwy", `${FACILITY.transit.busLine} bus, Rockaway Blvd`],
+  stations: ["JFK terminals", "Van Wyck Expwy", `${FACILITY.transit.busLine} bus, [street]`],
   pin: SITE.shortName,
   imageSlot: "EXTERIOR_PHOTO_01",
   imageAlt: "The exterior of The Gun Spa at dusk, the wordmark lit above the door",

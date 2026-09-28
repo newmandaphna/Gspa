@@ -13,6 +13,7 @@ import { tierByKey } from "@/lib/content/membership";
 import { CANCELLATION_POLICY } from "@/lib/content/requirements";
 import { getCurrentMember } from "@/lib/members/auth";
 import { stripeEnabled } from "@/lib/stripe";
+import { NotYetOpen } from "@/components/NotYetOpen";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = pageMeta("/reserve", {
@@ -21,6 +22,7 @@ export const metadata: Metadata = pageMeta("/reserve", {
 });
 
 export default async function ReservePage() {
+  if (!SITE.openForBusiness) return <NotYetOpen what="Reservations" />;
   const member = await getCurrentMember();
   const experiences = member ? memberCatalog(member.tier) : publicCatalog();
   const memberInfo = member
