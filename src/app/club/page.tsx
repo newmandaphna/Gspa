@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { pageMeta } from "@/lib/seo/meta";
 import Link from "next/link";
-import { AirFlow, LockerGrid, LoungePhotoArt, Scanline, ServiceTools, SuitePhotoArt } from "@/components/pages/club/Art";
+import { AirFlow, LockerGrid, Scanline, ServiceTools } from "@/components/pages/club/Art";
+import { Render } from "@/components/ui/Render";
 import { InView } from "@/components/pages/club/InView";
 import { TargetRail } from "@/components/pages/club/TargetRail";
 import { ZoneWatch } from "@/components/pages/club/ZoneWatch";
@@ -118,7 +119,7 @@ export default function ClubPage() {
                   subhead={CLUB_SUITES.subhead}
                   body={CLUB_SUITES.body}
                 />
-                <ImageSlot slot="SUITE_PHOTO_02" alt={SUITE_PHOTO_ALT} className="mt-10 aspect-[16/9] rounded-card ring-1 ring-white/10" art={<SuitePhotoArt />} sizes="(min-width: 1024px) 560px, 100vw" />
+                <ImageSlot slot="SUITE_PHOTO_02" alt={SUITE_PHOTO_ALT} className="mt-10 aspect-[16/9] rounded-card ring-1 ring-white/10" art={<Render name="pair" sizes="(min-width: 1024px) 560px, 100vw" />} sizes="(min-width: 1024px) 560px, 100vw" />
                 <Specs className="mt-8" aria-label={`${PRIVATE_SUITE.name} at a glance`} items={SUITE_FACTS} />
                 <p className="mt-5 font-mono text-[0.8125rem] leading-[1.6] text-mist">
                   From {formatMoney(PRIVATE_SUITE.priceCents)} for the suite
@@ -152,7 +153,7 @@ export default function ClubPage() {
               <Zone zone="lounge" id="lounge">
                 <Headline head="The line through glass · espresso on this side" headline={CLUB_LOUNGE.headline} subhead={CLUB_LOUNGE.subhead} body={CLUB_LOUNGE.body} />
                 <figure className="m-0 mt-10">
-                  <ImageSlot slot="LOUNGE_PHOTO_02" alt={LOUNGE_PHOTO_ALT} className="aspect-[4/3] rounded-card ring-1 ring-white/10" art={<LoungePhotoArt />} sizes="(min-width: 1024px) 560px, 100vw" />
+                  <ImageSlot slot="LOUNGE_PHOTO_02" alt={LOUNGE_PHOTO_ALT} className="aspect-[4/3] rounded-card ring-1 ring-white/10" art={<Render name="rest" sizes="(min-width: 1024px) 560px, 100vw" />} sizes="(min-width: 1024px) 560px, 100vw" />
                   <figcaption className="t-caption mt-3 text-mist">{LOUNGE_CAPTION}</figcaption>
                 </figure>
                 <Rows size="sm" className="mt-8" aria-label="In the lounge">

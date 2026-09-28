@@ -9,9 +9,9 @@ describe("public upcoming classes", () => {
   });
   it("shows New York start and end dates across midnight and free pricing", () => {
     const range = classDateRange({ startsAt: "2099-01-02T04:00:00Z", endsAt: "2099-01-02T07:00:00Z" });
-    expect(range).toContain("Jan 1, 2099");
-    expect(range).toContain("Jan 2, 2099");
-    expect(range).toContain("America/New_York");
+    // 04:00 to 07:00 UTC is 11 PM to 2 AM in New York, across midnight.
+    expect(range).toBe("Thu, Jan 1, 11 PM to Fri, Jan 2, 2 AM");
+    expect(classDateRange({ startsAt: "2099-01-02T15:00:00Z", endsAt: "2099-01-02T16:30:00Z" })).toBe("Fri, Jan 2 · 10 AM to 11:30 AM");
     expect(classPrice(0)).toBe("Free");
     expect(classPrice(12500)).toBe("$125.00 per person");
   });

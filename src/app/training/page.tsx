@@ -11,7 +11,8 @@ import { LinkArrow } from "@/components/ui/LinkArrow";
 import { Row, Rows } from "@/components/ui/List";
 import { PullQuote } from "@/components/ui/PullQuote";
 import { Section } from "@/components/ui/Section";
-import { DecisionTree, GroupingTarget, Ladder, MonthGrid, PortraitArt, ProcessLine, SeatDots, StepRail } from "@/components/pages/training/Art";
+import { DecisionTree, GroupingTarget, Ladder, MonthGrid, ProcessLine, SeatDots, StepRail } from "@/components/pages/training/Art";
+import { Render } from "@/components/ui/Render";
 import { InView } from "@/components/pages/training/InView";
 import { FACILITY } from "@/lib/config/site";
 import { COURSES, FIRST_SESSION, HERO, LADDER, LICENSE, PRIVATE, SIMULATOR, TRAINING_META, UPCOMING_CLASSES } from "@/lib/content/pages/training";
@@ -24,6 +25,15 @@ export const metadata: Metadata = pageMeta("/training", {
 /** The house line that stands in the hero until an instructor's own words arrive. Never attributed to a name. */
 const HOUSE_LINE = "Nobody skips a step.";
 
+/** Stand-in for an instructor's portrait until the photo arrives: their place in the list, stenciled. */
+function Monogram({ n }: { n: number }) {
+  return (
+    <span aria-hidden="true" className="absolute inset-0 flex items-end justify-start bg-night p-2">
+      <span className="t-stencil text-[1.6rem] leading-none text-accent">{String(n).padStart(2, "0")}</span>
+    </span>
+  );
+}
+
 export default function TrainingPage() {
   const lead = PRIVATE.instructors[0];
   return (
@@ -35,7 +45,7 @@ export default function TrainingPage() {
           <div className="grid gap-10 lg:grid-cols-12 lg:items-end lg:gap-10">
             {/* The portrait fills the left five columns at 4:5; the photo drops in at the same crop. */}
             <figure className="m-0 lg:col-span-5">
-              <ImageSlot slot={lead.slot} alt={lead.alt} className="aspect-[4/5] rounded-card ring-1 ring-white/10" art={<PortraitArt />} sizes="(min-width: 1024px) 480px, 100vw" priority />
+              <ImageSlot slot={lead.slot} alt={lead.alt} className="aspect-[4/5] rounded-card ring-1 ring-white/10" art={<Render name="trio" sizes="(min-width: 1024px) 480px, 100vw" priority />} sizes="(min-width: 1024px) 480px, 100vw" priority />
               <figcaption className="t-caption mt-3 text-mist">{PRIVATE.instructorsHeadline}</figcaption>
             </figure>
             <div className="lg:col-span-6 lg:col-start-7 lg:pb-10">
@@ -123,9 +133,9 @@ export default function TrainingPage() {
           {/* The instructors, one row each, with a 4:5 slot for the portrait sitting. */}
           <h3 className="t-3 mt-14 sm:mt-20">{PRIVATE.instructorsHeadline}</h3>
           <ul className="mt-6 border-t border-hairline" aria-label="Instructors">
-            {PRIVATE.instructors.map((p) => (
+            {PRIVATE.instructors.map((p, i) => (
               <li key={p.slot} className="flex items-center gap-5 border-b border-hairline py-4">
-                <ImageSlot slot={p.slot} alt={p.alt} className="h-20 w-16 shrink-0 rounded-card-sm ring-1 ring-hairline" sizes="64px" art={<PortraitArt />} />
+                <ImageSlot slot={p.slot} alt={p.alt} className="h-20 w-16 shrink-0 rounded-card-sm ring-1 ring-hairline" sizes="64px" art={<Monogram n={i + 1} />} />
                 <div className="min-w-0">
                   <p className="t-4">{p.name}</p>
                   <p className="mt-1 font-mono text-[0.8125rem] text-ink-muted">{p.credential}</p>

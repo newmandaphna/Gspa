@@ -27,11 +27,11 @@ const sizes = { hero: "t-hero", "1": "t-1", "2": "t-2" } as const;
 export function Headline({ head, headline, subhead, body, children, as: Tag = "h2", size = "1", layout = "stack", id, className }: Props) {
   const title = (
     <>
-      {head && <Eyebrow className="mb-4">{head}</Eyebrow>}
-      <Tag id={id} className={cn(sizes[size], "max-w-[14em]")}>
+      {head && <Eyebrow className="mb-5">{head}</Eyebrow>}
+      <Tag id={id} className={cn(sizes[size], "max-w-[16em]")}>
         {headline}
       </Tag>
-      {subhead && <p className="t-subhead mt-3 max-w-[26em] text-muted">{subhead}</p>}
+      {subhead && <p className="t-subhead mt-5 max-w-[24em] text-muted">{subhead}</p>}
     </>
   );
   const rest = (
@@ -43,8 +43,8 @@ export function Headline({ head, headline, subhead, body, children, as: Tag = "h
   if (layout === "beside") {
     return (
       <div className={cn("grid gap-8 lg:grid-cols-12 lg:gap-10", className)}>
-        <div className="lg:col-span-5">{title}</div>
-        <div className="lg:col-span-7 lg:pt-2">{rest}</div>
+        <div className="lg:col-span-7">{title}</div>
+        <div className="lg:col-span-5 lg:pt-3">{rest}</div>
       </div>
     );
   }

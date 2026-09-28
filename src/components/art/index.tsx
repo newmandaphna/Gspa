@@ -41,66 +41,6 @@ export function TargetRings({ className, tone = "dark", rings = 6, animate = tru
   );
 }
 
-/**
- * A lane receding into darkness: converging light rails and a lit target frame.
- * Used once on the site, as the home hero backdrop (page.tsx), so the vanishing
- * point belongs to one page. Pass `target={false}` behind copy: the hard-edged
- * target box otherwise lands at the visual centre and reads as an overlap.
- */
-export function LanePerspective({ className, target = true }: { className?: string; target?: boolean }) {
-  return (
-    <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" className={cn("h-full w-full", className)} aria-hidden="true">
-      <defs>
-        <linearGradient id="lp-floor" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#000" />
-          <stop offset="1" stopColor="#141416" />
-        </linearGradient>
-        <linearGradient id="lp-rail" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="#e2c98a" stopOpacity="0" />
-          <stop offset="0.5" stopColor="#e2c98a" stopOpacity="0.9" />
-          <stop offset="1" stopColor="#e2c98a" stopOpacity="0" />
-        </linearGradient>
-        <radialGradient id="lp-target" cx="50%" cy="50%" r="50%">
-          <stop offset="0" stopColor="#fff" stopOpacity="0.55" />
-          <stop offset="0.35" stopColor="#e2c98a" stopOpacity="0.25" />
-          <stop offset="1" stopColor="#000" stopOpacity="0" />
-        </radialGradient>
-        <linearGradient id="lp-fade" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#000" stopOpacity="0" />
-          <stop offset="1" stopColor="#000" stopOpacity="1" />
-        </linearGradient>
-      </defs>
-      <rect width="1600" height="900" fill="url(#lp-floor)" />
-      {/* vanishing-point glow */}
-      <circle cx="800" cy="430" r="260" fill="url(#lp-target)" />
-      {/* floor rails */}
-      {[-520, -380, -240, -110, 0, 110, 240, 380, 520].map((x, i) => (
-        <line key={i} x1={800 + x * 2.2} y1="900" x2={800 + x * 0.12} y2="440" stroke="rgba(255,255,255,0.10)" strokeWidth={Math.abs(x) < 130 ? 1.2 : 0.8} />
-      ))}
-      {/* ceiling rails */}
-      {[-520, -260, 0, 260, 520].map((x, i) => (
-        <line key={`c${i}`} x1={800 + x * 2.2} y1="0" x2={800 + x * 0.12} y2="420" stroke="rgba(255,255,255,0.06)" strokeWidth="0.8" />
-      ))}
-      {/* horizontal depth bands */}
-      {[900, 760, 660, 590, 540, 505, 480, 462].map((y, i) => (
-        <line key={`h${i}`} x1={800 - (y - 430) * 2.4} y1={y} x2={800 + (y - 430) * 2.4} y2={y} stroke="rgba(255,255,255,0.05)" strokeWidth="0.8" />
-      ))}
-      {/* lit rails on the lane edges */}
-      <path d="M470 900 L790 445" stroke="url(#lp-rail)" strokeWidth="2" />
-      <path d="M1130 900 L810 445" stroke="url(#lp-rail)" strokeWidth="2" />
-      {/* target frame */}
-      {target && (
-        <>
-          <rect x="770" y="400" width="60" height="70" rx="2" fill="#0a0a0b" stroke="rgba(226,201,138,0.7)" strokeWidth="1.2" />
-          <circle cx="800" cy="435" r="16" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="1" />
-          <circle cx="800" cy="435" r="8" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="1" />
-          <circle cx="800" cy="435" r="2.5" fill="#e2c98a" />
-        </>
-      )}
-      <rect width="1600" height="900" fill="url(#lp-fade)" opacity="0.35" />
-    </svg>
-  );
-}
 
 /**
  * Soft accent/white glow. Absolutely positioned; parent must be relative + overflow-hidden.
@@ -139,27 +79,6 @@ export function GlassPanel({ className, children, tone = "dark" }: { className?:
   );
 }
 
-/** Grid of 16 lane tiles that light up, for the "16 lanes" story. */
-export function LaneGrid({ className, highlight = 4 }: { className?: string; highlight?: number }) {
-  return (
-    <div className={cn("grid grid-cols-8 gap-2", className)} aria-hidden="true">
-      {Array.from({ length: 16 }).map((_, i) => {
-        const premium = i >= 16 - highlight;
-        return (
-          <div
-            key={i}
-            className={cn(
-              "aspect-[3/5] rounded-md ring-1",
-              premium ? "bg-[linear-gradient(180deg,rgba(226,201,138,.55),rgba(226,201,138,.08))] ring-accent-2/40" : "bg-[linear-gradient(180deg,rgba(255,255,255,.22),rgba(255,255,255,.03))] ring-white/10",
-            )}
-            style={{ animation: `lg-breathe 5s ${i * 0.12}s ease-in-out infinite` }}
-          />
-        );
-      })}
-      <style>{`@keyframes lg-breathe{0%,100%{opacity:.75}50%{opacity:1}}`}</style>
-    </div>
-  );
-}
 
 /** Thin crosshair reticle used as a decorative mark. */
 export function Reticle({ className }: { className?: string }) {

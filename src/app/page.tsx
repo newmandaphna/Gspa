@@ -1,26 +1,28 @@
 import type { Metadata } from "next";
-import { pageMeta } from "@/lib/seo/meta";
+import Image from "next/image";
 import Link from "next/link";
-import { LanePerspective } from "@/components/art";
+import { pageMeta } from "@/lib/seo/meta";
 import { AvailabilityStrip } from "@/components/AvailabilityStrip";
 import { DeskLog } from "@/components/DeskLog";
 import { LiveStatus } from "@/components/LiveStatus";
+import { LaneBoard } from "@/components/fun/LaneBoard";
+import { Marquee } from "@/components/fun/Marquee";
+import { RangeTimer } from "@/components/fun/RangeTimer";
+import { TargetPractice } from "@/components/fun/TargetPractice";
+import { CartridgeHero } from "@/components/three/CartridgeHero";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
-import { Headline } from "@/components/ui/Headline";
-import { ImageSlot } from "@/components/ui/ImageSlot";
+import { Eyebrow } from "@/components/ui/Eyebrow";
 import { LinkArrow } from "@/components/ui/LinkArrow";
-import { PullQuote } from "@/components/ui/PullQuote";
 import { Section } from "@/components/ui/Section";
-import { ExteriorArt, FloorPlan, LoungeArt, SimArt, SimulatorScreen, StepRail, SuiteArt, Waveform } from "@/components/pages/home/Art";
-import { HeroArt, LaneWalk } from "@/components/pages/home/HeroMotion";
-import { InView } from "@/components/pages/home/InView";
 import { Tonight } from "@/components/pages/home/Tonight";
 import { UpcomingClasses } from "@/components/pages/home/UpcomingClasses";
 import { cn } from "@/lib/cn";
 import { FACILITY, SITE, TIER_WINDOW_DAYS } from "@/lib/config/site";
 import { computeOpenStatus } from "@/lib/hours";
+import { itemBySlug } from "@/lib/content/catalog";
 import { tierByKey } from "@/lib/content/membership";
+import { formatMoney } from "@/lib/time";
 import { AVAILABILITY, FIRST_SESSION, HERO, HOME_META, HOSPITALITY, LANES, MEMBERSHIP, QUIET, SIMULATOR, SUITES, VISIT, spell } from "@/lib/content/pages/home";
 
 export const metadata: Metadata = pageMeta("/", {
@@ -28,139 +30,172 @@ export const metadata: Metadata = pageMeta("/", {
   description: HOME_META.description,
 });
 
-/* Page-local helpers. Text sits still: nothing here is wrapped in a reveal. */
-
-/** The tagline with "Relax!" italicised by hand. Nothing else on the site gets a last-word italic. */
-function Tagline({ text }: { text: string }) {
-  const word = "Relax!";
-  if (!text.endsWith(word)) return <>{text}</>;
+/** Headline stack for this page: running head, capitals headline, Bodoni subhead. */
+function Head({ id, head, headline, subhead, className, as: Tag = "h2" }: { id: string; head?: string; headline: React.ReactNode; subhead?: React.ReactNode; className?: string; as?: "h1" | "h2" }) {
   return (
-    <>
-      {text.slice(0, -word.length)}
-      <em className="t-italic text-accent">{word}</em>
-    </>
+    <div className={className}>
+      {head && <Eyebrow className="mb-6">{head}</Eyebrow>}
+      <Tag id={id} className="t-1 max-w-[15em]">
+        {headline}
+      </Tag>
+      {subhead && <p className="t-subhead mt-5 max-w-[22em] text-muted">{subhead}</p>}
+    </div>
   );
 }
 
-/** A photo with its caption in the left margin on lg. Mono is kept for captions that are times and prices. */
-function Figure({ caption, mono = false, children, className }: { caption: string; mono?: boolean; children: React.ReactNode; className?: string }) {
-  return (
-    <figure className={cn("m-0 lg:grid lg:grid-cols-12 lg:gap-6", className)}>
-      <div className="lg:col-span-9 lg:col-start-4 lg:row-start-1">{children}</div>
-      <figcaption className={cn("mt-3 text-muted lg:col-span-3 lg:col-start-1 lg:row-start-1 lg:mt-0 lg:self-end", mono ? "font-mono text-[0.75rem] leading-[1.5]" : "t-caption")}>{caption}</figcaption>
-    </figure>
-  );
-}
+const SUITE = itemBySlug("private-suite");
 
-const ADDRESS = `${SITE.address.line1}, ${SITE.address.neighborhood}`;
+const TICKER = [
+  `${FACILITY.laneCount} lanes`,
+  `${FACILITY.laneYards} yards`,
+  `${spell(FACILITY.suites)} private suites`,
+  `${spell(FACILITY.simulatorBays)} simulator bays`,
+  "Espresso, never alcohol",
+  `${FACILITY.transit.driveFromJfkMin} minutes from JFK`,
+  "Warm towels off the line",
+  `${SITE.address.line1}`,
+];
+
+const LOUNGE_MENU = [
+  { item: "Espresso", note: "Pulled to order" },
+  { item: "Tea", note: "Loose leaf" },
+  { item: "Sparkling water", note: "Always cold" },
+  { item: "A warm towel", note: "Off the line" },
+  { item: "Your locker", note: "Members" },
+];
 
 export default function HomePage() {
   const status = computeOpenStatus(new Date());
   return (
     <>
-      {/* ---------------------------------------------------------------- Hero */}
-      <Section as="header" theme="black" bleed id="hero" className="grain min-h-[100dvh] overflow-hidden pt-[var(--nav-h)]" aria-labelledby="hero-title">
-        {/* Hero art scales and drifts with scroll (HeroMotion); the copy uses the CSS-only .enter so it paints before hydration. */}
-        <HeroArt className="absolute inset-0">
-          <ImageSlot slot={HERO.imageSlot} alt={HERO.imageAlt} priority className="h-full w-full" art={<LanePerspective target={false} />} />
-        </HeroArt>
-        <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.35)_0%,rgba(0,0,0,0)_30%,rgba(0,0,0,0.25)_60%,rgba(0,0,0,0.9)_100%)]" />
-        <Container className="relative flex min-h-[calc(100dvh-var(--nav-h))] flex-col justify-end pb-14 sm:pb-20">
-          <div className="enter">
-            <h1 id="hero-title" className="t-display max-w-[9em] text-snow">
-              <Tagline text={HERO.headline} />
+      {/* ---------------------------------------------------------------- Hero: the round from the logo, lit */}
+      <Section as="header" theme="black" bleed id="hero" className="relative min-h-[100svh] overflow-hidden" aria-labelledby="hero-title">
+        <CartridgeHero anchor={0.8} className="cursor-pointer" />
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(10,10,11,0.85)_0%,rgba(10,10,11,0.2)_45%,rgba(10,10,11,0)_60%)] max-md:bg-[linear-gradient(0deg,rgba(10,10,11,0.95)_0%,rgba(10,10,11,0.7)_38%,rgba(10,10,11,0)_62%)]" />
+        <Container className="pointer-events-none relative flex min-h-[100svh] flex-col justify-end pb-12 pt-[calc(var(--nav-h)+2rem)] sm:pb-20">
+          <div className="enter pointer-events-auto">
+            <p className="t-eyebrow text-mist">{SITE.address.line1} · {SITE.address.neighborhood}</p>
+            <h1 id="hero-title" className="mt-6 text-snow">
+              <span className="t-display block lg:text-[clamp(5rem,6.8vw,6.6rem)]">Ready? Aim.</span>
+              <span className="t-accent -mt-[0.05em] block pl-[0.04em] text-[clamp(4.5rem,12.5vw,11.5rem)] leading-[0.82]">Relax!</span>
             </h1>
-            {/* The address, then "Open tonight until 10." from HOURS, server-rendered and refreshed each minute. */}
-            <p className="mt-6 font-mono text-[0.8125rem] uppercase leading-[1.6] tracking-[0.12em] text-mist">
-              <span className="block">{ADDRESS}</span>
-              <LiveStatus initial={status} field="hero" variant="line" className="block" />
-            </p>
           </div>
-          <div className="enter mt-8" style={{ "--enter-delay": "250ms" } as React.CSSProperties}>
-            <Button href={HERO.cta.href} size="lg">
+          <div className="enter pointer-events-auto mt-10 flex flex-wrap items-center gap-x-8 gap-y-5" style={{ "--enter-delay": "220ms" } as React.CSSProperties}>
+            <Button href={HERO.cta.href} size="lg" variant="accent">
               {HERO.cta.label}
             </Button>
+            <LinkArrow href={HERO.link.href}>{HERO.link.label}</LinkArrow>
+            <LiveStatus initial={status} field="hero" variant="line" className="font-mono text-[0.75rem] uppercase tracking-[0.14em] text-mist sm:ml-auto" />
           </div>
         </Container>
+        <p aria-hidden="true" className="pointer-events-none absolute bottom-6 right-6 hidden font-mono text-[0.625rem] uppercase tracking-[0.2em] text-night-4 md:block">
+          9 mm Luger · tap the round
+        </p>
       </Section>
 
-      <UpcomingClasses />
+      {/* ---------------------------------------------------------------- Ticker */}
+      <div className="border-y border-black/20 bg-accent py-3.5 text-night">
+        <Marquee items={TICKER} className="t-label text-[0.8125rem]" />
+      </div>
 
-      {/* ---------------------------------------------------------------- Quiet */}
-      <Section theme="light" id="quiet" aria-labelledby="quiet-title">
+      {/* ---------------------------------------------------------------- Take a shot */}
+      <Section theme="light" padding="vast" id="take-a-shot" aria-label="Target practice">
         <Container>
-          <Headline id="quiet-title" layout="beside" head={QUIET.captions.join(" · ")} headline={QUIET.headline} subhead={QUIET.subhead} body={QUIET.body}>
-            <LinkArrow href={QUIET.link.href} className="mt-6">
-              {QUIET.link.label}
-            </LinkArrow>
-          </Headline>
-          <InView className="mt-14 sm:mt-20">
-            <Waveform />
-            <div className="mt-6 grid grid-cols-3 gap-4 border-t border-hairline pt-5">
-              {QUIET.captions.map((c, i) => (
-                <p key={c} className={cn("font-mono text-[0.75rem] uppercase tracking-[0.12em] text-ink-muted", i === 1 && "text-center", i === 2 && "text-right")}>
-                  {c}
-                </p>
-              ))}
-            </div>
-          </InView>
+          <TargetPractice ctaHref={LANES.cta.href} />
         </Container>
       </Section>
 
       {/* ---------------------------------------------------------------- Lanes */}
-      <Section theme="dark" id="lanes" aria-labelledby="lanes-title">
+      <Section theme="black" id="lanes" aria-labelledby="lanes-title" className="overflow-hidden">
         <Container>
-          <Headline id="lanes-title" head={`${FACILITY.laneCount} lanes · ${FACILITY.laneYards} yd · own air`} headline={LANES.headline} subhead={LANES.subhead} body={LANES.body} />
-          <div className="mt-14 sm:mt-20">
-            {/* Scrolling walks the firing line: lane labels turn gold in order (HeroMotion). */}
-            <LaneWalk>
-              <FloorPlan laneLabel={LANES.laneLabel} />
-            </LaneWalk>
+          <div className="grid gap-10 lg:grid-cols-12 lg:items-end">
+            <Head id="lanes-title" className="lg:col-span-7" head={`${FACILITY.laneCount} lanes · ${FACILITY.laneYards} yd · own air`} headline={LANES.headline} subhead={LANES.subhead} />
+            <div className="lg:col-span-5">
+              <p className="t-body-lg text-mist">{LANES.body}</p>
+              <p className="mt-5 font-mono text-[0.75rem] leading-[1.7] tracking-[0.04em] text-mist">
+                {LANES.priceFrom}. {LANES.eligibility}.
+              </p>
+            </div>
           </div>
-          <div className="mt-10 flex flex-col gap-4 border-t border-hairline pt-8 sm:flex-row sm:items-baseline sm:justify-between sm:gap-8">
-            <p className="font-mono text-[0.8125rem] leading-[1.6] text-mist">
-              {LANES.priceFrom}. {LANES.eligibility}.
-            </p>
-            <LinkArrow href={LANES.cta.href} className="shrink-0">
-              {LANES.cta.label}
-            </LinkArrow>
+          <div className="mt-16 sm:mt-24">
+            <LaneBoard count={FACILITY.laneCount} yards={FACILITY.laneYards} href="/reserve?experience=lane-session&lane={lane}" />
+          </div>
+          <div className="mt-10 flex flex-wrap items-center gap-8">
+            <Button href={LANES.cta.href}>{LANES.cta.label}</Button>
+            <LinkArrow href={QUIET.link.href}>{QUIET.link.label}</LinkArrow>
           </div>
         </Container>
       </Section>
 
-      {/* ---------------------------------------------------------------- Suites */}
-      <Section theme="gray" id="suites" className="overflow-hidden" aria-labelledby="suites-title">
+      {/* ---------------------------------------------------------------- Quiet: one sentence, big */}
+      <Section theme="light" padding="vast" id="quiet" aria-labelledby="quiet-title">
         <Container>
-          <div className="grid gap-12 lg:grid-cols-12 lg:items-end lg:gap-10">
-            <div className="lg:col-span-5">
-              <Headline id="suites-title" head={`${FACILITY.suites} suites · ${FACILITY.lanesPerSuite} lanes each · a host at the door`} headline={SUITES.headline} subhead={SUITES.subhead} body={SUITES.body}>
-                <LinkArrow href={SUITES.cta.href} className="mt-6">
-                  {SUITES.cta.label}
-                </LinkArrow>
-              </Headline>
+          <Eyebrow>{QUIET.captions.join(" · ")}</Eyebrow>
+          <h2 id="quiet-title" className="mt-8 max-w-[18ch] font-serif text-[clamp(2.6rem,6.8vw,6.25rem)] italic leading-[0.98] tracking-[-0.02em]">
+            {QUIET.subhead}
+          </h2>
+          <div className="mt-12 grid gap-8 border-t border-hairline pt-8 md:grid-cols-12">
+            <p className="t-body-lg text-ink-muted md:col-span-6">{QUIET.body}</p>
+            <div className="md:col-span-6 md:text-right">
+              <LinkArrow href={QUIET.link.href}>{QUIET.link.label}</LinkArrow>
             </div>
-            <Figure caption={SUITES.caption} mono className="lg:col-span-7">
-              <ImageSlot slot={SUITES.imageSlot} alt={SUITES.imageAlt} className="aspect-[16/10] rounded-card ring-1 ring-ink/5" art={<SuiteArt />} sizes="(min-width: 1024px) 640px, 100vw" />
-            </Figure>
+          </div>
+        </Container>
+      </Section>
+
+      {/* ---------------------------------------------------------------- Brass: product shot band */}
+      <section aria-hidden="true" className="relative h-[46vw] max-h-[720px] min-h-[300px] overflow-hidden bg-night">
+        <Image src="/renders/round-side.webp" alt="" fill sizes="100vw" className="object-cover" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,10,11,0)_55%,rgba(10,10,11,1)_100%)]" />
+      </section>
+
+      {/* ---------------------------------------------------------------- Suites */}
+      <Section theme="black" id="suites" padding="normal" aria-labelledby="suites-title" className="!pt-4">
+        <Container>
+          <div className="grid gap-12 lg:grid-cols-12 lg:gap-10">
+            <div className="lg:col-span-4">
+              <span className="t-numeral block text-accent" aria-hidden="true">
+                0{FACILITY.suites}
+              </span>
+              <p className="t-label mt-3 text-mist">Private suites</p>
+            </div>
+            <div className="lg:col-span-8">
+              <Head id="suites-title" head={`${FACILITY.lanesPerSuite} lanes each · a host at the door`} headline={SUITES.headline} subhead={SUITES.subhead} />
+              <p className="t-body-lg mt-8 max-w-[34em] text-mist">{SUITES.body}</p>
+              <dl className="mt-10 grid grid-cols-2 border-t border-hairline-dark sm:grid-cols-4">
+                {[
+                  { k: "Lanes", v: String(FACILITY.lanesPerSuite) },
+                  { k: "Guests", v: String(SUITE?.maxGuestsPerUnit ?? "") },
+                  { k: "Minutes", v: String(SUITE?.durationMin ?? "") },
+                  { k: "From", v: SUITE ? formatMoney(SUITE.priceCents) : "" },
+                ].map((d) => (
+                  <div key={d.k} className="border-b border-hairline-dark py-5 pr-4">
+                    <dt className="t-label text-mist">{d.k}</dt>
+                    <dd className="t-stencil mt-2 text-[2.5rem] leading-none text-snow">{d.v}</dd>
+                  </div>
+                ))}
+              </dl>
+              <div className="mt-10">
+                <Button href={SUITES.cta.href}>{SUITES.cta.label}</Button>
+              </div>
+            </div>
           </div>
         </Container>
       </Section>
 
       {/* ---------------------------------------------------------------- Simulator */}
-      <Section theme="black" id="simulator" aria-labelledby="simulator-title">
+      <Section theme="dark" id="simulator" aria-labelledby="simulator-title">
         <Container>
-          <Headline id="simulator-title" head={`${FACILITY.simulatorBays} bays · no live ammunition · ID only`} headline={SIMULATOR.headline} subhead={SIMULATOR.subhead} body={SIMULATOR.body} />
-          <InView className="relative mt-14 overflow-hidden rounded-card ring-1 ring-white/10 shadow-[var(--shadow-card-dark)] sm:mt-20">
-            <div className="relative aspect-[21/9]">
-              <div className="absolute inset-0">
-                <ImageSlot slot={SIMULATOR.imageSlot} alt={SIMULATOR.imageAlt} className="h-full w-full" art={<SimArt />} sizes="(min-width: 1180px) 1180px, 100vw" />
-              </div>
-              <SimulatorScreen labels={SIMULATOR.cornerLabels} />
-            </div>
-          </InView>
-          <div className="mt-10 flex flex-col gap-5 border-t border-hairline pt-8 sm:flex-row sm:items-center sm:justify-between">
+          <div className="grid gap-10 lg:grid-cols-12 lg:items-end">
+            <Head id="simulator-title" className="lg:col-span-7" head={`${FACILITY.simulatorBays} bays · no live ammunition · ID only`} headline={SIMULATOR.headline} subhead={SIMULATOR.subhead} />
+            <p className="t-body-lg text-mist lg:col-span-5">{SIMULATOR.body}</p>
+          </div>
+          <div className="mt-14 sm:mt-20">
+            <RangeTimer labels={SIMULATOR.cornerLabels} />
+          </div>
+          <div className="mt-10 flex flex-wrap items-center justify-between gap-6">
             <Button href={SIMULATOR.cta.href}>{SIMULATOR.cta.label}</Button>
-            <p className="font-mono text-[0.8125rem] text-mist">{SIMULATOR.eligibility}.</p>
+            <p className="font-mono text-[0.75rem] tracking-[0.04em] text-mist">{SIMULATOR.eligibility}.</p>
           </div>
         </Container>
       </Section>
@@ -168,126 +203,146 @@ export default function HomePage() {
       {/* ---------------------------------------------------------------- First Session */}
       <Section theme="light" id="first-session" aria-labelledby="first-session-title">
         <Container>
-          <Headline id="first-session-title" layout="beside" head={FIRST_SESSION.price} headline={FIRST_SESSION.headline} subhead={FIRST_SESSION.subhead} body={FIRST_SESSION.body}>
-            <p className="mt-4 font-mono text-[0.8125rem] text-ink-muted">{FIRST_SESSION.eligibility}.</p>
-            <LinkArrow href={FIRST_SESSION.cta.href} className="mt-6">
+          <div className="grid gap-10 lg:grid-cols-12 lg:items-end">
+            <Head id="first-session-title" className="lg:col-span-7" head={FIRST_SESSION.price} headline={FIRST_SESSION.headline} subhead={FIRST_SESSION.subhead} />
+            <div className="lg:col-span-5">
+              <p className="t-body-lg text-ink-muted">{FIRST_SESSION.body}</p>
+              <p className="mt-4 font-mono text-[0.75rem] tracking-[0.04em] text-ink-muted">{FIRST_SESSION.eligibility}.</p>
+            </div>
+          </div>
+          <ol className="mt-16 grid grid-cols-2 border-t border-ink sm:mt-20 sm:grid-cols-5">
+            {FIRST_SESSION.steps.map((s, i) => (
+              <li key={s} className={cn("border-b border-hairline py-6 pr-4 sm:border-b-0 sm:py-8", i > 0 && "sm:border-l sm:pl-6")}>
+                <span className="t-stencil block text-[3.5rem] leading-none text-accent-deep">{String(i + 1).padStart(2, "0")}</span>
+                <span className="t-label mt-3 block">{s}</span>
+              </li>
+            ))}
+          </ol>
+          <div className="mt-12">
+            <Button href={FIRST_SESSION.cta.href} size="lg">
               {FIRST_SESSION.cta.label}
-            </LinkArrow>
-          </Headline>
-          <InView className="mt-14 sm:mt-20">
-            <StepRail steps={FIRST_SESSION.steps} />
-          </InView>
+            </Button>
+          </div>
         </Container>
       </Section>
 
-      {/* ---------------------------------------------------------------- Hospitality */}
-      <Section theme="dark" id="hospitality" aria-labelledby="hospitality-title">
+      {/* ---------------------------------------------------------------- The lounge, as a printed menu */}
+      <Section theme="gray" padding="vast" id="hospitality" aria-labelledby="hospitality-title">
         <Container>
-          <div className="grid gap-12 lg:grid-cols-12 lg:items-center lg:gap-10">
+          <div className="grid gap-14 lg:grid-cols-12 lg:gap-10">
             <div className="lg:col-span-6">
-              <Headline id="hospitality-title" head="Espresso, tea, sparkling water · a warm towel off the line" headline={HOSPITALITY.headline} subhead={HOSPITALITY.subhead} body={HOSPITALITY.body} />
-              <PullQuote className="mt-10">No alcohol, ever.</PullQuote>
-              <p className="t-footnote mt-6 text-mist">{HOSPITALITY.footnote}</p>
-              <LinkArrow href={HOSPITALITY.link.href} className="mt-6">
-                {HOSPITALITY.link.label}
-              </LinkArrow>
+              <Head id="hospitality-title" head="The lounge · behind the glass" headline={HOSPITALITY.headline} subhead={HOSPITALITY.subhead} />
+              <p className="t-body-lg mt-8 max-w-[30em] text-ink-muted">{HOSPITALITY.body}</p>
+              <div className="mt-10">
+                <LinkArrow href={HOSPITALITY.link.href}>{HOSPITALITY.link.label}</LinkArrow>
+              </div>
             </div>
-            <div className="lg:col-span-6">
-              <ImageSlot slot={HOSPITALITY.imageSlot} alt={HOSPITALITY.imageAlt} className="aspect-[3/2] rounded-card ring-1 ring-white/10" art={<LoungeArt />} sizes="(min-width: 1024px) 560px, 100vw" />
+            <div className="lg:col-span-5 lg:col-start-8">
+              <div className="relative mx-auto max-w-[420px] bg-[#f8f4ec] px-6 pb-10 pt-9 sm:px-8 shadow-[0_30px_60px_-30px_rgba(20,18,16,0.45),0_1px_0_rgba(20,18,16,0.06)] lg:rotate-[0.6deg]">
+                <p className="text-center font-serif text-[1.9rem] italic leading-none">The Lounge</p>
+                <p className="mt-2 text-center font-mono text-[0.625rem] uppercase tracking-[0.2em] text-ink-muted">Included with every visit</p>
+                <div className="mx-auto my-6 h-px w-16 bg-accent" />
+                <ul className="space-y-4">
+                  {LOUNGE_MENU.map((m) => (
+                    <li key={m.item} className="flex items-baseline gap-3">
+                      <span className="t-4 whitespace-nowrap">{m.item}</span>
+                      <span aria-hidden="true" className="mb-1 min-w-4 flex-1 border-b border-dotted border-ink/30" />
+                      <span className="text-right font-serif text-[1.05rem] italic leading-tight text-ink-muted">{m.note}</span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-8 border-t border-hairline pt-5 text-center font-serif text-[1.35rem] italic">No alcohol, ever.</p>
+              </div>
             </div>
           </div>
         </Container>
       </Section>
 
-      {/* ---------------------------------------------------------------- Membership */}
-      <Section theme="gray" id="membership" aria-labelledby="membership-title">
-        <Container>
-          <Headline
-            id="membership-title"
-            layout="beside"
-            head={`${spell(MEMBERSHIP.tiers.length)} tiers · ${TIER_WINDOW_DAYS.club}, ${TIER_WINDOW_DAYS.signature} or ${TIER_WINDOW_DAYS.founders} days ahead`}
-            headline={MEMBERSHIP.headline}
-            subhead={MEMBERSHIP.subhead}
-            body={MEMBERSHIP.body}
-          />
-          {/* One hairline table, price right-aligned, in place of three matching cards. */}
-          <table className="mt-14 w-full border-collapse sm:mt-20">
-            <caption className="sr-only">Membership tiers, price and who each is for</caption>
-            <thead>
-              <tr className="border-t border-hairline">
-                <th scope="col" className="py-3 pr-4 text-left font-mono text-[0.6875rem] font-normal uppercase tracking-[0.12em] text-ink-muted">
-                  Tier
-                </th>
-                <th scope="col" className="hidden py-3 pr-4 text-left font-mono text-[0.6875rem] font-normal uppercase tracking-[0.12em] text-ink-muted md:table-cell">
-                  Who it is for
-                </th>
-                <th scope="col" className="py-3 text-right font-mono text-[0.6875rem] font-normal uppercase tracking-[0.12em] text-ink-muted">
-                  Window · price
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {MEMBERSHIP.tiers.map((t) => {
+      {/* ---------------------------------------------------------------- Membership: spent brass under the headline */}
+      <Section theme="black" bleed id="membership" aria-labelledby="membership-title" className="overflow-hidden">
+        <div className="relative">
+          <div className="relative h-[70vw] max-h-[760px] min-h-[420px]">
+            <Image src="/renders/casings.webp" alt="" fill sizes="100vw" className="object-cover" />
+            <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,10,11,0.2)_0%,rgba(10,10,11,0)_35%,rgba(10,10,11,0.9)_85%,rgba(10,10,11,1)_100%)]" />
+          </div>
+          <Container className="relative -mt-44 pb-20 sm:-mt-56 sm:pb-28">
+            <Head
+              id="membership-title"
+              head={`${spell(MEMBERSHIP.tiers.length)} tiers · ${TIER_WINDOW_DAYS.club}, ${TIER_WINDOW_DAYS.signature} or ${TIER_WINDOW_DAYS.founders} days ahead`}
+              headline={MEMBERSHIP.headline}
+              subhead={MEMBERSHIP.subhead}
+            />
+            <ul className="mt-16 grid border-t border-hairline-dark md:grid-cols-3">
+              {MEMBERSHIP.tiers.map((t, i) => {
                 const tier = tierByKey(t.key);
                 return (
-                  <tr key={t.key} className="border-t border-hairline align-baseline">
-                    <th scope="row" className="py-6 pr-4 text-left font-normal sm:py-7">
-                      <Link href={`/membership#tiers`} className="t-3 text-ink hover:underline hover:underline-offset-4">
-                        {t.name}
-                      </Link>
-                      <p className="t-caption mt-1 text-ink-muted md:hidden">{tier?.forWhom ?? t.tagline}</p>
-                    </th>
-                    <td className="hidden py-6 pr-8 sm:py-7 md:table-cell">
-                      <p className="t-body max-w-[30em] text-ink-muted">{tier?.forWhom ?? t.tagline}</p>
-                      {t.limited && <p className="t-footnote mt-2 text-ink-muted">{t.limited}</p>}
-                    </td>
-                    <td className="py-6 text-right sm:py-7">
-                      <p className="whitespace-nowrap font-mono text-[0.75rem] text-ink-muted">
-                        {t.days} {MEMBERSHIP.caption}
-                      </p>
-                      <p className="t-3 t-price mt-1 whitespace-nowrap text-ink">{t.price}</p>
-                      <p className="t-caption text-ink-muted">{t.priceNote}</p>
-                    </td>
-                  </tr>
+                  <li key={t.key} className={cn("border-b border-hairline-dark py-8 md:border-b-0 md:py-10", i > 0 && "md:border-l md:pl-8", i < 2 && "md:pr-8")}>
+                    <Link href="/membership#tiers" className="group/tier block">
+                      <span className="flex items-baseline justify-between">
+                        <span className="t-3 text-snow">{t.name}</span>
+                        <span className="font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-mist">{t.limited ? "50 only" : " "}</span>
+                      </span>
+                      <span className="mt-6 flex items-end gap-3">
+                        <span className="t-numeral text-[clamp(5rem,9vw,8rem)] text-accent transition-colors group-hover/tier:text-accent-2">{t.days}</span>
+                        <span className="t-label mb-3 text-mist">days
+                          <br />
+                          ahead
+                        </span>
+                      </span>
+                      <span className="t-body mt-6 block max-w-[24em] text-mist">{tier?.forWhom ?? t.tagline}</span>
+                      <span className="mt-6 block font-mono text-[0.8125rem] tracking-[0.04em] text-snow">
+                        {t.price} <span className="text-mist">{t.priceNote}</span>
+                      </span>
+                    </Link>
+                  </li>
                 );
               })}
-              <tr className="border-t border-hairline">
-                <td colSpan={3} className="p-0" aria-hidden="true" />
-              </tr>
-            </tbody>
-          </table>
-          <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <Button href={MEMBERSHIP.cta.href}>{MEMBERSHIP.cta.label}</Button>
-            <p className="t-caption text-ink-muted">{MEMBERSHIP.publicWindowNote}</p>
-          </div>
-        </Container>
-      </Section>
-
-      {/* ---------------------------------------------------------------- Visit */}
-      <Section theme="black" bleed id="visit" className="overflow-hidden" aria-labelledby="visit-title">
-        <div className="absolute inset-0">
-          <ImageSlot slot={VISIT.imageSlot} alt={VISIT.imageAlt} className="h-full w-full" art={<ExteriorArt />} />
+            </ul>
+            <div className="mt-12 flex flex-wrap items-center justify-between gap-6">
+              <Button href={MEMBERSHIP.cta.href} variant="accent" size="lg">
+                {MEMBERSHIP.cta.label}
+              </Button>
+              <p className="font-mono text-[0.75rem] tracking-[0.04em] text-mist">{MEMBERSHIP.publicWindowNote}</p>
+            </div>
+          </Container>
         </div>
-        <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(0deg,rgba(0,0,0,0.92)_0%,rgba(0,0,0,0.55)_50%,rgba(0,0,0,0.35)_100%)]" />
-        <Container className="relative py-24 sm:py-32 lg:py-40">
-          <div className="lg:max-w-[58%]">
-            <Headline id="visit-title" head={`${SITE.address.line1} · ${FACILITY.transit.driveFromJfkMin} min from the terminals`} headline={VISIT.headline} subhead={VISIT.subhead} body={VISIT.body}>
-              <LinkArrow href={VISIT.cta.href} className="mt-6">
-                {VISIT.cta.label}
-              </LinkArrow>
-            </Headline>
+      </Section>
+
+      <UpcomingClasses />
+
+      {/* ---------------------------------------------------------------- Visit: the headstamp and the address */}
+      <Section theme="black" id="visit" aria-labelledby="visit-title" className="overflow-hidden">
+        <Container>
+          <div className="grid items-center gap-12 lg:grid-cols-12">
+            <div className="lg:col-span-7">
+              <Eyebrow>{`${FACILITY.transit.driveFromJfkMin} min from the terminals · ${FACILITY.transit.expressway.split(" (")[0]}`}</Eyebrow>
+              <h2 id="visit-title" className="t-display mt-8 text-snow">
+                <span className="t-stencil block text-[1.15em] leading-[0.85] text-accent">{SITE.address.line1.split(" ")[0]}</span>
+                <span className="block whitespace-nowrap text-[0.5em] leading-[1.05]">{SITE.address.line1.split(" ").slice(1).join(" ")}</span>
+              </h2>
+              <p className="t-subhead mt-6 max-w-[22em] text-mist">{VISIT.subhead}</p>
+              <p className="t-body-lg mt-8 max-w-[32em] text-mist">{VISIT.body}</p>
+              <div className="mt-10 flex flex-wrap items-center gap-8">
+                <Button href={VISIT.cta.href}>{VISIT.cta.label}</Button>
+                <LinkArrow href={VISIT.hoursLink.href}>{VISIT.hoursLink.label}</LinkArrow>
+              </div>
+            </div>
+            <div className="lg:col-span-5">
+              <div className="relative mx-auto aspect-square max-w-[480px]">
+                <Image src="/renders/headstamp.webp" alt="" fill sizes="(min-width: 1024px) 480px, 90vw" className="object-contain" />
+              </div>
+            </div>
           </div>
         </Container>
       </Section>
 
-      {/* ---------------------------------------------------------------- Tonight (silent) */}
+      {/* ---------------------------------------------------------------- Tonight */}
       <Section theme="light" padding="vast" id="tonight" aria-label="Lanes free tonight">
         <Container>
           <Tonight initial={status} />
         </Container>
       </Section>
 
-      {/* ---------------------------------------------------------------- Availability */}
       <Section theme="light" padding="tight" id="availability" className="border-t border-hairline" aria-label="Live availability">
         <Container>
           <AvailabilityStrip />
@@ -297,7 +352,6 @@ export default function HomePage() {
         </Container>
       </Section>
 
-      {/* ---------------------------------------------------------------- From the desk */}
       <DeskLog />
     </>
   );

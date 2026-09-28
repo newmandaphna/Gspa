@@ -1,5 +1,5 @@
 import { cn } from "@/lib/cn";
-import type { BringItem, TransitLine } from "@/lib/content/pages/visit";
+import type { BringItem } from "@/lib/content/pages/visit";
 
 /**
  * Visuals for /visit. Pure SVG and CSS so the page looks finished before any
@@ -54,80 +54,6 @@ export function ExteriorArt() {
       <path d="M560 -50 L1040 950" stroke="rgba(255,255,255,0.16)" strokeWidth="1" />
       <rect width="1600" height="900" fill="url(#vx-vignette)" />
     </svg>
-  );
-}
-
-const ORIGINS: Record<TransitLine["id"], { x: number; y: number; anchor: "start" | "middle" | "end" }> = {
-  lirr: { x: 60, y: 70, anchor: "start" },
-  subway: { x: 400, y: 40, anchor: "middle" },
-  airtrain: { x: 740, y: 70, anchor: "end" },
-};
-
-const PIN = { x: 400, y: 300 };
-
-function lerp(a: number, b: number, t: number) {
-  return a + (b - a) * t;
-}
-
-/**
- * Three hairlines with station dots converging on a gold pin. Paths carry the
- * `draw` class and animate when a parent gets `in-view`. Labels are HTML so
- * they stay legible on wide screens; below `sm` the three origin labels are
- * hidden because the drawing is too small to hold them and the transit chips
- * under the sketch carry the same information.
- */
-export function TransitSketch({ lines, className }: { lines: TransitLine[]; className?: string }) {
-  return (
-    <div className={cn("relative w-full", className)}>
-      <svg viewBox="0 0 800 360" className="h-auto w-full" aria-hidden="true">
-        {lines.map((line, li) => {
-          const o = ORIGINS[line.id];
-          const mid = { x: lerp(o.x, PIN.x, 0.5) + (o.anchor === "middle" ? 0 : o.anchor === "start" ? 40 : -40), y: lerp(o.y, PIN.y, 0.5) - 30 };
-          const d = `M${o.x} ${o.y} Q${mid.x} ${mid.y} ${PIN.x} ${PIN.y - 26}`;
-          return (
-            <g key={line.id}>
-              <path d={d} pathLength={1} className="draw" fill="none" stroke="#6e6e73" strokeWidth="1" style={{ transitionDelay: `${li * 150}ms` }} />
-              {line.stops.map((stop, si) => {
-                const t = (si + 1) / (line.stops.length + 1);
-                // point on the quadratic curve
-                const x = (1 - t) * (1 - t) * o.x + 2 * (1 - t) * t * mid.x + t * t * PIN.x;
-                const y = (1 - t) * (1 - t) * o.y + 2 * (1 - t) * t * mid.y + t * t * (PIN.y - 26);
-                return <circle key={stop} cx={x} cy={y} r="4" fill="#fbfbfd" stroke="#6e6e73" strokeWidth="1" />;
-              })}
-              <circle cx={o.x} cy={o.y} r="5" fill="#fbfbfd" stroke="#6e6e73" strokeWidth="1" />
-            </g>
-          );
-        })}
-        {/* the pin: the one gold element */}
-        <g transform={`translate(${PIN.x - 12} ${PIN.y - 32})`}>
-          <path d="M12 1.5c-5.2 0-9.5 4.2-9.5 9.4 0 7 9.5 19.6 9.5 19.6s9.5-12.6 9.5-19.6c0-5.2-4.3-9.4-9.5-9.4z" fill="none" stroke={GOLD} strokeWidth="1.4" strokeLinejoin="round" />
-          <circle cx="12" cy="11" r="3.4" fill="none" stroke={GOLD} strokeWidth="1.4" />
-          <circle cx="12" cy="11" r="1" fill={GOLD} />
-        </g>
-        <line x1="0" y1="340" x2="800" y2="340" stroke={HAIR_LIGHT} strokeWidth="1" />
-      </svg>
-      {lines.map((line) => {
-        const o = ORIGINS[line.id];
-        const left = (o.x / 800) * 100;
-        const top = (o.y / 360) * 100;
-        return (
-          <span
-            key={line.id}
-            className={cn(
-              "absolute hidden whitespace-nowrap font-mono text-[0.75rem] leading-none text-ink-muted sm:block",
-              o.anchor === "middle" && "-translate-x-1/2",
-              o.anchor === "end" && "-translate-x-full",
-            )}
-            style={{ left: `${left}%`, top: `calc(${top}% + 12px)` }}
-          >
-            {line.label}
-          </span>
-        );
-      })}
-      <span className="absolute left-1/2 -translate-x-1/2 font-mono text-[0.75rem] leading-none text-accent-deep" style={{ top: `calc(${(PIN.y / 360) * 100}% + 10px)` }}>
-        The Gun Spa
-      </span>
-    </div>
   );
 }
 

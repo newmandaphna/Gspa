@@ -10,7 +10,7 @@ export function Eyebrow({ children, className, accent = false }: { children: Rea
   return (
     <p
       className={cn(
-        "font-mono text-[0.75rem] uppercase leading-[1.4] tracking-[0.12em]",
+        "t-eyebrow",
         accent ? "text-accent-deep [[data-theme=dark]_&]:text-accent" : "text-ink [[data-theme=dark]_&]:text-mist",
         className,
       )}

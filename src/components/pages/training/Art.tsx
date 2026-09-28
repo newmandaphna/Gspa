@@ -86,30 +86,6 @@ export function GroupingTarget({ className }: { className?: string }) {
    two rails to the target and one downlight, so a photograph drops in later
    at the same crop.
    --------------------------------------------------------------------- */
-export function PortraitArt({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice" className={cn("h-full w-full", className)} aria-hidden="true">
-      <defs>
-        <linearGradient id="pa-bg" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#0a0a0b" />
-          <stop offset="1" stopColor="#1c1c20" />
-        </linearGradient>
-        <radialGradient id="pa-light" cx="50%" cy="28%" r="45%">
-          <stop offset="0" stopColor={GOLD_2} stopOpacity="0.2" />
-          <stop offset="1" stopColor={GOLD_2} stopOpacity="0" />
-        </radialGradient>
-      </defs>
-      <rect width="400" height="500" fill="url(#pa-bg)" />
-      <ellipse cx="200" cy="150" rx="220" ry="200" fill="url(#pa-light)" />
-      {/* lane rails converging on the target frame */}
-      <path d="M40 500L170 190M360 500L230 190" fill="none" stroke={HAIR_DARK} strokeWidth="1" />
-      <path d="M0 470H400M20 400H380M60 330H340" fill="none" stroke={HAIR_DARK} strokeWidth="1" />
-      <rect x="176" y="150" width="48" height="56" rx="2" fill="#0a0a0b" stroke="rgba(226,201,138,0.5)" strokeWidth="1" />
-      <circle cx="200" cy="178" r="12" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="1" />
-      <circle cx="200" cy="178" r="2" fill={GOLD} />
-    </svg>
-  );
-}
 
 /* ------------------------------------------------------------------------
    The ladder: five ascending treads drawn with hairlines. The tread under

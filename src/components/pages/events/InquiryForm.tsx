@@ -2,6 +2,7 @@
 
 import { useId, useState, type FormEvent } from "react";
 import { cn } from "@/lib/cn";
+import { Button } from "@/components/ui/Button";
 import { BUDGETS, EVENT_FORM, OCCASIONS, type Occasion } from "@/lib/content/pages/events";
 import { todayIso } from "@/lib/time";
 
@@ -212,13 +213,9 @@ export function InquiryForm({ className }: { className?: string }) {
       </div>
 
       <div className="mt-8 flex flex-wrap items-center gap-4">
-        <button
-          type="submit"
-          disabled={status.kind === "sending"}
-          className="inline-flex h-[52px] items-center justify-center rounded-pill bg-ink px-7 text-[1.125rem] font-medium text-snow transition-[background-color,transform] duration-200 hover:bg-night-3 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40"
-        >
+        <Button type="submit" size="lg" disabled={status.kind === "sending"}>
           {status.kind === "sending" ? f.sending : f.submit}
-        </button>
+        </Button>
         {status.kind === "error" && (
           <p className="t-caption text-danger" role="alert">
             {status.message}
