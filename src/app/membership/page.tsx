@@ -314,7 +314,7 @@ export default async function MembershipPage() {
             <div>
               <Head copy={MEMBERSHIP_VETTING} />
               <Reveal delay={0.1} className="mt-8">
-                <p className="font-mono text-[0.8125rem] text-mist">{VETTING_VENDOR_LINE}</p>
+                {VETTING_VENDOR_LINE && <p className="font-mono text-[0.8125rem] text-mist">{VETTING_VENDOR_LINE}</p>}
                 <LinkArrow href={VETTING_LINK.href} className="mt-3 text-mist">
                   {VETTING_LINK.label}
                 </LinkArrow>

@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
 import { SITE } from "@/lib/config/site";
-import { REQUIREMENTS, REQUIREMENTS_LAST_REVIEWED, type RequirementTag } from "@/lib/content/requirements";
+import { REQUIREMENTS, REVIEWED_LINE, type RequirementTag } from "@/lib/content/requirements";
 
 /**
  * The requirements set as the printed card that sits at the desk: 5.5 by 8.5,
@@ -125,7 +125,7 @@ export function RulesCard({ className, print = true }: { className?: string; pri
             ))}
             <span>No mark, everyone</span>
           </p>
-          <p className="m-0 mt-2 font-mono text-[10px] uppercase tracking-[0.1em]">Reviewed {REQUIREMENTS_LAST_REVIEWED}</p>
+          {REVIEWED_LINE && <p className="m-0 mt-2 font-mono text-[10px] uppercase tracking-[0.1em]">{REVIEWED_LINE}</p>}
         </footer>
       </article>
       {print && (

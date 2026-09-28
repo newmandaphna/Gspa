@@ -26,6 +26,7 @@ import {
   type LegalSection,
 } from "@/lib/content/pages/legal";
 import { RANGE_RULES, REQUIREMENTS, REQUIREMENTS_LAST_REVIEWED } from "@/lib/content/requirements";
+import { isPlaceholder } from "@/lib/seo/placeholders";
 
 export const metadata: Metadata = pageMeta("/legal", {
   title: LEGAL_META.title,
@@ -37,14 +38,17 @@ export const metadata: Metadata = pageMeta("/legal", {
 const ANCHOR = "scroll-mt-[calc(var(--nav-h)+1.5rem)]";
 const MEASURE = "max-w-[34em]";
 
-/** Mono "Last updated [date]" stamp. Inherits the band's muted color. */
+/** Mono "Last updated <date>" stamp. Inherits the band's muted color. Nothing renders while the date is still a placeholder. */
 function Stamp({ children, className }: { children: React.ReactNode; className?: string }) {
+  const text = Array.isArray(children) ? children.join("") : String(children ?? "");
+  if (!text.trim() || isPlaceholder(text)) return null;
   return <p className={cn("mt-4 font-mono text-[0.8125rem] leading-[1.5] text-ink-muted [[data-theme=dark]_&]:text-mist", className)}>{children}</p>;
 }
 
-/** Bracketed counsel note, rendered verbatim. */
+/** Counsel's notes stay in the source (legal.ts) as the working list and never render. */
 function CounselNote({ children }: { children: React.ReactNode }) {
-  return <p className="mt-8 font-mono text-[0.8125rem] leading-[1.5] text-ink-muted [[data-theme=dark]_&]:text-mist">{children}</p>;
+  void children;
+  return null;
 }
 
 /** One long-form section: headline block, stamp, clauses with hairlines. */
@@ -139,9 +143,11 @@ function RangeRules() {
               ))}
             </Numbered>
             <div className="mt-6 flex flex-wrap items-center justify-between gap-x-8 gap-y-3">
-              <p className="font-mono text-[0.8125rem] leading-[1.5] text-mist">
-                {c.reviewedLabel} {REQUIREMENTS_LAST_REVIEWED}
-              </p>
+              {!isPlaceholder(REQUIREMENTS_LAST_REVIEWED) && (
+                <p className="font-mono text-[0.8125rem] leading-[1.5] text-mist">
+                  {c.reviewedLabel} {REQUIREMENTS_LAST_REVIEWED}
+                </p>
+              )}
               <LinkArrow href={SEE_REQUIREMENTS.href}>{SEE_REQUIREMENTS.label}</LinkArrow>
             </div>
           </div>

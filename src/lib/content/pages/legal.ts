@@ -11,6 +11,7 @@ import { itemBySlug } from "@/lib/content/catalog";
 import { MEMBERSHIP_TIERS, SCREENING_FEE_CENTS, tierByKey } from "@/lib/content/membership";
 import { formatMoney } from "@/lib/time";
 import { ifPriced } from "@/lib/pricing";
+import { isPlaceholder } from "@/lib/seo/placeholders";
 
 export type LegalSectionId = "privacy" | "terms" | "screening" | "membership-agreement" | "biometrics" | "range-rules" | "waiver";
 
@@ -47,6 +48,8 @@ export type RetentionRow = { data: string; why: string; howLong: string };
 export const LEGAL_UPDATED = "[date]";
 
 export const SCREENING_VENDOR = "[Vendor]";
+/** How the pages name the vendor: its name once the owner sets it, a plain description until then. */
+const VENDOR = isPlaceholder(SCREENING_VENDOR) ? "the screening vendor" : SCREENING_VENDOR;
 export const PRIVACY_EMAIL = SITE.email;
 
 const course = itemBySlug("nys-ccw-course");
@@ -72,7 +75,7 @@ export const LEGAL_HERO = {
   eyebrow: "Legal",
   headline: "The fine print, in plain English.",
   subhead: "Everything you agree to at the club, on one page.",
-  body: "Read the part you need and skip the rest. Anything in square brackets is still with counsel or the owner and will change before launch.",
+  body: "Read the part you need and skip the rest.",
 };
 
 export const NAV_LABEL = "On this page";
@@ -90,11 +93,11 @@ export const RETENTION_ROWS: RetentionRow[] = [
   { data: "ID checks at the desk", why: "A yes or no flag plus the document type. Never an image.", howLong: "3 years" },
   { data: "License and permit numbers", why: "To verify eligibility for the lane you reserve. Stored encrypted.", howLong: "3 years after your last visit, or on request" },
   { data: "Membership applications and references", why: "To decide membership. Each reference is asked one question.", howLong: "Reference replies 1 year, then deleted" },
-  { data: "Screening results", why: `${SCREENING_VENDOR} holds the consumer report. The club keeps the decision and any adverse-action record.`, howLong: "Decision 5 years; the report itself 1 year" },
+  { data: "Screening results", why: `${VENDOR.replace(/^the /, "The ")} holds the consumer report. The club keeps the decision and any adverse-action record.`, howLong: "Decision 5 years; the report itself 1 year" },
   { data: "Event leads", why: "To quote and plan the event.", howLong: "2 years" },
   { data: "Lane credit ledger", why: "To apply credit at the desk.", howLong: "12 months after the credit expires" },
   { data: "Member-match cookie", why: "A signed, httpOnly cookie holding only a member id, set when you sign in to the members portal.", howLong: "30 days" },
-  { data: "Analytics", why: "[Privacy-preserving analytics vendor, or none.] No cross-site tracking, no advertising pixels.", howLong: "[Per vendor]" },
+  { data: "Analytics", why: "None. No cross-site tracking, no advertising pixels.", howLong: "Nothing kept" },
 ];
 
 export const PRIVACY: LegalSection = {
@@ -108,7 +111,7 @@ export const PRIVACY: LegalSection = {
       heading: "What the club collects",
       paragraphs: [
         "When you reserve, the club records four things about you (name, email address, phone number, party size) and the session you chose. At the desk, staff look at your photo ID and note only that it was checked and what kind of document it was. No copy or image of the ID is kept.",
-        `Members also give a license or permit number, the names of two references and written authorization for a background screen. The screening result comes back from ${SCREENING_VENDOR} and serves two purposes: deciding the application, and confirming the membership once a year.`,
+        `Members also give a license or permit number, the names of two references and written authorization for a background screen. The screening result comes back from ${VENDOR} and serves two purposes: deciding the application, and confirming the membership once a year.`,
         "If you sign in to the members portal, a signed cookie holding only your member id keeps you matched to your account for 30 days.",
       ],
     },
@@ -195,7 +198,7 @@ export const TERMS: LegalSection = {
     {
       heading: "Prices and payment",
       paragraphs: [
-        "The price shown at reservation covers the items listed for that experience. Ammunition is charged at the desk, as are targets beyond those included and catering. Where online payment is offered it is taken at reservation. Otherwise payment is due at the desk when you arrive.",
+        "The price shown at reservation covers the items listed for that experience. Targets beyond those included and catering are charged at the desk. Where online payment is offered it is taken at reservation. Otherwise payment is due at the desk when you arrive.",
       ],
     },
   ],
@@ -205,7 +208,7 @@ export const TERMS: LegalSection = {
 
 /* ---------------------------------------------------------- screening */
 
-export const SCREENING_BY = `Screening by ${SCREENING_VENDOR}`;
+export const SCREENING_BY = isPlaceholder(SCREENING_VENDOR) ? "" : `Screening by ${SCREENING_VENDOR}`;
 
 export const SCREENING: LegalSection = {
   id: "screening",
@@ -217,13 +220,13 @@ export const SCREENING: LegalSection = {
     {
       heading: "Disclosure",
       paragraphs: [
-        `The Gun Spa may obtain a consumer report about you from ${SCREENING_VENDOR}, a consumer reporting agency, to decide your application for membership and, once a year while you remain a member, to confirm the membership. The report may include any of the following: identity verification, criminal history records, public records. This disclosure is made in a document that consists solely of the disclosure, as the Fair Credit Reporting Act requires.`,
+        `The Gun Spa may obtain a consumer report about you from ${VENDOR}, a consumer reporting agency, to decide your application for membership and, once a year while you remain a member, to confirm the membership. The report may include any of the following: identity verification, criminal history records, public records. This disclosure is made in a document that consists solely of the disclosure, as the Fair Credit Reporting Act requires.`,
       ],
     },
     {
       heading: "Authorization",
       paragraphs: [
-        `The authorization sits on its own page of the application. Signing it lets the club obtain the report described above from ${SCREENING_VENDOR}, and it covers the annual re-screen for as long as your membership continues. You may withdraw it at any time by writing to ${PRIVACY_EMAIL}. Withdrawing it ends the application or the membership.`,
+        `The authorization sits on its own page of the application. Signing it lets the club obtain the report described above from ${VENDOR}, and it covers the annual re-screen for as long as your membership continues. You may withdraw it at any time by writing to ${PRIVACY_EMAIL}. Withdrawing it ends the application or the membership.`,
       ],
     },
     {
@@ -235,7 +238,7 @@ export const SCREENING: LegalSection = {
     {
       heading: "If the application is declined",
       paragraphs: [
-        `If the decision rests in whole or in part on the report, you receive a written notice. It names ${SCREENING_VENDOR} and gives its address and phone number. It states that the vendor did not make the decision and cannot explain it. And it sets out your right to dispute the accuracy or completeness of the report with the vendor, and to obtain a free copy of it within 60 days.`,
+        `If the decision rests in whole or in part on the report, you receive a written notice. It names ${VENDOR} and gives its address and phone number. It states that the vendor did not make the decision and cannot explain it. And it sets out your right to dispute the accuracy or completeness of the report with the vendor, and to obtain a free copy of it within 60 days.`,
         "The club reviews every application against the criteria published here.",
       ],
     },
@@ -245,7 +248,7 @@ export const SCREENING: LegalSection = {
       bullets: [
         "Verified identity that matches the application.",
         "A licensing status consistent with the activities you intend to reserve. See the requirements for what each activity asks for.",
-        "A report with no record that would make possession or handling of a firearm unlawful, and no record of violence within [N] years.",
+        "A report with no record that would make possession or handling of a firearm unlawful, and no record of violence the club considers disqualifying.", // Owner and counsel: set the look-back period (was "[N] years").
         "Two references who confirm they know you and would shoot beside you.",
         "Completion of the in-person orientation.",
       ],

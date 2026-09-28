@@ -42,6 +42,13 @@ export const SITE = {
    * hidden. Set true on opening day.
    */
   openForBusiness: false,
+  /**
+   * Owner's call: services that need their own license (gunsmithing, firearm
+   * detailing, ammunition sales or sourcing) are not named anywhere on the site
+   * until those licenses are in hand. Members see "More member services at
+   * opening" instead. Set true once they are.
+   */
+  licensedServicesPublic: false,
   openingLine: "Opening soon",
   /**
    * Owner's call: prices stay off the public site until they are final. When

@@ -14,7 +14,7 @@ import { Row, Rows } from "@/components/ui/List";
 import { PullQuote } from "@/components/ui/PullQuote";
 import { Section } from "@/components/ui/Section";
 import { cn } from "@/lib/cn";
-import { deskPhone, deskPhoneHref, FACILITY } from "@/lib/config/site";
+import { deskPhone, deskPhoneHref, FACILITY, SITE } from "@/lib/config/site";
 import { ELIGIBILITY_LABELS } from "@/lib/content/catalog";
 import {
   CORPORATE,
@@ -85,7 +85,7 @@ export default function EventsPage() {
             <div className="lg:col-span-5">
               <Headline
                 as="h1"
-                head={`Suites for ${PRIVATE_SUITE.maxGuestsPerUnit} and ${FOUNDERS_SUITE.maxGuestsPerUnit} · the floor for ${CORPORATE.maxGuestsPerUnit} · a reply within one business day`}
+                head={SITE.facilityDetailsPublic ? `Suites for ${PRIVATE_SUITE.maxGuestsPerUnit} and ${FOUNDERS_SUITE.maxGuestsPerUnit} · the floor for ${CORPORATE.maxGuestsPerUnit} · a reply within one business day` : "Parties, client evenings, offsites · a reply within one business day"}
                 headline={EVENTS_HERO.headline}
                 subhead={EVENTS_HERO.subhead}
                 body={EVENTS_HERO.body}
@@ -118,6 +118,9 @@ export default function EventsPage() {
         </Container>
       </Section>
 
+      {/* Floor plan and suite formats describe the built space: shown only with SITE.facilityDetailsPublic. */}
+      {SITE.facilityDetailsPublic && (
+        <>
       {/* ------------------------ silent: the plan alone, bleeding off the right edge */}
       <Section theme="black" padding="vast" id="plan" className="overflow-hidden" aria-label="Floor plan">
         <Container>
@@ -145,6 +148,9 @@ export default function EventsPage() {
           </div>
         </Container>
       </Section>
+
+        </>
+      )}
 
       {/* ---------------------------------------------------- date night */}
       <Section theme="light" padding="tight" id="date-night" className="border-t border-hairline">
@@ -193,7 +199,7 @@ export default function EventsPage() {
       {/* ------------------------------------------ corporate: the page ends here */}
       <Section theme="black" id="corporate" className="grain overflow-hidden">
         <Container className="relative">
-          <Headline layout="beside" head={`${CORPORATE_MIN_GUESTS} to ${CORPORATE.maxGuestsPerUnit} guests · ${FACILITY.laneCount} lanes and ${FACILITY.simulatorBays} bays · quoted per group`} headline={EVENTS_CORPORATE.headline} subhead={EVENTS_CORPORATE.subhead} body={EVENTS_CORPORATE.body}>
+          <Headline layout="beside" head={SITE.facilityDetailsPublic ? `${CORPORATE_MIN_GUESTS} to ${CORPORATE.maxGuestsPerUnit} guests · ${FACILITY.laneCount} lanes and ${FACILITY.simulatorBays} bays · quoted per group` : "Quoted per group"} headline={EVENTS_CORPORATE.headline} subhead={EVENTS_CORPORATE.subhead} body={EVENTS_CORPORATE.body}>
             {EVENTS_CORPORATE.cta && (
               <div className="mt-8">
                 <Button href={EVENTS_CORPORATE.cta.href}>{EVENTS_CORPORATE.cta.label}</Button>
