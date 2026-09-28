@@ -2,6 +2,7 @@ import { FACILITY, HOURS, SITE } from "@/lib/config/site";
 import { CATALOG, CATEGORY_LABELS, itemBySlug, type CatalogItem } from "@/lib/content/catalog";
 import type { Faq } from "@/lib/content/faq";
 import { isPlaceholder, stripPlaceholders } from "@/lib/seo/placeholders";
+import { PRICES_PUBLIC } from "@/lib/pricing";
 
 /**
  * Structured data for search engines. Every fact here is read from
@@ -51,6 +52,7 @@ export function openingHoursSpecification(): JsonLd[] {
 
 /** The public offers: one per bookable catalog item, priced from priceCents. */
 export function offers(): JsonLd[] {
+  if (!PRICES_PUBLIC) return [];
   return CATALOG.filter((item) => item.bookable && !item.memberOnly && item.priceCents > 0).map((item) => offerFor(item));
 }
 
@@ -74,6 +76,7 @@ function offerFor(item: CatalogItem): JsonLd {
 
 /** "$75 to $1400": the cheapest and dearest bookable unit, from the catalog. */
 function priceRange(): string | undefined {
+  if (!PRICES_PUBLIC) return undefined;
   const prices = CATALOG.filter((i) => i.bookable && i.priceCents > 0).map((i) => i.priceCents);
   if (prices.length === 0) return undefined;
   const lo = Math.min(...prices) / 100;
@@ -175,7 +178,7 @@ export function courseJsonLd(): JsonLd | null {
       location: { "@id": businessId() },
     },
   };
-  if (course.priceCents > 0) {
+  if (PRICES_PUBLIC && course.priceCents > 0) {
     record.offers = {
       "@type": "Offer",
       price: dollars(course.priceCents),

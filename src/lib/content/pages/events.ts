@@ -7,7 +7,7 @@
  */
 import { FACILITY, SITE } from "@/lib/config/site";
 import { itemBySlug, type CatalogItem } from "@/lib/content/catalog";
-import { formatMoney } from "@/lib/time";
+import { ifPriced, shownMoney } from "@/lib/pricing";
 
 export type Cta = { label: string; href: string };
 
@@ -66,7 +66,7 @@ export function durationLabel(min: number): string {
 
 /** Price chip: quoted items have no price in the catalog. */
 export function priceLabel(c: CatalogItem): string {
-  return c.priceCents > 0 ? formatMoney(c.priceCents) : "Quoted";
+  return c.priceCents > 0 ? shownMoney(c.priceCents) : "Quoted";
 }
 
 /* ------------------------------------------------------------------ meta */
@@ -163,7 +163,7 @@ export const EVENTS_DATE_NIGHT: SectionCopy = {
   secondary: REQUIREMENTS_LINK,
 };
 
-export const DATE_NIGHT_CHIPS: string[] = [`${priceLabel(DATE_NIGHT)} for two`, durationLabel(DATE_NIGHT.durationMin)];
+export const DATE_NIGHT_CHIPS: string[] = [ifPriced(`${priceLabel(DATE_NIGHT)} for two`, "For two"), durationLabel(DATE_NIGHT.durationMin)];
 
 export const DATE_PHOTO_ALT = "A lounge table set for two with espresso and dessert, the simulator wall glowing beyond the glass.";
 

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { PRICE_PENDING, PRICES_PUBLIC } from "@/lib/pricing";
 import { upcomingClasses, classDateRange, classPrice, canEnroll, type PublicClassSession } from "@/lib/public-classes";
 
 describe("public upcoming classes", () => {
@@ -12,8 +13,9 @@ describe("public upcoming classes", () => {
     // 04:00 to 07:00 UTC is 11 PM to 2 AM in New York, across midnight.
     expect(range).toBe("Thu, Jan 1, 11 PM to Fri, Jan 2, 2 AM");
     expect(classDateRange({ startsAt: "2099-01-02T15:00:00Z", endsAt: "2099-01-02T16:30:00Z" })).toBe("Fri, Jan 2 · 10 AM to 11:30 AM");
-    expect(classPrice(0)).toBe("Free");
-    expect(classPrice(12500)).toBe("$125.00 per person");
+    // Prices follow SITE.pricesPublic: real figures when public, the pending line otherwise.
+    expect(classPrice(0)).toBe(PRICES_PUBLIC ? "Free" : PRICE_PENDING);
+    expect(classPrice(12500)).toBe(PRICES_PUBLIC ? "$125.00 per person" : PRICE_PENDING);
   });
   it("respects payment, document, closed and sold-out restrictions", () => {
     const s = { ...session(2), priceCents: 0, collectId: false, seatsRemaining: 1 } as PublicClassSession;

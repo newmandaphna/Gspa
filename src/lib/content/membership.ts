@@ -1,4 +1,5 @@
 import { TIER_WINDOW_DAYS, type TierKey } from "@/lib/config/site";
+import { PRICE_PENDING, ifPriced } from "@/lib/pricing";
 
 export type Tier = {
   key: TierKey;
@@ -30,16 +31,16 @@ export const MEMBERSHIP_TIERS: Tier[] = [
   {
     key: "club",
     name: "Club",
-    price: "$3,600",
-    priceNote: "per year",
-    altPrice: "or $325 a month",
+    price: ifPriced("$3,600", PRICE_PENDING),
+    priceNote: ifPriced("per year", ""),
+    altPrice: ifPriced<string | undefined>("or $325 a month", undefined),
     billing: "annual",
     tagline: "The calendar, a week early.",
-    forWhom: "For the regular. A half-size locker, a week's head start on the calendar, and the $45 lane.",
-    differs: [`Reserve ${TIER_WINDOW_DAYS.club} days ahead`, "Lane sessions at $45", "Gear locker, half size"],
+    forWhom: ifPriced("For the regular. A half-size locker, a week's head start on the calendar, and the $45 lane.", "For the regular. A half-size locker, a week's head start on the calendar, and the member lane rate."),
+    differs: [`Reserve ${TIER_WINDOW_DAYS.club} days ahead`, ifPriced("Lane sessions at $45", "Lane sessions at the member rate"), "Gear locker, half size"],
     perks: [
       `Reserve ${TIER_WINDOW_DAYS.club} days ahead`,
-      "Lane sessions at the member rate of $45",
+      ifPriced("Lane sessions at the member rate of $45", "Lane sessions at the member rate"),
       "One guest per visit at the member rate",
       "Gear locker, half size",
       "Lounge and espresso bar on every visit, with towel service",
@@ -53,15 +54,15 @@ export const MEMBERSHIP_TIERS: Tier[] = [
   {
     key: "signature",
     name: "Signature",
-    price: "$9,000",
-    priceNote: "per year",
+    price: ifPriced("$9,000", PRICE_PENDING),
+    priceNote: ifPriced("per year", ""),
     billing: "annual",
     tagline: "Two dozen hours and a suite a month.",
     forWhom: "For the member who brings people. A suite every month, two guests every visit, and somebody else cleans the gun.",
     differs: ["One Private Suite session each month", "Two guests per visit", "Firearm detailing included"],
     perks: [
       `Reserve ${TIER_WINDOW_DAYS.signature} days ahead`,
-      "24 lane hours a year included, then $45",
+      ifPriced("24 lane hours a year included, then $45", "24 lane hours a year included, then the member rate"),
       "One Private Suite session each month",
       "Two guests per visit at the member rate",
       "Priority instructor scheduling",
@@ -76,9 +77,9 @@ export const MEMBERSHIP_TIERS: Tier[] = [
   {
     key: "founders",
     name: "Founders",
-    price: "$20,000",
-    priceNote: "per year",
-    altPrice: "or [$60,000] once, for life",
+    price: ifPriced("$20,000", PRICE_PENDING),
+    priceNote: ifPriced("per year", ""),
+    altPrice: ifPriced<string | undefined>("or [$60,000] once, for life", undefined),
     billing: "annual-or-lifetime",
     tagline: "Fifty names, first call on everything.",
     forWhom: `For the fifty who were here first, and a wall that says so. Unlimited lane time, a ${TIER_WINDOW_DAYS.founders}-day calendar, and same-day priority on two lanes until 6 PM.`,
@@ -125,7 +126,7 @@ export const BENEFITS: BenefitRow[] = [
   { label: "Same-day priority", club: false, signature: false, founders: "Two lanes until 6 PM" },
   { label: "Guests per visit", club: "1", signature: "2", founders: "3" },
   { label: "Guest passes per year", club: false, signature: false, founders: "6, transferable" },
-  { label: "Lane rate", club: "$45", signature: "$45 after 24 hours", founders: "Included" },
+  { label: "Lane rate", club: ifPriced("$45", "Member rate"), signature: ifPriced("$45 after 24 hours", "Member rate after 24 hours"), founders: "Included" },
   { label: "Included lane hours", club: false, signature: "24 a year", founders: "Unlimited" },
   { label: "Private Suite sessions", club: "Member rate", signature: "1 a month", founders: "1 a month" },
   { label: "Founders' Suite", club: "Public rate", signature: "Public rate", founders: "Member rate" },

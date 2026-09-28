@@ -1,5 +1,6 @@
 import { BOOKING, SITE } from "@/lib/config/site";
 import { COURSE_CANCEL_WINDOW, COURSE_NAME } from "@/lib/content/requirements";
+import { ifPriced } from "@/lib/pricing";
 
 export type Faq = { id: string; q: string; a: string };
 
@@ -22,7 +23,7 @@ export const FAQ: Faq[] = [
   {
     id: "non-member",
     q: "Can I shoot without being a member?",
-    a: "Yes. Lanes and suites are open to the public by reservation. So are training and the simulator, all subject to the requirements list. Membership buys a longer calendar and guest privileges, plus the $45 lane rate.",
+    a: `Yes. Lanes and suites are open to the public by reservation. So are training and the simulator, all subject to the requirements list. Membership buys a longer calendar and guest privileges, plus the ${ifPriced("$45 lane rate", "member lane rate")}.`,
   },
   {
     id: "how-far-ahead",

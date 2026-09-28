@@ -10,6 +10,7 @@ import { BOOKING, SITE, TIER_WINDOW_DAYS } from "@/lib/config/site";
 import { itemBySlug } from "@/lib/content/catalog";
 import { MEMBERSHIP_TIERS, SCREENING_FEE_CENTS, tierByKey } from "@/lib/content/membership";
 import { formatMoney } from "@/lib/time";
+import { ifPriced } from "@/lib/pricing";
 
 export type LegalSectionId = "privacy" | "terms" | "screening" | "membership-agreement" | "biometrics" | "range-rules" | "waiver";
 
@@ -252,7 +253,7 @@ export const SCREENING: LegalSection = {
     {
       heading: "The fee",
       paragraphs: [
-        `${FEE_TIERS} applicants pay a ${FEE} screening fee. It is refunded in full if the application is declined. ${FOUNDERS_NAME} applicants pay no fee.`,
+        `${FEE_TIERS} applicants pay a ${ifPriced(`${FEE} `, "")}screening fee. It is refunded in full if the application is declined. ${FOUNDERS_NAME} applicants pay no fee.`,
       ],
     },
   ],

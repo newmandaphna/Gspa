@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { PRICE_PENDING, PRICES_PUBLIC } from "../src/lib/pricing";
 
 const session = (id: number, overrides = {}) => ({
   id, title: `Public class ${id}`, experienceName: "Instruction",
@@ -15,8 +16,13 @@ for (const width of [1280, 390]) {
     await page.goto("/");
     const section = page.locator("#upcoming-classes");
     await expect(section.getByRole("heading", { level: 3 })).toHaveText(["Public class 1", "Public class 2", "Public class 3"]);
-    await expect(section.getByText("Free", { exact: true })).toHaveCount(2);
-    await expect(section.getByText("$50.00 per person")).toBeVisible();
+    // Prices follow SITE.pricesPublic: real figures when public, the pending line on every row otherwise.
+    if (PRICES_PUBLIC) {
+      await expect(section.getByText("Free", { exact: true })).toHaveCount(2);
+      await expect(section.getByText("$50.00 per person")).toBeVisible();
+    } else {
+      await expect(section.getByText(PRICE_PENDING, { exact: true })).toHaveCount(3);
+    }
     await expect(section.getByText("Enrollment closed")).toBeVisible();
     await section.getByRole("link", { name: "Public class 2" }).click();
     await expect(page).toHaveURL(/session=2/);

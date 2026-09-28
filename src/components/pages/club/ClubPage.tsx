@@ -40,7 +40,7 @@ import {
 } from "@/lib/content/pages/club";
 import { FACILITY, LOCKERS_TOTAL } from "@/lib/config/site";
 import { HOUSE_RULES } from "@/lib/content/requirements";
-import { formatMoney } from "@/lib/time";
+import { shownMoney } from "@/lib/pricing";
 
 /** Suite facts as label / value pairs, read from the catalog item and FACILITY (the same sources as SUITE_SPECS). */
 const SUITE_FACTS: ReadonlyArray<Spec> = [
@@ -108,7 +108,7 @@ export function ClubPage() {
               {/* Suites */}
               <Zone zone="suites" id="suites">
                 <Headline
-                  head={`${FACILITY.suites} suites · ${PRIVATE_SUITE.durationMin} minutes · from ${formatMoney(PRIVATE_SUITE.priceCents)}`}
+                  head={`${FACILITY.suites} suites · ${PRIVATE_SUITE.durationMin} minutes · from ${shownMoney(PRIVATE_SUITE.priceCents)}`}
                   headline={CLUB_SUITES.headline}
                   subhead={CLUB_SUITES.subhead}
                   body={CLUB_SUITES.body}
@@ -116,8 +116,8 @@ export function ClubPage() {
                 <ImageSlot slot="SUITE_PHOTO_02" alt={SUITE_PHOTO_ALT} className="mt-10 aspect-[16/9] rounded-card ring-1 ring-white/10" art={<Render name="pair" sizes="(min-width: 1024px) 560px, 100vw" />} sizes="(min-width: 1024px) 560px, 100vw" />
                 <Specs className="mt-8" aria-label={`${PRIVATE_SUITE.name} at a glance`} items={SUITE_FACTS} />
                 <p className="mt-5 font-mono text-[0.8125rem] leading-[1.6] text-mist">
-                  From {formatMoney(PRIVATE_SUITE.priceCents)} for the suite
-                  {PRIVATE_SUITE.memberPriceCents !== undefined && <>, members {formatMoney(PRIVATE_SUITE.memberPriceCents)}</>}. {ELIGIBILITY_LABELS[PRIVATE_SUITE.eligibility]}.
+                  From {shownMoney(PRIVATE_SUITE.priceCents)} for the suite
+                  {PRIVATE_SUITE.memberPriceCents !== undefined && <>, members {shownMoney(PRIVATE_SUITE.memberPriceCents)}</>}. {ELIGIBILITY_LABELS[PRIVATE_SUITE.eligibility]}.
                 </p>
                 {CLUB_SUITES.cta && (
                   <div className="mt-8">
@@ -129,7 +129,7 @@ export function ClubPage() {
               {/* Simulator */}
               <Zone zone="sim" id="simulator">
                 <Headline
-                  head={`${formatMoney(SIMULATOR.priceCents)} · ${SIMULATOR.durationMin} minutes · up to ${SIMULATOR.maxGuestsPerUnit} to a bay`}
+                  head={`${shownMoney(SIMULATOR.priceCents)} · ${SIMULATOR.durationMin} minutes · up to ${SIMULATOR.maxGuestsPerUnit} to a bay`}
                   headline={CLUB_SIMULATOR.headline}
                   subhead={CLUB_SIMULATOR.subhead}
                   body={CLUB_SIMULATOR.body}

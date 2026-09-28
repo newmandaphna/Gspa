@@ -14,6 +14,7 @@ import { computeAmount, maxBookableDate } from "@/lib/availability";
 import { laneFor, laneNoteFor, parseLane } from "@/lib/lanes";
 import { formatDateLong, formatMoney, isHHMM, isIsoDate, todayIso } from "@/lib/time";
 import { cn } from "@/lib/cn";
+import { PRICES_PUBLIC, shownMoney } from "@/lib/pricing";
 
 type SlotDto = { time: string; label: string; available: number; startsAt: string };
 type AvailabilityDto = {
@@ -343,10 +344,10 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
                             <span className="t-footnote mt-3 italic text-ink-muted">{ELIGIBILITY_LABELS[e.eligibility]}</span>
                             <span className="mt-auto flex items-end justify-between gap-3 pt-6">
                               <span className="t-4">
-                                {price === 0 ? "Included" : formatMoney(price)}
-                                {price > 0 && <span className="t-caption font-normal text-ink-muted"> / {unitNoun(e, 1).replace(/^1 /, "")}</span>}
-                                {discounted && <span className="t-caption ml-2 font-normal text-ink-faint line-through">{formatMoney(e.priceCents)}</span>}
-                                {!member && e.memberPriceCents != null && e.memberPriceCents < e.priceCents && (
+                                {price === 0 ? "Included" : shownMoney(price)}
+                                {price > 0 && PRICES_PUBLIC && <span className="t-caption font-normal text-ink-muted"> / {unitNoun(e, 1).replace(/^1 /, "")}</span>}
+                                {discounted && PRICES_PUBLIC && <span className="t-caption ml-2 font-normal text-ink-faint line-through">{formatMoney(e.priceCents)}</span>}
+                                {PRICES_PUBLIC && !member && e.memberPriceCents != null && e.memberPriceCents < e.priceCents && (
                                   <span className="t-footnote block font-normal text-ink-muted">Members {e.memberPriceCents === 0 ? "included" : formatMoney(e.memberPriceCents)}</span>
                                 )}
                               </span>
@@ -552,7 +553,7 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
 
                 <div className="mt-10 flex flex-wrap items-center gap-3">
                   <Button type="submit" disabled={submitting} size="lg">
-                    {submitting ? "One moment…" : total === 0 ? "Confirm reservation" : stripeEnabled ? `Continue to payment · ${formatMoney(total)}` : "Confirm reservation"}
+                    {submitting ? "One moment…" : total === 0 ? "Confirm reservation" : stripeEnabled ? (PRICES_PUBLIC ? `Continue to payment · ${formatMoney(total)}` : "Continue to payment") : "Confirm reservation"}
                   </Button>
                   <Button variant="link" onClick={() => goTo(1)}>
                     Back
@@ -585,10 +586,11 @@ export function ReserveFlow({ experiences, stripeEnabled, member = null }: Props
                   {!member && typedMember && <Row label="Member no." value={typedMember.toUpperCase()} />}
                 </dl>
                 <div className="mt-5 border-t border-ink/10 pt-4">
-                  <Row label="Total" value={total === 0 ? "Included" : formatMoney(total)} strong />
+                  <Row label="Total" value={total === 0 ? "Included" : shownMoney(total)} strong />
                   <p className="t-footnote mt-1 text-ink-muted">
                     {total === 0 ? "Included with your membership. " : stripeEnabled ? "Charged securely at checkout. " : "Pay at the front desk on arrival. "}
                     {unitPrice > 0 &&
+                      PRICES_PUBLIC &&
                       (experience.fixedUnits
                         ? `${formatMoney(unitPrice)} flat${member && experience.memberPriceCents != null && experience.memberPriceCents < experience.priceCents ? " at the member rate" : ""}. Tax included.`
                         : `${formatMoney(unitPrice)} per ${unitNoun(experience, 1).replace(/^1 /, "")}${experience.extraGuestCents ? `, ${formatMoney(experience.extraGuestCents)} per additional guest` : ""}${member && experience.memberPriceCents != null && experience.memberPriceCents < experience.priceCents ? " at the member rate" : ""}. Tax included.`)}
