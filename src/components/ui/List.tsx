@@ -23,11 +23,12 @@ const GOLD_BG = "bg-accent-deep [[data-theme=dark]_&]:bg-accent";
 const MUTED = "text-ink-muted [[data-theme=dark]_&]:text-mist";
 const FAINT = "text-ink-faint [[data-theme=dark]_&]:text-mist/80";
 
-/** A thin gold check, stroke 1.5, drawn inline so it inherits currentColor. */
+/** The list mark: a primer seen from the base of a case, ring and cup, in currentColor. */
 export function CheckMark({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 16 16" className={cn("h-4 w-4", className)} fill="none" aria-hidden="true">
-      <path d="M3 8.5l3.2 3.2L13 4.6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    <svg viewBox="0 0 16 16" className={cn("h-3.5 w-3.5", className)} fill="none" aria-hidden="true">
+      <circle cx="8" cy="8" r="5.6" stroke="currentColor" strokeWidth="1.2" />
+      <circle cx="8" cy="8" r="2.4" fill="currentColor" />
     </svg>
   );
 }

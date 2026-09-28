@@ -33,8 +33,8 @@ const PAPER = "#fbfbfd";
 const PAPER_2 = "#f5f5f7";
 const GOLD = "#c9a55a";
 const SERIF = "'Bodoni Moda',Didot,Georgia,'Times New Roman',serif";
-const SANS = "-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',Helvetica,Arial,sans-serif";
-const MONO = "ui-monospace,SFMono-Regular,Menlo,Consolas,monospace";
+const BODY = "'Libre Caslon Text',Georgia,'Times New Roman',serif";
+const CODE = BODY; // codes and figures share the body face; there is no monospace in the brand
 
 function escape(s: string): string {
   return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
@@ -179,7 +179,7 @@ function button(href: string, label: string, kind: "primary" | "secondary" = "pr
 function row(label: string, value: string, mono = false): string {
   return `<tr>
     <td style="padding:8px 16px 8px 0;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:${MUTED};vertical-align:top;white-space:nowrap">${escape(label)}</td>
-    <td style="padding:8px 0;font-size:15px;color:${INK};vertical-align:top;${mono ? `font-family:${MONO};letter-spacing:.04em` : ""}">${escape(value)}</td>
+    <td style="padding:8px 0;font-size:15px;color:${INK};vertical-align:top;${mono ? `font-family:${CODE};letter-spacing:.04em` : ""}">${escape(value)}</td>
   </tr>`;
 }
 
@@ -203,7 +203,7 @@ function shell(opts: { title: string; preheader: string; headline: string; body:
 <div style="display:none;max-height:0;overflow:hidden;font-size:1px;line-height:1px;color:${PAPER_2}">${escape(opts.preheader)}</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${PAPER_2}">
 <tr><td align="center" style="padding:32px 16px">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;background:${PAPER};border-radius:18px;font-family:${SANS}">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;background:${PAPER};border-radius:18px;font-family:${BODY}">
   <tr><td style="padding:32px 32px 0">
     <img src="${wordmark}" width="151" height="32" alt="Gun Spa" style="display:block;border:0;width:151px;height:32px">
   </td></tr>
@@ -213,7 +213,7 @@ function shell(opts: { title: string; preheader: string; headline: string; body:
     ${opts.body}
   </td></tr>
 </table>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;font-family:${SANS}">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;font-family:${BODY}">
   <tr><td style="padding:24px 32px 0;font-size:13px;line-height:1.6;color:${MUTED}">
     <a href="${escape(mapHref)}" style="color:${MUTED};text-decoration:underline">${escape(SITE.name)}, ${escape(fullAddress())}</a><br>
     ${phone ? `${escape(phone)}<br>` : ""}
@@ -415,7 +415,7 @@ export function reminderText(booking: Booking, experience: Experience, now: Date
     .join("\n");
 
   const body = [
-    para(`${escape(title)}, ${escape(when)}, ${guests}.${lane ? ` Lane ${lane} requested; the desk confirms at check-in.` : ""} Code <span style="font-family:${MONO};letter-spacing:.04em">${booking.code}</span>.`),
+    para(`${escape(title)}, ${escape(when)}, ${guests}.${lane ? ` Lane ${lane} requested; the desk confirms at check-in.` : ""} Code <span style="font-family:${CODE};letter-spacing:.04em">${booking.code}</span>.`),
     classEnd ? para(escape(classEnd)) : "",
     instructor ? para(escape(instructor)) : "",
     para(`<strong>Doors:</strong> <a href="${escape(SITE.address.googleMapsUrl)}" style="color:${INK}">${escape(fullAddress())}</a>. ${escape(drivingLine())}`),

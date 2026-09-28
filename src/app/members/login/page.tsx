@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { SignInForm } from "@/components/members/AuthForms";
 import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
-import { TargetRings } from "@/components/art";
+import { Render } from "@/components/ui/Render";
 import { getCurrentMember } from "@/lib/members/auth";
 import { safeNext } from "@/lib/members/safe-next";
 
@@ -27,9 +27,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           </div>
         </div>
         <div className="relative hidden aspect-square overflow-hidden rounded-card bg-night lg:block" data-theme="dark">
-          <div className="absolute inset-[10%] opacity-80">
-            <TargetRings tone="dark" />
-          </div>
+          <Render name="headstamp" sizes="(min-width: 1024px) 560px, 1px" />
           <p className="t-caption absolute bottom-6 left-6 text-mist">Not a member yet? Membership is by application.</p>
         </div>
       </Container>
