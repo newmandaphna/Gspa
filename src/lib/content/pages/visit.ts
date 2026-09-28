@@ -58,8 +58,8 @@ export const ADDRESS_LINE = `${SITE.address.line1}, ${SITE.address.city}, ${SITE
 export const VISIT_HERO: SectionCopy = {
   eyebrow: "Visit",
   headline: SITE.address.public ? "Jamaica, Queens." : "Queens, New York.",
-  subhead: SITE.address.public ? `On [street], ${FACILITY.transit.driveFromJfkMin} minutes north of the JFK terminals.` : "The address goes out with your confirmation.",
-  body: SITE.address.public ? `${ADDRESS_LINE}. Come in through the doors under the sign.` : "Hours, what to bring and every requirement are below. Questions go to the desk.",
+  subhead: SITE.address.public ? `On [street], ${FACILITY.transit.driveFromJfkMin} minutes north of the JFK terminals.` : "The address is published closer to opening.",
+  body: SITE.address.public ? `${ADDRESS_LINE}. Come in through the doors under the sign.` : "What to bring and every requirement are below. Questions go to the desk.",
   cta: SITE.address.public ? { label: "Open in Maps", href: SITE.address.mapsUrl, external: true } : undefined,
 };
 
@@ -138,7 +138,7 @@ export const OPEN_STATUS_LABELS = {
 export const VISIT_BRING: SectionCopy = {
   eyebrow: "What to bring",
   headline: "Bring ID and shoes you can stand in.",
-  subhead: "We have the rest: eye and ear protection, targets, a towel.",
+  subhead: "Eye and ear protection is mandatory: bring your own or rent it at the desk.",
   body: "The full list is below and the desk checks every line of it. Read it once before you come and check-in takes a minute.",
   cta: { label: "See requirements", href: "#requirements" },
 };
@@ -157,7 +157,7 @@ export const VISIT_REQUIREMENTS: SectionCopy = {
   eyebrow: "Requirements",
   headline: "Read this once.",
   subhead: `${cap(numberWord(REQUIREMENTS.length))} lines, the same card the desk keeps.`,
-  body: "When you reserve, the flow shows only the lines that apply to that session. Nothing else on the site restates them.",
+  body: SITE.openForBusiness ? "When you reserve, the flow shows only the lines that apply to that session. Nothing else on the site restates them." : "Nothing else on the site restates them. The desk checks every line on arrival.",
 };
 
 export const LAST_REVIEWED_LABEL = "Last reviewed";
@@ -175,8 +175,8 @@ export const VISIT_FAQ: SectionCopy = {
 export const VISIT_CONTACT: SectionCopy = {
   eyebrow: "Contact",
   headline: "Someone at the desk picks up",
-  subhead: `Whenever the doors are open, until ${closeHour(1)} most nights.`,
-  body: "Call or write. Groups and buyouts start with the desk.",
+  subhead: SITE.openForBusiness ? `Whenever the doors are open, until ${closeHour(1)} most nights.` : "The club is not open yet. Write and someone replies.",
+  body: SITE.openForBusiness ? "Call or write. Groups and buyouts start with the desk." : "Membership questions, events and press all start here.",
   secondary: { label: "Press and partnerships", href: `mailto:${SITE.email}?subject=Press%20and%20partnerships`, external: true },
 };
 

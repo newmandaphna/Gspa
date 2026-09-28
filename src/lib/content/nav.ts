@@ -14,6 +14,9 @@ export function isNavActive(pathname: string, href: string): boolean {
 export const HOUSE_RULES_LINK: NavItem = { label: "House rules", href: "/house-rules" };
 
 /** Primary navigation (order matters). Edit here to rename or reorder. Five items; the classes page is reached from /training and the footer columns. */
+/** The header button: Reserve once open, the membership list before. */
+export const HEADER_CTA: NavItem = SITE.openForBusiness ? { label: "Reserve", href: "/reserve" } : { label: "Join the list", href: "/membership#apply" };
+
 export const NAV: NavItem[] = [
   ...(SITE.clubPageLive ? [{ label: "The Club", href: "/club" }] : []),
   { label: "Training", href: "/training" },
@@ -41,22 +44,24 @@ export const FOOTER_COLUMNS: { title: string; links: NavItem[] }[] = [
   },
   {
     title: "Reserve",
-    links: [
-      { label: "Reserve a lane", href: "/reserve?category=lane" },
-      { label: "Reserve a suite", href: "/reserve?category=suite" },
-      { label: "Reserve training", href: "/reserve?category=training" },
-      { label: "Manage a reservation", href: "/reserve/manage" },
-      { label: "Plan an event", href: "/events#inquire" },
-    ],
+    links: SITE.openForBusiness
+      ? [
+          { label: "Reserve a lane", href: "/reserve?category=lane" },
+          { label: "Reserve training", href: "/reserve?category=training" },
+          { label: "Manage a reservation", href: "/reserve/manage" },
+          { label: "Plan an event", href: "/events#inquire" },
+        ]
+      : [{ label: "Plan an event", href: "/events#inquire" }],
   },
   {
     title: "Members",
-    links: [
-      { label: "Sign in", href: "/members/login" },
-      { label: "Activate your account", href: "/members/activate" },
-      { label: "Compare tiers", href: "/membership#tiers" },
-      { label: "Apply", href: "/membership#apply" },
-    ],
+    links: SITE.openForBusiness
+      ? [
+          { label: "Sign in", href: "/members/login" },
+          { label: "Activate your account", href: "/members/activate" },
+          { label: "Apply", href: "/membership#apply" },
+        ]
+      : [{ label: "Join the list", href: "/membership#apply" }],
   },
   {
     title: "Visit",
@@ -71,9 +76,13 @@ export const FOOTER_COLUMNS: { title: string; links: NavItem[] }[] = [
     title: "Legal",
     links: [
       HOUSE_RULES_LINK,
-      { label: "Acknowledgement", href: "/legal#waiver" },
-      { label: "Terms", href: "/legal#terms" },
-      { label: "Membership agreement", href: "/legal#membership-agreement" },
+      ...(SITE.openForBusiness
+        ? [
+            { label: "Acknowledgement", href: "/legal#waiver" },
+            { label: "Terms", href: "/legal#terms" },
+            { label: "Membership agreement", href: "/legal#membership-agreement" },
+          ]
+        : [{ label: "Range rules", href: "/legal#range-rules" }]),
       { label: "Privacy", href: "/legal#privacy" },
     ],
   },

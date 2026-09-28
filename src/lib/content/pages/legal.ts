@@ -68,26 +68,30 @@ const TIER_GUESTS = MEMBERSHIP_TIERS.map((t) => `${t.name} ${t.guestsPerVisit}`)
 
 export const LEGAL_META = {
   title: "Legal",
-  description: "Privacy, reservation terms, screening, the membership agreement, the biometric notice, the range rules, the acknowledgement. All of it in plain English, on one page.",
+  description: SITE.openForBusiness
+    ? "Privacy, reservation terms, screening, the membership agreement, the biometric notice, the range rules, the acknowledgement. All of it in plain English, on one page."
+    : "Privacy and the range rules, in plain English. Membership terms and the acknowledgement are published before opening.",
 };
 
 export const LEGAL_HERO = {
   eyebrow: "Legal",
   headline: "The fine print, in plain English.",
   subhead: "Everything you agree to at the club, on one page.",
-  body: "Read the part you need and skip the rest.",
+  body: SITE.openForBusiness
+    ? "Read the part you need and skip the rest."
+    : "The club is not open yet. This page covers what the site collects today and the range rules. Reservation terms, membership terms and the acknowledgement go up here before opening.",
 };
 
 export const NAV_LABEL = "On this page";
 
-export const BACK_TO_RESERVE: Cta = { label: "Back to Reserve", href: "/reserve" };
+export const BACK_TO_RESERVE: Cta = SITE.openForBusiness ? { label: "Back to Reserve", href: "/reserve" } : { label: "Join the membership list", href: "/membership#apply" };
 export const SEE_REQUIREMENTS: Cta = { label: "See requirements", href: "/visit#requirements" };
 
 /* ------------------------------------------------------------ privacy */
 
 export const RETENTION_HEADERS = { data: "Data", why: "Why", howLong: "How long" };
 
-export const RETENTION_ROWS: RetentionRow[] = [
+const RETENTION_ROWS_OPEN: RetentionRow[] = [
   { data: "Reservation and guest details", why: "To run the reservation and reach you about it.", howLong: "3 years after the visit" },
   { data: "Signed acknowledgements (name, timestamp, IP address, browser)", why: "To prove acceptance of the range rules.", howLong: "7 years" },
   { data: "ID checks at the desk", why: "A yes or no flag plus the document type. Never an image.", howLong: "3 years" },
@@ -99,6 +103,55 @@ export const RETENTION_ROWS: RetentionRow[] = [
   { data: "Member-match cookie", why: "A signed, httpOnly cookie holding only a member id, set when you sign in to the members portal.", howLong: "30 days" },
   { data: "Analytics", why: "None. No cross-site tracking, no advertising pixels.", howLong: "Nothing kept" },
 ];
+
+/** Before opening the site collects only list sign-ups and event inquiries. */
+const RETENTION_ROWS_PRELAUNCH: RetentionRow[] = [
+  { data: "Membership list sign-ups (name, email, phone, license type, how you heard)", why: "To contact you when membership opens.", howLong: "Until membership opens, or until you ask to be removed" },
+  { data: "Event inquiries", why: "To reply and plan the event.", howLong: "2 years" },
+  { data: "Analytics", why: "None. No cross-site tracking, no advertising pixels.", howLong: "Nothing kept" },
+];
+
+export const RETENTION_ROWS: RetentionRow[] = SITE.openForBusiness ? RETENTION_ROWS_OPEN : RETENTION_ROWS_PRELAUNCH;
+
+/** What the site does today: a list and an inquiry form. Replaced by PRIVACY at opening. */
+export const PRIVACY_PRELAUNCH: LegalSection = {
+  id: "privacy",
+  label: "Privacy",
+  headline: "Privacy.",
+  subhead: "What the site collects before opening, and for how long.",
+  updated: LEGAL_UPDATED,
+  clauses: [
+    {
+      heading: "What the club collects",
+      paragraphs: [
+        "If you join the membership list, the club keeps your name, email address, phone number if you give one, the type of New York City pistol license you hold, and how you heard about the club. No license number, no ID and no payment details are asked for or kept.",
+        "If you ask about an event, the club keeps what you put in the form: your name, company, email, phone, preferred date, the occasion, a budget range and your notes.",
+      ],
+    },
+    {
+      heading: "Why the club collects it",
+      paragraphs: [
+        "To tell you when membership opens and to answer event inquiries. The club does not sell personal information and does not use it for advertising.",
+      ],
+    },
+    {
+      heading: "How long it is kept",
+      paragraphs: ["The table below is the whole retention schedule. Anything missing from it is deleted once the reason for holding it ends."],
+      slot: "retention-table",
+    },
+    {
+      heading: "Safeguards under the New York SHIELD Act",
+      paragraphs: ["The club keeps reasonable administrative, technical and physical safeguards for private information: encrypted traffic, access limited to club staff, and notice to affected New York residents in the manner and timeframe the Act requires."],
+    },
+    {
+      heading: "Your copy, and deletion",
+      paragraphs: [
+        `Email ${PRIVACY_EMAIL} from the address you signed up with to ask for a copy of what the club holds about you, or to be removed from the list. The club replies within 30 days.`,
+      ],
+    },
+  ],
+  counselNote: "[Counsel to review.]",
+};
 
 export const PRIVACY: LegalSection = {
   id: "privacy",
@@ -416,8 +469,13 @@ export const ACKNOWLEDGEMENT = {
   ],
 };
 
-/** Sections in page order, for the anchor list. */
-export const LEGAL_NAV: { id: LegalSectionId; label: string }[] = [
+/** Sections in page order, for the anchor list. Before opening: privacy and the range rules only. */
+export const LEGAL_NAV: { id: LegalSectionId; label: string }[] = !SITE.openForBusiness
+  ? [
+      { id: PRIVACY_PRELAUNCH.id, label: PRIVACY_PRELAUNCH.label },
+      { id: RANGE_RULES_COPY.id, label: RANGE_RULES_COPY.label },
+    ]
+  : [
   { id: PRIVACY.id, label: PRIVACY.label },
   { id: TERMS.id, label: TERMS.label },
   { id: SCREENING.id, label: SCREENING.label },
@@ -427,4 +485,7 @@ export const LEGAL_NAV: { id: LegalSectionId; label: string }[] = [
   { id: ACKNOWLEDGEMENT.id, label: ACKNOWLEDGEMENT.label },
 ];
 
-export const LONG_FORM_SECTIONS: LegalSection[] = [PRIVACY, TERMS, SCREENING, MEMBERSHIP_AGREEMENT, BIOMETRICS];
+export const LONG_FORM_SECTIONS: LegalSection[] = SITE.openForBusiness ? [PRIVACY, TERMS, SCREENING, MEMBERSHIP_AGREEMENT, BIOMETRICS] : [PRIVACY_PRELAUNCH];
+
+/** The acknowledgement is published with the membership terms, at opening. */
+export const SHOW_ACKNOWLEDGEMENT = SITE.openForBusiness;

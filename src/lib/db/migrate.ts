@@ -157,9 +157,11 @@ async function createSchema(db: Db): Promise<void> {
     // The one true entry: the day the site went live. The desk writes everything after it.
     await db.execute(sql`
       INSERT INTO desk_log (date, text, initials)
-      VALUES ('2026-09-24', 'Site is live. Reservations open.', 'GS')
+      VALUES ('2026-09-24', 'Site is live. Membership list open.', 'GS')
     `);
   }
+  // The first seed promised reservations the club is not taking yet. Reword it where it still stands.
+  await db.execute(sql`UPDATE desk_log SET text = 'Site is live. Membership list open.' WHERE text = 'Site is live. Reservations open.'`);
 }
 
 /** True when a table of that name is already in the current schema. */

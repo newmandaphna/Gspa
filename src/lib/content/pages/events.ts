@@ -86,7 +86,7 @@ export const EVENTS_HERO: SectionCopy = {
   subhead: SITE.facilityDetailsPublic
     ? `A Private Suite for ${numberWord(PRIVATE_SUITE.maxGuestsPerUnit)}, the Founders' Suite for ${numberWord(FOUNDERS_SUITE.maxGuestsPerUnit)}, or the whole floor for ${numberWord(CORPORATE.maxGuestsPerUnit)}.`
     : "Private parties, client evenings and offsites, planned with you.",
-  body: "Simulator bays for every guest, lanes for the ones who qualify. The desk checks eligibility. You handle the invitations.",
+  body: "Events on the range and in the training room. The desk checks who qualifies for live fire. You handle the invitations.",
   cta: { label: "Plan an event", href: "#inquire" },
   secondary: REQUIREMENTS_LINK,
 };
@@ -179,7 +179,7 @@ export const EVENTS_PARTIES: SectionCopy = {
   subhead: SITE.facilityDetailsPublic
     ? `${cap(numberWord(PRIVATE_SUITE.maxGuestsPerUnit))} in a Private Suite or ${numberWord(FOUNDERS_SUITE.maxGuestsPerUnit)} in the Founders' Suite, with one range officer for every ${numberWord(SHOOTERS_PER_OFFICER)} shooters.`
     : `A host on every party, and one range officer for every ${numberWord(SHOOTERS_PER_OFFICER)} shooters.`,
-  body: "The simulator takes everyone; the lanes take guests who qualify. A member host or a club host is required. No alcohol.",
+  body: "Live fire is for guests who qualify, and the desk checks every one. A member host or a club host is required. No alcohol.",
   cta: SITE.facilityDetailsPublic ? { label: "Check suite dates", href: "/reserve?category=suite" } : { label: "Tell us about the party", href: "#inquire" },
   secondary: REQUIREMENTS_LINK,
 };
@@ -197,8 +197,8 @@ export const EVENTS_CORPORATE: SectionCopy = {
   headline: "Offsites with a point.",
   subhead: SITE.facilityDetailsPublic
     ? `${cap(numberWord(CORPORATE_MIN_GUESTS))} to ${numberWord(CORPORATE.maxGuestsPerUnit)} guests. An eight-team bracket in the simulator, and a host who writes the run of show.`
-    : "An eight-team bracket in the simulator, and a host who writes the run of show.",
-  body: "Teams shoot the bracket in the simulator, guests who qualify get guided lanes, and the lounge is bought out. Quoted per group.",
+    : "An eight-team scenario bracket in the training room, and a host who writes the run of show.",
+  body: "Teams run the bracket in the training room, guests who qualify take guided lanes, and the lounge is yours. Quoted per group.",
   cta: { label: "Request a quote", href: "#inquire" },
 };
 
@@ -219,7 +219,7 @@ export const EVENTS_INQUIRE: SectionCopy = {
   body: "Date, headcount, occasion. Food or AV if you want them. Buyouts are quoted by a planner.",
 };
 
-export const OCCASIONS = ["Offsite", "Party", "Client evening", "Date night list", "Other"] as const;
+export const OCCASIONS = ["Offsite", "Party", "Client evening", "Other"] as const;
 export type Occasion = (typeof OCCASIONS)[number];
 
 export const BUDGETS = ["Under $2,500", "$2,500 to $5,000", "$5,000 to $10,000", "Over $10,000", "Not sure yet"] as const;
@@ -233,7 +233,7 @@ export const EVENT_FORM = {
     preferredDate: { label: "Preferred date" },
     guests: { label: "Guests" },
     occasion: { label: "Occasion" },
-    licenseHolders: { label: "NYC pistol license holders", hint: "Guests without one use the simulator and house long guns where eligible." },
+    licenseHolders: { label: "NYC pistol license holders", hint: "Live fire is for guests who qualify; the desk checks every one." },
     budget: { label: "Budget", placeholder: "Optional" },
     notes: { label: "Notes", placeholder: "Food, AV, timing, anything else." },
   },

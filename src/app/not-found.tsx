@@ -1,3 +1,4 @@
+import { HEADER_CTA } from "@/lib/content/nav";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
@@ -15,8 +16,8 @@ export default function NotFound() {
         <p className="t-lead mt-4 max-w-[520px] text-mist">That page doesn&apos;t exist. Let&apos;s get you back on the line.</p>
         <div className="mt-8 flex gap-3">
           <Button href="/">Home</Button>
-          <Button href="/reserve" variant="secondary">
-            Reserve
+          <Button href={HEADER_CTA.href} variant="secondary">
+            {HEADER_CTA.label}
           </Button>
         </div>
       </Container>

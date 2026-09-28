@@ -126,7 +126,7 @@ export function localBusinessJsonLd(): JsonLd {
           potentialAction: {
             "@type": "ReserveAction",
             target: { "@type": "EntryPoint", urlTemplate: `${base}/reserve`, actionPlatform: ["https://schema.org/DesktopWebPlatform", "https://schema.org/MobileWebPlatform"] },
-            result: { "@type": "Reservation", name: "Lane, suite, simulator or instructor reservation" },
+            result: { "@type": "Reservation", name: "Lane or training reservation" },
           },
         }
       : {}),

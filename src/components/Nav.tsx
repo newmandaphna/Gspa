@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "motion/react";
-import { NAV, isNavActive } from "@/lib/content/nav";
+import { HEADER_CTA, NAV, isNavActive } from "@/lib/content/nav";
 import { SITE } from "@/lib/config/site";
 import { cn } from "@/lib/cn";
 import type { OpenStatus } from "@/lib/hours";
@@ -215,12 +215,15 @@ export function Nav({ memberName, initialStatus }: Props) {
           </ul>
 
           <div className="flex items-center gap-4">
-            <Link href={membersHref} className="hidden text-[0.8125rem] tracking-[-0.01em] opacity-80 transition-opacity hover:opacity-100 md:inline">
-              {memberName ? memberName : "Members"}
-            </Link>
+            {/* No members before opening: the link shows only once open, or to someone already signed in. */}
+            {(SITE.openForBusiness || memberName) && (
+              <Link href={membersHref} className="hidden text-[0.8125rem] tracking-[-0.01em] opacity-80 transition-opacity hover:opacity-100 md:inline">
+                {memberName ? memberName : "Members"}
+              </Link>
+            )}
             {/* Live status: server-rendered, refreshed each minute. Gold dot when open, mist when closed. */}
             <Link
-              href="/visit#hours"
+              href={SITE.openForBusiness ? "/visit#hours" : "/visit"}
               className={cn("hidden items-center gap-2 font-mono text-[0.6875rem] tracking-[0.02em] transition-opacity hover:opacity-100 xl:inline-flex", light ? "text-ink-muted" : "text-mist")}
               aria-label={`${status.short}. See hours`}
             >
@@ -228,13 +231,13 @@ export function Nav({ memberName, initialStatus }: Props) {
               <span aria-live="polite">{status.short}</span>
             </Link>
             <Link
-              href="/reserve"
+              href={HEADER_CTA.href}
               className={cn(
                 "hidden h-7 items-center rounded-pill px-3.5 text-[0.75rem] font-medium transition-colors duration-250 sm:inline-flex",
                 light ? "bg-ink text-snow hover:bg-night-3" : "bg-snow text-ink hover:bg-white",
               )}
             >
-              Reserve
+              {HEADER_CTA.label}
             </Link>
             <button
               ref={toggleRef}
@@ -280,7 +283,7 @@ export function Nav({ memberName, initialStatus }: Props) {
               variants={{ hidden: {}, show: { transition: { staggerChildren: 0.05, delayChildren: 0.05 } } }}
               className="flex flex-col px-8 pt-8"
             >
-              {[...NAV, { label: memberName ? `Members · ${memberName}` : "Members", href: membersHref }, { label: "Reserve", href: "/reserve" }].map((item) => (
+              {[...NAV, ...(SITE.openForBusiness || memberName ? [{ label: memberName ? `Members · ${memberName}` : "Members", href: membersHref }] : []), HEADER_CTA].map((item) => (
                 <motion.li
                   key={item.href}
                   variants={{ hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } }}
@@ -328,11 +331,11 @@ export function Nav({ memberName, initialStatus }: Props) {
                 <span className="truncate">{status.short}</span>
               </p>
               <Link
-                href="/reserve"
+                href={HEADER_CTA.href}
                 tabIndex={showBottomBar ? undefined : -1}
                 className={cn("inline-flex h-9 shrink-0 items-center rounded-pill px-5 text-[0.875rem] font-medium", light ? "bg-ink text-snow" : "bg-snow text-ink")}
               >
-                Reserve
+                {HEADER_CTA.label}
               </Link>
             </div>
           </motion.div>,

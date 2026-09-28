@@ -13,7 +13,8 @@ import { CANCELLATION_POLICY, COURSE_CANCEL_DAYS, COURSE_CANCEL_WINDOW, HOUSE_RU
 
 describe("cancellation copy follows the catalog and BOOKING", () => {
   const course = itemBySlug("nys-ccw-course");
-  const faqAnswer = FAQ.find((f) => f.id === "cancellation")?.a ?? "";
+  // The FAQ drops its cancellation answer until reservations open; when it returns it must agree.
+  const faqAnswer = FAQ.find((f) => f.id === "cancellation")?.a;
 
   it("derives the course window from the catalog's cancelHours", () => {
     expect(course?.cancelHours).toBeDefined();
@@ -22,7 +23,7 @@ describe("cancellation copy follows the catalog and BOOKING", () => {
   });
 
   it("names the course exception in the policy and in the FAQ", () => {
-    for (const text of [CANCELLATION_POLICY, faqAnswer]) {
+    for (const text of [CANCELLATION_POLICY, ...(faqAnswer ? [faqAnswer] : [])]) {
       expect(text).toContain(`${BOOKING.freeCancelHours} hours`);
       expect(text).toContain(`${BOOKING.suiteFreeCancelHours} hours`);
       expect(text).toContain(COURSE_CANCEL_WINDOW);

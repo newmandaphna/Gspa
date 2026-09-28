@@ -128,7 +128,8 @@ export default function VisitPage() {
         </>
       )}
 
-      {/* Hours */}
+      {/* Hours: published once the opening schedule is set. */}
+      {SITE.openForBusiness && (
       <Section theme="dark" id="hours" className={SCROLL_MT}>
         <Container>
           <div className="grid gap-12 lg:grid-cols-12 lg:items-start lg:gap-10">
@@ -142,11 +143,12 @@ export default function VisitPage() {
           </div>
         </Container>
       </Section>
+      )}
 
       {/* What to bring */}
       <Section theme="light" padding="tight" id="bring">
         <Container>
-          <Headline layout="beside" head="Photo ID · closed-toe shoes · eye and ear protection provided" headline={VISIT_BRING.headline} subhead={VISIT_BRING.subhead} body={VISIT_BRING.body}>
+          <Headline layout="beside" head="Photo ID · closed-toe shoes · eye and ear protection" headline={VISIT_BRING.headline} subhead={VISIT_BRING.subhead} body={VISIT_BRING.body}>
             {VISIT_BRING.cta && (
               <LinkArrow href={VISIT_BRING.cta.href} className="mt-6">
                 {VISIT_BRING.cta.label}

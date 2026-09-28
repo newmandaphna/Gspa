@@ -107,7 +107,7 @@ export const HOSPITALITY = {
   eyebrow: "The lounge",
   headline: "The spa part is not a metaphor.",
   subhead: "Warm towels and a proper espresso.",
-  body: "The towel is warm before you ask. Members keep their gear in a locker that opens to a fingerprint or a PIN. You go home smelling like the espresso.",
+  body: "The towel is warm before you ask. The lounge sits off the line, quiet enough to talk. You go home smelling like the espresso.",
   items: [
     { key: "towel", label: "Towels", note: "Every visit" },
     { key: "espresso", label: "Espresso", note: "The lounge" },
@@ -147,7 +147,7 @@ export const VISIT = {
   subhead: SITE.address.public ? `${SITE.address.line1}, at the north fence of JFK, on the boulevard the cargo trucks use.` : "A short ride from every terminal.",
   body: SITE.address.public
     ? `Come off the ${FACILITY.transit.expressway.split(" (")[0]} at ${FACILITY.transit.exit}, or take a car from any terminal. From Manhattan, plan on ${FACILITY.transit.driveFromManhattanMin} minutes. Hours and parking are on the Visit page.`
-    : "The address goes out with your confirmation. Hours and what to bring are on the Visit page.",
+    : "The address is published closer to opening. What to bring and the requirements are on the Visit page.",
   cta: { label: "Plan your visit", href: "/visit" },
   hoursLink: { label: "See hours", href: "/visit#hours" },
   stations: ["JFK terminals", "Van Wyck Expwy", `${FACILITY.transit.busLine} bus, [street]`],
