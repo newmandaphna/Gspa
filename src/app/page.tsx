@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { pageMeta } from "@/lib/seo/meta";
+import { Landing } from "@/components/landing/Landing";
+import { isAdmin } from "@/lib/auth";
 import { AvailabilityStrip } from "@/components/AvailabilityStrip";
 import { DeskLog } from "@/components/DeskLog";
 import { LiveStatus } from "@/components/LiveStatus";
@@ -22,12 +24,12 @@ import { itemBySlug } from "@/lib/content/catalog";
 import { formatMoney } from "@/lib/time";
 import { AVAILABILITY, HERO, HOME_META, HOSPITALITY, LANES, QUIET, SUITES, VISIT, spell } from "@/lib/content/pages/home";
 import { PRICES_PUBLIC } from "@/lib/pricing";
-import { MEMBERSHIP_PRELAUNCH } from "@/lib/content/pages/membership";
+import { LANDING, MEMBERSHIP_PRELAUNCH } from "@/lib/content/pages/membership";
 import { TRAINING_PRELAUNCH } from "@/lib/content/pages/training";
 
 export const metadata: Metadata = pageMeta("/", {
-  title: { absolute: HOME_META.title },
-  description: HOME_META.description,
+  title: { absolute: SITE.landingOnly ? LANDING.meta.title : HOME_META.title },
+  description: SITE.landingOnly ? LANDING.meta.description : HOME_META.description,
 });
 
 /** Headline stack for this page: running head, capitals headline, Bodoni subhead. */
@@ -62,7 +64,9 @@ const LOUNGE_MENU = [
   { item: "A warm towel", note: "Off the line" },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  // Landing-only mode: the public sees the sign-up; a signed-in admin sees the full home page.
+  if (SITE.landingOnly && !(await isAdmin().catch(() => false))) return <Landing />;
   const status = computeOpenStatus(new Date());
   return (
     <>

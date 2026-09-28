@@ -79,12 +79,16 @@ export const LEGAL_HERO = {
   subhead: "Everything you agree to at the club, on one page.",
   body: SITE.openForBusiness
     ? "Read the part you need and skip the rest."
-    : "The club is not open yet. This page covers what the site collects today and the range rules. Reservation terms, membership terms and the acknowledgement go up here before opening.",
+    : SITE.landingOnly
+      ? "The club is not open yet. This page covers what the site collects today. Reservation terms, membership terms and the range rules go up here before opening."
+      : "The club is not open yet. This page covers what the site collects today and the range rules. Reservation terms, membership terms and the acknowledgement go up here before opening.",
 };
 
 export const NAV_LABEL = "On this page";
 
-export const BACK_TO_RESERVE: Cta = SITE.openForBusiness ? { label: "Back to Reserve", href: "/reserve" } : { label: "Join the membership list", href: "/membership#apply" };
+export const BACK_TO_RESERVE: Cta = SITE.openForBusiness
+  ? { label: "Back to Reserve", href: "/reserve" }
+  : { label: "Join the membership list", href: SITE.landingOnly ? "/#join" : "/membership#apply" };
 export const SEE_REQUIREMENTS: Cta = { label: "See requirements", href: "/visit#requirements" };
 
 /* ------------------------------------------------------------ privacy */
@@ -106,7 +110,7 @@ const RETENTION_ROWS_OPEN: RetentionRow[] = [
 
 /** Before opening the site collects only list sign-ups and event inquiries. */
 const RETENTION_ROWS_PRELAUNCH: RetentionRow[] = [
-  { data: "Membership list sign-ups (name, email, phone, license type, how you heard)", why: "To contact you when membership opens.", howLong: "Until membership opens, or until you ask to be removed" },
+  { data: "Membership list sign-ups (name, email, phone, ZIP code, license status, how you heard)", why: "To contact you when membership opens.", howLong: "Until membership opens, or until you ask to be removed" },
   { data: "Event inquiries", why: "To reply and plan the event.", howLong: "2 years" },
   { data: "Analytics", why: "None. No cross-site tracking, no advertising pixels.", howLong: "Nothing kept" },
 ];
@@ -124,7 +128,7 @@ export const PRIVACY_PRELAUNCH: LegalSection = {
     {
       heading: "What the club collects",
       paragraphs: [
-        "If you join the membership list, the club keeps your name, email address, phone number if you give one, the type of New York City pistol license you hold, and how you heard about the club. No license number, no ID and no payment details are asked for or kept.",
+        "If you join the membership list, the club keeps your name, email address, phone number if you give one, ZIP code, your New York City pistol license status (the license type, pending, or not yet applied), and how you heard about the club. No street address, license number, ID or payment details are asked for or kept.",
         "If you ask about an event, the club keeps what you put in the form: your name, company, email, phone, preferred date, the occasion, a budget range and your notes.",
       ],
     },
@@ -470,7 +474,9 @@ export const ACKNOWLEDGEMENT = {
 };
 
 /** Sections in page order, for the anchor list. Before opening: privacy and the range rules only. */
-export const LEGAL_NAV: { id: LegalSectionId; label: string }[] = !SITE.openForBusiness
+export const LEGAL_NAV: { id: LegalSectionId; label: string }[] = SITE.landingOnly
+  ? [{ id: PRIVACY_PRELAUNCH.id, label: PRIVACY_PRELAUNCH.label }]
+  : !SITE.openForBusiness
   ? [
       { id: PRIVACY_PRELAUNCH.id, label: PRIVACY_PRELAUNCH.label },
       { id: RANGE_RULES_COPY.id, label: RANGE_RULES_COPY.label },
@@ -489,3 +495,6 @@ export const LONG_FORM_SECTIONS: LegalSection[] = SITE.openForBusiness ? [PRIVAC
 
 /** The acknowledgement is published with the membership terms, at opening. */
 export const SHOW_ACKNOWLEDGEMENT = SITE.openForBusiness;
+
+/** In landing-only mode the page is the privacy policy alone. */
+export const SHOW_RANGE_RULES = !SITE.landingOnly;
