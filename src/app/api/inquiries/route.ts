@@ -4,6 +4,7 @@ import { inquiries } from "@/lib/db/schema";
 import { expectedJson, isJsonRequest } from "@/lib/http";
 import { clientKey, rateLimit } from "@/lib/ratelimit";
 import { firstIssue, inquiryInputSchema } from "@/lib/validation";
+import { sendSignupToSheet } from "@/lib/signup-sheet";
 
 export const dynamic = "force-dynamic";
 
@@ -35,8 +36,14 @@ export async function POST(req: Request) {
         preferredDate: d.preferredDate || null,
         message: d.message || "",
       })
-      .returning({ id: inquiries.id });
-    console.info(`[inquiry] #${row.id} ${d.kind} from ${d.email}`);
+      .returning();
+    try {
+      await sendSignupToSheet(row);
+    } catch {
+      // Do not invite duplicate signups: the database already saved this inquiry.
+      console.error(`[inquiry] #${row.id} saved; spreadsheet sync failed. Recover from admin inquiries.`);
+    }
+    console.info(`[inquiry] #${row.id} ${d.kind} saved`);
     return NextResponse.json({ ok: true, id: row.id });
   } catch (err) {
     console.error("[inquiry] failed", err);
