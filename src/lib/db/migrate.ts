@@ -20,8 +20,22 @@ export async function ensureSchema(db: Db): Promise<void> {
     if (!process.env.DATABASE_URL && !process.env.REPLIT_DEPLOYMENT) {
       await ensureClassSchema(tx as unknown as Db);
       await ensureClassMailSchema(tx as unknown as Db);
+      await ensureSignupSchema(tx as unknown as Db);
     }
   });
+}
+
+/** Local PGlite/test provisioning only. Managed PostgreSQL changes via Publish. */
+async function ensureSignupSchema(db: Db): Promise<void> {
+  await db.execute(sql`ALTER TABLE inquiries ADD COLUMN IF NOT EXISTS interest text`);
+  await db.execute(sql`ALTER TABLE inquiries ADD COLUMN IF NOT EXISTS duplicate_email boolean NOT NULL DEFAULT false`);
+  await db.execute(sql`ALTER TABLE inquiries ADD COLUMN IF NOT EXISTS sheet_status text NOT NULL DEFAULT 'pending'`);
+  await db.execute(sql`ALTER TABLE inquiries ADD COLUMN IF NOT EXISTS sheet_attempts integer NOT NULL DEFAULT 0`);
+  await db.execute(sql`ALTER TABLE inquiries ADD COLUMN IF NOT EXISTS sheet_retry_at timestamptz NOT NULL DEFAULT now()`);
+  await db.execute(sql`ALTER TABLE inquiries ADD COLUMN IF NOT EXISTS sheet_error text`);
+  await db.execute(sql`ALTER TABLE inquiries ADD COLUMN IF NOT EXISTS sheet_synced_at timestamptz`);
+  await db.execute(sql`CREATE INDEX IF NOT EXISTS inquiries_sheet_retry_idx ON inquiries (sheet_status, sheet_retry_at)`);
+  await db.execute(sql`CREATE INDEX IF NOT EXISTS inquiries_email_idx ON inquiries (email)`);
 }
 
 async function createSchema(db: Db): Promise<void> {

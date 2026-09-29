@@ -37,6 +37,7 @@ export const inquiryInputSchema = z.object({
   guests: z.number().int().min(1).max(500).optional(),
   preferredDate: z.string().trim().max(40).optional().or(z.literal("")),
   message: z.string().trim().max(2000).optional().or(z.literal("")),
+  interest: z.enum(["Membership", "Training", "Both"]).optional(),
     // Honeypot: real users leave it empty.
     website: z.string().max(0).optional().or(z.literal("")),
   })

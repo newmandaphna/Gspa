@@ -38,6 +38,7 @@ describe("scheduled run (GET /api/cron/run)", () => {
     expect(body.ok).toBe(false);
     expect(body.error).toBe("Email is not configured");
     expect(body.documents).toEqual({ purged: true });
+    expect(body.signups).toEqual({ due: 0, synced: 0, failed: 0, skipped: 0 });
     expect(body.classMail.reconciled).toEqual({ scanned: 0, enqueued: 0, failed: 0 });
     expect(body.classMail.delivery).toEqual({ claimed: 0, sent: 0, failed: 0, skipped: 0 });
     expect(body.reminders).toBeNull();
@@ -62,7 +63,7 @@ describe("scheduled run (GET /api/cron/run)", () => {
       const res = await call(handler, "s3cret");
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(Object.keys(body).sort()).toEqual(["classMail", "documents", "ok", "ranAt", "reminders"]);
+      expect(Object.keys(body).sort()).toEqual(["classMail", "documents", "ok", "ranAt", "reminders", "signups"]);
     }
   });
 });

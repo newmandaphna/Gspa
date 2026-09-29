@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
+import { after } from "next/server";
 import { getDb } from "@/lib/db";
 import { inquiries } from "@/lib/db/schema";
 import { expectedJson, isJsonRequest } from "@/lib/http";
 import { clientKey, rateLimit } from "@/lib/ratelimit";
 import { firstIssue, inquiryInputSchema } from "@/lib/validation";
-import { sendSignupToSheet } from "@/lib/signup-sheet";
+import { isSignup, processSignupSheetQueue, syncSignup } from "@/lib/signup-sheet";
+import { and, eq, ilike, sql } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
 
@@ -24,9 +26,17 @@ export async function POST(req: Request) {
   const d = parsed.data;
   try {
     const db = await getDb();
-    const [row] = await db
-      .insert(inquiries)
-      .values({
+    const row = await db.transaction(async (tx) => {
+      if (d.kind === "membership" && (d.message ?? "").startsWith("Membership list (pre-opening)")) {
+        // Serialize signups for the same email even on different serverless instances.
+        await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${d.email.toLowerCase()}))`);
+      }
+      const previous = d.kind === "membership" && (d.message ?? "").startsWith("Membership list (pre-opening)")
+        ? await tx.select({ id: inquiries.id }).from(inquiries).where(and(
+          eq(inquiries.kind, "membership"), eq(inquiries.email, d.email.toLowerCase()),
+          ilike(inquiries.message, "Membership list (pre-opening)%"),
+        )).limit(1) : [];
+      const [inserted] = await tx.insert(inquiries).values({
         kind: d.kind,
         name: d.name,
         email: d.email.toLowerCase(),
@@ -35,13 +45,28 @@ export async function POST(req: Request) {
         guests: d.guests ?? null,
         preferredDate: d.preferredDate || null,
         message: d.message || "",
-      })
-      .returning();
-    try {
-      await sendSignupToSheet(row);
-    } catch {
-      // Do not invite duplicate signups: the database already saved this inquiry.
-      console.error(`[inquiry] #${row.id} saved; spreadsheet sync failed. Recover from admin inquiries.`);
+        interest: d.kind === "membership" ? d.interest ?? null : null,
+        duplicateEmail: previous.length > 0,
+        sheetStatus: d.kind === "membership" && (d.message ?? "").startsWith("Membership list (pre-opening)") ? "pending" : "not_applicable",
+      }).returning();
+      return inserted;
+    });
+    if (isSignup(row)) {
+      // Return the durable DB receipt immediately; Next keeps this work attached
+      // to the request lifecycle after the response is sent. Future signups also
+      // drain a few previously due retries when no cron scheduler is configured.
+      after(async () => {
+        try {
+          await syncSignup(row.id);
+        } catch (error) {
+          console.error(`[inquiry] #${row.id} saved; spreadsheet sync deferred`, error);
+        }
+        try {
+          await processSignupSheetQueue(new Date(), 3);
+        } catch (error) {
+          console.error("[inquiry] deferred signup retry sweep failed", error);
+        }
+      });
     }
     console.info(`[inquiry] #${row.id} ${d.kind} saved`);
     return NextResponse.json({ ok: true, id: row.id });

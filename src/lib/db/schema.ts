@@ -165,8 +165,15 @@ export const inquiries = pgTable("inquiries", {
   guests: integer("guests"),
   preferredDate: text("preferred_date"),
   message: text("message").notNull().default(""),
+  interest: text("interest"),
+  duplicateEmail: boolean("duplicate_email").notNull().default(false),
+  sheetStatus: text("sheet_status").notNull().default("pending"),
+  sheetAttempts: integer("sheet_attempts").notNull().default(0),
+  sheetRetryAt: timestamp("sheet_retry_at", { withTimezone: true }).notNull().defaultNow(),
+  sheetError: text("sheet_error"),
+  sheetSyncedAt: timestamp("sheet_synced_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
+}, (t) => [index("inquiries_sheet_retry_idx").on(t.sheetStatus, t.sheetRetryAt), index("inquiries_email_idx").on(t.email)]);
 
 /**
  * From the desk: dated one-liners written by whoever is on, shown above the

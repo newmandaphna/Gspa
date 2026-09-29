@@ -27,6 +27,7 @@ export type ScheduledRunSummary = {
   ranAt: string;
   documents: { purged: boolean; error?: string };
   classMail: { reconciled: ClassMailReconcileResult; delivery: ClassMailQueueResult } | { error: string };
+  signups: { due: number; synced: number; failed: number; skipped: number } | { error: string };
   /** Null when email is not configured: nothing was sent and nothing was stamped. */
   reminders: ReminderRunResult | null;
   error?: string;
@@ -54,9 +55,20 @@ export async function runScheduledJobs(now: Date = new Date()): Promise<{ summar
     ranAt: now.toISOString(),
     documents: { purged: false },
     classMail: { error: "Not run" },
+    signups: { error: "Not run" },
     reminders: null,
   };
   const failures: string[] = [];
+
+  try {
+    const { processSignupSheetQueue } = await import("@/lib/signup-sheet");
+    summary.signups = await processSignupSheetQueue(now);
+    if (summary.signups.failed) failures.push("signups");
+  } catch (err) {
+    console.error("[cron] signup sheet sync failed", err);
+    summary.signups = { error: "Signup sheet sync failed" };
+    failures.push("signups");
+  }
 
   try {
     const { purgeExpiredClassDocuments } = await import("@/lib/class-documents");

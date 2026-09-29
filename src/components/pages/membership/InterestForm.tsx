@@ -26,6 +26,7 @@ export function InterestForm({ className, idPrefix = "i" }: { className?: string
   const [zip, setZip] = useState("");
   const [license, setLicense] = useState<ListLicenseOption | "">("");
   const [heard, setHeard] = useState("");
+  const [interest, setInterest] = useState("");
   const [consent, setConsent] = useState(false);
   const [website, setWebsite] = useState("");
   const [status, setStatus] = useState<Status>({ kind: "idle" });
@@ -50,7 +51,7 @@ export function InterestForm({ className, idPrefix = "i" }: { className?: string
       const res = await fetch("/api/inquiries", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ kind: "membership", name, email, phone, message, website }),
+        body: JSON.stringify({ kind: "membership", name, email, phone, message, interest: interest || undefined, website }),
       });
       const data = (await res.json()) as { ok?: boolean; id?: number | string; error?: string };
       if (!res.ok || !data.ok || data.id === undefined) {
@@ -125,6 +126,13 @@ export function InterestForm({ className, idPrefix = "i" }: { className?: string
           </select>
         </div>
         <p className="t-caption -mt-3 text-mist sm:col-span-2">{L.licenseNote}</p>
+        <div className="sm:col-span-2">
+          <label htmlFor={`${idPrefix}-interest`} className={label}>{L.interest}</label>
+          <select id={`${idPrefix}-interest`} name="interest" value={interest} onChange={(e) => setInterest(e.target.value)} className={cn(field, "appearance-none")}>
+            <option value="" className="text-ink">Choose one (optional)</option>
+            {INTEREST_FORM.interestOptions.map((o) => <option key={o} value={o} className="text-ink">{o}</option>)}
+          </select>
+        </div>
         <div className="sm:col-span-2">
           <label htmlFor={`${idPrefix}-heard`} className={label}>
             {L.heard}
