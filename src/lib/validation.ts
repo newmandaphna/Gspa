@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { BOOKING } from "@/lib/config/site";
+import { formatSignupPhone, SIGNUP_PREFIX, validSignupEmail, validSignupZip } from "@/lib/signup-validation";
 
 /** Digits with the usual separators. Shared by bookings and any inquiry the desk has promised to call back. */
 const PHONE_RE = /^[+()\-.\s\d]+$/;
@@ -44,6 +45,12 @@ export const inquiryInputSchema = z.object({
   // A founders request is a promise to call within one business day, so it
   // needs a number the desk can dial. The other kinds are answered by email.
   .superRefine((d, ctx) => {
+    if (d.kind === "membership" && (d.message ?? "").startsWith(SIGNUP_PREFIX)) {
+      if (!validSignupEmail(d.email)) ctx.addIssue({ code: "custom", path: ["email"], message: "Enter a valid email address." });
+      if (formatSignupPhone(d.phone ?? "") === null) ctx.addIssue({ code: "custom", path: ["phone"], message: "Enter a valid US phone number." });
+      const zip = (d.message ?? "").split("\n").find(line => line.startsWith("ZIP: "))?.slice(5) ?? "";
+      if (!validSignupZip(zip)) ctx.addIssue({ code: "custom", path: ["message"], message: "Enter an assigned US ZIP code." });
+    }
     if (d.kind !== "founders") return;
     const phone = d.phone ?? "";
     if (phone.length < 7 || !PHONE_RE.test(phone)) {

@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
 import { INTEREST_FORM, LIST_LICENSE_OPTIONS, type ListLicenseOption } from "@/lib/content/pages/membership";
+import { formatSignupPhone, validSignupEmail, validSignupZip } from "@/lib/signup-validation";
 
 type Status = { kind: "idle" } | { kind: "sending" } | { kind: "sent"; id: number | string } | { kind: "error"; message: string };
 
@@ -26,6 +27,7 @@ export function InterestForm({ className, idPrefix = "i" }: { className?: string
   const [zip, setZip] = useState("");
   const [license, setLicense] = useState<ListLicenseOption | "">("");
   const [heard, setHeard] = useState("");
+  const [heardOther, setHeardOther] = useState("");
   const [interest, setInterest] = useState("");
   const [consent, setConsent] = useState(false);
   const [website, setWebsite] = useState("");
@@ -33,11 +35,20 @@ export function InterestForm({ className, idPrefix = "i" }: { className?: string
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!validSignupEmail(email)) {
+      setStatus({ kind: "error", message: INTEREST_FORM.errors.email });
+      return;
+    }
+    const formattedPhone = formatSignupPhone(phone);
+    if (formattedPhone === null) {
+      setStatus({ kind: "error", message: INTEREST_FORM.errors.phone });
+      return;
+    }
     if (!consent) {
       setStatus({ kind: "error", message: INTEREST_FORM.errors.consent });
       return;
     }
-    if (!/^\d{5}$/.test(zip.trim())) {
+    if (!validSignupZip(zip.trim())) {
       setStatus({ kind: "error", message: INTEREST_FORM.errors.zip });
       return;
     }
@@ -45,13 +56,18 @@ export function InterestForm({ className, idPrefix = "i" }: { className?: string
       setStatus({ kind: "error", message: INTEREST_FORM.errors.license });
       return;
     }
+    if (heard === "Other" && !heardOther.trim()) {
+      setStatus({ kind: "error", message: "Please tell us how you heard about us." });
+      return;
+    }
     setStatus({ kind: "sending" });
-    const message = [`Membership list (pre-opening)`, `ZIP: ${zip.trim()}`, `NYC pistol license: ${license}`, `Heard via: ${heard || "not said"}`].join("\n");
+    const source = heard === "Other" ? `Other: ${heardOther.trim().replace(/[\r\n]+/g, " ")}` : heard || "not said";
+    const message = [`Membership list (pre-opening)`, `ZIP: ${zip.trim()}`, `NYC pistol license: ${license}`, `Heard via: ${source}`].join("\n");
     try {
       const res = await fetch("/api/inquiries", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ kind: "membership", name, email, phone, message, interest: interest || undefined, website }),
+        body: JSON.stringify({ kind: "membership", name, email: email.trim(), phone: formattedPhone, message, interest: interest || undefined, website }),
       });
       const data = (await res.json()) as { ok?: boolean; id?: number | string; error?: string };
       if (!res.ok || !data.ok || data.id === undefined) {
@@ -91,7 +107,7 @@ export function InterestForm({ className, idPrefix = "i" }: { className?: string
           <label htmlFor={`${idPrefix}-phone`} className={label}>
             {L.phone}
           </label>
-          <input id={`${idPrefix}-phone`} name="phone" type="tel" autoComplete="tel" maxLength={30} value={phone} onChange={(e) => setPhone(e.target.value)} className={field} />
+          <input id={`${idPrefix}-phone`} name="phone" type="tel" autoComplete="tel" maxLength={30} value={phone} onChange={(e) => setPhone(e.target.value)} onBlur={() => { const formatted = formatSignupPhone(phone); if (formatted) setPhone(formatted); }} className={field} />
         </div>
         <div>
           <label htmlFor={`${idPrefix}-zip`} className={label}>
@@ -148,6 +164,17 @@ export function InterestForm({ className, idPrefix = "i" }: { className?: string
             ))}
           </select>
         </div>
+
+        {heard === "Other" && (
+          <div className="sm:col-span-2">
+            <label htmlFor={`${idPrefix}-heard-other`} className={label}>
+              Please tell us how you heard about us
+            </label>
+            <input id={`${idPrefix}-heard-other`} name="heardOther" required maxLength={200}
+              value={heardOther} onChange={(e) => setHeardOther(e.target.value)}
+              placeholder="For example, a neighborhood flyer" className={field} />
+          </div>
+        )}
 
         <div className="sm:col-span-2">
           <label className="flex cursor-pointer items-start gap-3 text-[0.9375rem] text-mist">

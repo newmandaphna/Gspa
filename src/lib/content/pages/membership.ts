@@ -394,7 +394,9 @@ export const INTEREST_FORM = {
   success: "Thank you. You are on the list, and the desk will be in touch before opening.",
   errors: {
     consent: "Please confirm we may contact you.",
-    zip: "Enter a five-digit ZIP code.",
+    email: "Enter a valid email address.",
+    phone: "Enter a valid US phone number.",
+    zip: "Enter an assigned US ZIP code.",
     license: "Choose your license status.",
     generic: "Could not send that. Please email the desk directly.",
   },

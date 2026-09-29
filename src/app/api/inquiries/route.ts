@@ -5,6 +5,7 @@ import { inquiries } from "@/lib/db/schema";
 import { expectedJson, isJsonRequest } from "@/lib/http";
 import { clientKey, rateLimit } from "@/lib/ratelimit";
 import { firstIssue, inquiryInputSchema } from "@/lib/validation";
+import { formatSignupPhone, SIGNUP_PREFIX } from "@/lib/signup-validation";
 import { isSignup, processSignupSheetQueue, syncSignup } from "@/lib/signup-sheet";
 import { and, eq, ilike, sql } from "drizzle-orm";
 
@@ -24,14 +25,15 @@ export async function POST(req: Request) {
   const parsed = inquiryInputSchema.safeParse(json);
   if (!parsed.success) return NextResponse.json({ error: firstIssue(parsed.error) }, { status: 400 });
   const d = parsed.data;
+  const signup = d.kind === "membership" && (d.message ?? "").startsWith(SIGNUP_PREFIX);
   try {
     const db = await getDb();
     const row = await db.transaction(async (tx) => {
-      if (d.kind === "membership" && (d.message ?? "").startsWith("Membership list (pre-opening)")) {
+       if (signup) {
         // Serialize signups for the same email even on different serverless instances.
         await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${d.email.toLowerCase()}))`);
       }
-      const previous = d.kind === "membership" && (d.message ?? "").startsWith("Membership list (pre-opening)")
+       const previous = signup
         ? await tx.select({ id: inquiries.id }).from(inquiries).where(and(
           eq(inquiries.kind, "membership"), eq(inquiries.email, d.email.toLowerCase()),
           ilike(inquiries.message, "Membership list (pre-opening)%"),
@@ -40,14 +42,14 @@ export async function POST(req: Request) {
         kind: d.kind,
         name: d.name,
         email: d.email.toLowerCase(),
-        phone: d.phone || null,
+         phone: signup ? formatSignupPhone(d.phone ?? "") || null : d.phone || null,
         company: d.company || null,
         guests: d.guests ?? null,
         preferredDate: d.preferredDate || null,
         message: d.message || "",
         interest: d.kind === "membership" ? d.interest ?? null : null,
         duplicateEmail: previous.length > 0,
-        sheetStatus: d.kind === "membership" && (d.message ?? "").startsWith("Membership list (pre-opening)") ? "pending" : "not_applicable",
+         sheetStatus: signup ? "pending" : "not_applicable",
       }).returning();
       return inserted;
     });

@@ -95,7 +95,7 @@ describe("signup spreadsheet", () => {
       headers: { "Content-Type": "application/json", "x-forwarded-for": "192.0.2.123" },
       body: JSON.stringify({
         kind: "membership", name: "Later lead", email: "later@example.invalid",
-        message: inquiry.message, interest: "Training",
+        message: inquiry.message.replace("ZIP: 01234", "ZIP: 00501"), interest: "Training",
       }),
     }));
     expect(res.status).toBe(200);
