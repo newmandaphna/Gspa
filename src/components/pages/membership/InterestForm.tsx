@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
 import { INTEREST_FORM, LIST_LICENSE_OPTIONS, type ListLicenseOption } from "@/lib/content/pages/membership";
-import { formatSignupPhone, validSignupEmail, validSignupZip } from "@/lib/signup-validation";
+import { formatSignupPhone, maskSignupPhone, validSignupEmail, validSignupZip } from "@/lib/signup-validation";
 
 type Status = { kind: "idle" } | { kind: "sending" } | { kind: "sent"; id: number | string } | { kind: "error"; message: string };
 
@@ -107,7 +107,29 @@ export function InterestForm({ className, idPrefix = "i" }: { className?: string
           <label htmlFor={`${idPrefix}-phone`} className={label}>
             {L.phone}
           </label>
-          <input id={`${idPrefix}-phone`} name="phone" type="tel" autoComplete="tel" maxLength={30} value={phone} onChange={(e) => setPhone(e.target.value)} onBlur={() => { const formatted = formatSignupPhone(phone); if (formatted) setPhone(formatted); }} className={field} />
+          <input id={`${idPrefix}-phone`} name="phone" type="tel" inputMode="tel" autoComplete="tel"
+            placeholder="(347) 886-0773" value={phone}
+            onChange={(e) => {
+              const input = e.currentTarget;
+              const raw = input.value;
+              const caret = input.selectionStart ?? raw.length;
+              const digitsBefore = raw.slice(0, caret).replace(/\D/g, "").length;
+              const masked = maskSignupPhone(raw);
+              setPhone(masked);
+              // Also reset the DOM when rejected letters leave state unchanged.
+              input.value = masked;
+              let position = masked.length;
+              if (caret < raw.length) {
+                let seen = 0;
+                position = 0;
+                while (position < masked.length && seen < digitsBefore) {
+                  if (/\d/.test(masked[position])) seen++;
+                  position++;
+                }
+              }
+              input.setSelectionRange(position, position);
+            }}
+            className={field} />
         </div>
         <div>
           <label htmlFor={`${idPrefix}-zip`} className={label}>

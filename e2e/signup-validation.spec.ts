@@ -19,6 +19,7 @@ test("signup rejects bad phone, email and unassigned ZIP before an intercepted s
   await page.getByRole("checkbox").check();
 
   await phone.fill("347-ABC-0773");
+  await expect(phone).toHaveValue("(347) 077-3");
   await submit.click();
   await expect(page.locator("form").getByRole("alert")).toContainText("valid US phone number");
   expect(submissions).toHaveLength(0);
@@ -28,8 +29,14 @@ test("signup rejects bad phone, email and unassigned ZIP before an intercepted s
   await expect(page.locator("form").getByRole("alert")).toContainText("valid US phone number");
   expect(submissions).toHaveLength(0);
 
-  await phone.fill("3478860773");
-  await phone.blur();
+  await phone.fill("");
+  await phone.pressSequentially("abc");
+  await expect(phone).toHaveValue("");
+  await phone.pressSequentially("3478860773");
+  await expect(phone).toHaveValue("(347) 886-0773");
+  await phone.press("Backspace");
+  await expect(phone).toHaveValue("(347) 886-077");
+  await phone.pressSequentially("3xyz");
   await expect(phone).toHaveValue("(347) 886-0773");
   await email.fill("a@localhost");
   await submit.click();
