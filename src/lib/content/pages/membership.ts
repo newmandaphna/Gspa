@@ -370,7 +370,7 @@ export const MEMBERSHIP_PRELAUNCH = {
 } as const;
 
 /** The list takes anyone on the way to a license; membership itself still requires one. */
-export const LIST_LICENSE_OPTIONS = [...LICENSE_OPTIONS, "Application pending", "Not yet applied"] as const;
+export const LIST_LICENSE_OPTIONS = [...LICENSE_OPTIONS, "Special Carry License", "Application pending", "Not yet applied"] as const;
 export type ListLicenseOption = (typeof LIST_LICENSE_OPTIONS)[number];
 
 export const INTEREST_FORM = {
