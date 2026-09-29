@@ -108,7 +108,7 @@ export function InterestForm({ className, idPrefix = "i" }: { className?: string
             {L.phone}
           </label>
           <input id={`${idPrefix}-phone`} name="phone" type="tel" inputMode="tel" autoComplete="tel"
-            placeholder="(347) 886-0773" value={phone}
+            placeholder="(999)999-9999" value={phone}
             onChange={(e) => {
               const input = e.currentTarget;
               const raw = input.value;
